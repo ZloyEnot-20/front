@@ -21,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { CheckCircle2, AlertCircle } from 'lucide-react'
+import { CheckCircle2, AlertCircle, Loader2 } from 'lucide-react'
 
 interface CreateUserModalProps {
   isOpen: boolean
@@ -47,6 +47,7 @@ export function CreateUserModal({ isOpen, onOpenChange }: CreateUserModalProps) 
   })
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
+  const [saving, setSaving] = useState(false)
 
   const validateForm = () => {
     if (!formData.firstName.trim()) {
@@ -74,6 +75,7 @@ export function CreateUserModal({ isOpen, onOpenChange }: CreateUserModalProps) 
 
     if (!validateForm()) return
 
+    setSaving(true)
     const newUser = {
       id: `user-${Date.now()}`,
       name: `${formData.firstName} ${formData.lastName}`,
@@ -90,6 +92,8 @@ export function CreateUserModal({ isOpen, onOpenChange }: CreateUserModalProps) 
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Ошибка создания пользователя')
       return
+    } finally {
+      setSaving(false)
     }
 
     setTimeout(() => {
@@ -192,11 +196,19 @@ export function CreateUserModal({ isOpen, onOpenChange }: CreateUserModalProps) 
                 variant="outline"
                 className="flex-1 bg-transparent"
                 onClick={() => onOpenChange(false)}
+                disabled={saving}
               >
                 Отмена
               </Button>
-              <Button type="submit" className="flex-1">
-                Создать
+              <Button type="submit" className="flex-1" disabled={saving}>
+                {saving ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Создание...
+                  </>
+                ) : (
+                  'Создать'
+                )}
               </Button>
             </div>
           </form>

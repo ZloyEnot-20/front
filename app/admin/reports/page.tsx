@@ -41,11 +41,11 @@ function ReportsContent() {
     <div className="flex min-h-screen bg-background">
       <AdminSidebar />
 
-      <main className="flex-1 ml-64">
+      <main className="flex-1 pt-14 lg:pt-0 ml-0 lg:ml-64 min-h-screen">
         {/* Header */}
         <div className="border-b border-border/40 bg-white/50 backdrop-blur">
-          <div className="px-8 py-6">
-            <h1 className="text-3xl font-bold">Отчеты</h1>
+          <div className="px-4 sm:px-6 lg:px-8 py-4 lg:py-6">
+            <h1 className="text-2xl lg:text-3xl font-bold">Отчеты</h1>
             <p className="text-muted-foreground mt-1">Аналитика и статистика платформы</p>
           </div>
         </div>
@@ -76,7 +76,7 @@ function ReportsContent() {
           </div>
 
           {/* Additional Reports */}
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
                 <CardTitle>Распределение пользователей по ролям</CardTitle>
@@ -143,7 +143,7 @@ function ReportsContent() {
               <CardTitle>Экспорт данных</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <Button>Экспортировать в CSV</Button>
                 <Button variant="outline">Экспортировать в PDF</Button>
                 <Button variant="outline">Отправить на email</Button>

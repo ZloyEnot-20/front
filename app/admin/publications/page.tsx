@@ -106,17 +106,17 @@ function PublicationsContent() {
     <div className="flex min-h-screen bg-background">
       <AdminSidebar />
 
-      <main className="flex-1 ml-64">
+      <main className="flex-1 pt-14 lg:pt-0 ml-0 lg:ml-64 min-h-screen">
         {/* Header */}
         <div className="border-b border-border/40 bg-white/50 backdrop-blur">
-          <div className="px-8 py-6">
-            <h1 className="text-3xl font-bold">Публикации</h1>
+          <div className="px-4 sm:px-6 lg:px-8 py-4 lg:py-6">
+            <h1 className="text-2xl lg:text-3xl font-bold">Публикации</h1>
             <p className="text-muted-foreground mt-1">Управление выставками и новостями</p>
           </div>
         </div>
 
         {/* Content */}
-        <div className="p-8">
+        <div className="p-4 sm:p-6 lg:p-8">
           <Tabs defaultValue="exhibitions" className="space-y-6">
             <TabsList className="grid w-fit grid-cols-2">
               <TabsTrigger value="exhibitions">Выставки</TabsTrigger>
@@ -125,7 +125,7 @@ function PublicationsContent() {
 
             {/* Exhibitions Tab */}
             <TabsContent value="exhibitions" className="space-y-6">
-              <div className="flex gap-4">
+              <div className="flex flex-col sm:flex-row gap-4">
                 <Input
                   placeholder="Поиск выставок..."
                   value={searchQuery}
@@ -135,7 +135,7 @@ function PublicationsContent() {
                 <Button onClick={() => handleCreateContent('exhibition')}>+ Новая выставка</Button>
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
                 {isLoading ? (
                   Array.from({ length: 6 }).map((_, i) => (
                     <PublicationCardSkeleton key={i} />
@@ -204,7 +204,7 @@ function PublicationsContent() {
 
             {/* News Tab */}
             <TabsContent value="news" className="space-y-6">
-              <div className="flex gap-4">
+              <div className="flex flex-col sm:flex-row gap-4">
                 <Input
                   placeholder="Поиск новостей..."
                   value={searchQuery}
@@ -214,7 +214,7 @@ function PublicationsContent() {
                 <Button onClick={() => handleCreateContent('news')}>+ Новая новость</Button>
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
                 {isLoading ? (
                   Array.from({ length: 6 }).map((_, i) => (
                     <PublicationCardSkeleton key={i} />
@@ -283,7 +283,7 @@ function PublicationsContent() {
 
           {/* Modal for Creating/Editing */}
           <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-            <DialogContent className="max-w-md">
+            <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>
                   {editingItem

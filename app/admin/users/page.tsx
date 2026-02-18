@@ -9,7 +9,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { MoreHorizontal, Users, Activity, TrendingUp, Plus } from 'lucide-react'
+import { MoreHorizontal, Users, Activity, TrendingUp, Plus, Loader2 } from 'lucide-react'
+import { Skeleton } from '@/components/ui/skeleton'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,7 +19,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 
 function UsersModeration() {
-  const { users, updateUser, deleteUser } = useAdmin()
+  const { users, updateUser, deleteUser, isLoading } = useAdmin()
   const [searchQuery, setSearchQuery] = useState('')
   const [createUserOpen, setCreateUserOpen] = useState(false)
 
@@ -58,22 +59,22 @@ function UsersModeration() {
     <div className="flex min-h-screen bg-background">
       <AdminSidebar />
 
-      <main className="flex-1 ml-64">
+      <main className="flex-1 pt-14 lg:pt-0 ml-0 lg:ml-64 min-h-screen">
         {/* Header */}
         <div className="border-b border-border/40 bg-white/50 backdrop-blur">
-          <div className="px-8 py-6">
-            <h1 className="text-3xl font-bold">Модерация пользователей</h1>
+          <div className="px-4 sm:px-6 lg:px-8 py-4 lg:py-6">
+            <h1 className="text-2xl lg:text-3xl font-bold">Модерация пользователей</h1>
             <p className="text-muted-foreground mt-1">Управление пользователями системы</p>
           </div>
         </div>
 
         {/* Content */}
-        <div className="p-8">
+        <div className="p-4 sm:p-6 lg:p-8">
           {/* Stats */}
-          <div className="grid grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             <Card>
               <CardContent className="pt-6">
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600">
                     <Users className="w-6 h-6" />
                   </div>
@@ -88,7 +89,7 @@ function UsersModeration() {
 
             <Card>
               <CardContent className="pt-6">
-                <div className="flex justify-center items-center gap-4">
+                <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-lg bg-green-100 flex items-center justify-center text-green-600">
                     <Activity className="w-6 h-6" />
                   </div>
@@ -103,7 +104,7 @@ function UsersModeration() {
 
             <Card>
               <CardContent className="pt-6">
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600">
                     <TrendingUp className="w-6 h-6" />
                   </div>
@@ -118,7 +119,7 @@ function UsersModeration() {
 
             <Card>
               <CardContent className="pt-6">
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-lg bg-yellow-100 flex items-center justify-center text-yellow-600">
                     <Users className="w-6 h-6" />
                   </div>
@@ -133,13 +134,13 @@ function UsersModeration() {
           </div>
 
           {/* Search */}
-          <div className="mb-6 flex gap-4">
+          <div className="mb-6 flex flex-col sm:flex-row gap-4">
             <Input
               placeholder="Поиск по имени или email..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
-            <Button onClick={() => setCreateUserOpen(true)} className="gap-2">
+            <Button onClick={() => setCreateUserOpen(true)} className="gap-2 w-full sm:w-auto shrink-0">
               <Plus className="w-4 h-4" />
               Создать пользователя
             </Button>
@@ -159,7 +160,18 @@ function UsersModeration() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredUsers.map((user) => (
+                  {isLoading ? (
+                    Array.from({ length: 5 }).map((_, i) => (
+                      <tr key={i} className="border-b border-border/40">
+                        <td className="p-4"><Skeleton className="h-5 w-24" /></td>
+                        <td className="p-4"><Skeleton className="h-5 w-36" /></td>
+                        <td className="p-4"><Skeleton className="h-5 w-20" /></td>
+                        <td className="p-4"><Skeleton className="h-6 w-16" /></td>
+                        <td className="p-4 text-center"><Skeleton className="h-8 w-8 mx-auto rounded" /></td>
+                      </tr>
+                    ))
+                  ) : (
+                    filteredUsers.map((user) => (
                     <tr key={user.id} className="border-b border-border/40 hover:bg-muted/30">
                       <td className="p-4 font-medium">{user.name}</td>
                       <td className="p-4 text-sm text-muted-foreground">{user.email}</td>
@@ -195,7 +207,8 @@ function UsersModeration() {
                         </DropdownMenu>
                       </td>
                     </tr>
-                  ))}
+                  ))
+                  )}
                 </tbody>
               </table>
             </div>

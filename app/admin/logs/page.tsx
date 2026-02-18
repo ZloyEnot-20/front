@@ -96,11 +96,11 @@ function LogsContent() {
     <div className="flex min-h-screen bg-background">
       <AdminSidebar />
 
-      <main className="flex-1 ml-64">
+      <main className="flex-1 pt-14 lg:pt-0 ml-0 lg:ml-64 min-h-screen">
         {/* Header */}
         <div className="border-b border-border/40 bg-white/50 backdrop-blur">
-          <div className="px-8 py-6">
-            <h1 className="text-3xl font-bold">Логи системы</h1>
+          <div className="px-4 sm:px-6 lg:px-8 py-4 lg:py-6">
+            <h1 className="text-2xl lg:text-3xl font-bold">Логи системы</h1>
             <p className="text-muted-foreground mt-1">История действий администраторов и пользователей</p>
           </div>
         </div>
@@ -177,7 +177,7 @@ function LogsContent() {
           </Card>
 
           {/* Pagination */}
-          <div className="flex justify-between items-center mt-6">
+          <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 mt-6">
             <p className="text-sm text-muted-foreground">Показано {filteredLogs.length} из {mockLogs.length}</p>
             <div className="flex gap-2">
               <Button variant="outline" size="sm">
