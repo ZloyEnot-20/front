@@ -5,10 +5,10 @@ import { ProtectedRoute } from '@/components/auth/protected-route'
 import { AdminSidebar } from '@/components/admin/admin-sidebar'
 import { useAdmin } from '@/lib/admin-context'
 import { useAuth } from '@/lib/auth-context'
-import { uploadImage } from '@/lib/api'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { MoreHorizontal, Plus, Edit2, Trash2, Eye } from 'lucide-react'
@@ -33,7 +33,6 @@ function PublicationsContent() {
   const [modalType, setModalType] = useState<'news' | 'exhibition'>('news')
   const [editingItem, setEditingItem] = useState<any>(null)
   const [formData, setFormData] = useState<any>({})
-  const [uploading, setUploading] = useState(false)
 
   const filteredExhibitions = exhibitions.filter((e) =>
     e.title.toLowerCase().includes(searchQuery.toLowerCase())
@@ -308,21 +307,18 @@ function PublicationsContent() {
                         type="file"
                         accept="image/*"
                         className="hidden"
-                        disabled={uploading}
-                        onChange={async (e) => {
+                        onChange={(e) => {
                           const file = e.target.files?.[0]
                           if (!file) return
-                          setUploading(true)
-                          try {
-                            const { url } = await uploadImage(file)
-                            setFormData({ ...formData, image: url })
-                          } finally {
-                            setUploading(false)
-                            e.target.value = ''
+                          const reader = new FileReader()
+                          reader.onload = () => {
+                            setFormData({ ...formData, image: reader.result as string })
                           }
+                          reader.readAsDataURL(file)
+                          e.target.value = ''
                         }}
                       />
-                      <span className="text-sm text-primary hover:underline">{uploading ? 'Загрузка...' : 'Выбрать файл'}</span>
+                      <span className="text-sm text-primary hover:underline">Выбрать файл</span>
                     </label>
                   </div>
                 </div>
@@ -330,10 +326,11 @@ function PublicationsContent() {
                   <>
                     <div>
                       <label className="text-sm font-medium">Описание</label>
-                      <Input
+                      <Textarea
                         value={formData.description || ''}
                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                         placeholder="Введите описание"
+                        rows={4}
                       />
                     </div>
                     <div>
