@@ -139,7 +139,7 @@ export default function Home() {
             </div>
           </div>
           <div className="border-t border-border/40 mt-8 pt-8 text-center text-sm text-muted-foreground">
-            <p>&copy; 2024 Myfair. Все права защищены.</p>
+            <p>&copy; 2026 Myfair. Все права защищены.</p>
           </div>
         </div>
       </footer>
