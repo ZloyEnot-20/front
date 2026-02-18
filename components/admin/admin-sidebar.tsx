@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
 import { Button } from '@/components/ui/button'
-import { Users, FileText, BarChart3, LogOut, Menu, X } from 'lucide-react'
+import { Users, FileText, BarChart3, LogOut, Menu, X, Home } from 'lucide-react'
 
 export function AdminSidebar() {
   const pathname = usePathname()
@@ -90,7 +90,16 @@ export function AdminSidebar() {
           })}
         </nav>
 
-        <div className="p-4 lg:p-6 border-t border-slate-800">
+        <div className="p-4 lg:p-6 border-t border-slate-800 space-y-2">
+          <Link href="/" onClick={() => setMobileOpen(false)}>
+            <Button
+              variant="ghost"
+              className="w-full justify-start gap-3 hover:bg-slate-800"
+            >
+              <Home className="w-5 h-5" />
+              <span>Вернуться на сайт</span>
+            </Button>
+          </Link>
           <Button
             variant="ghost"
             className="w-full justify-start gap-3 hover:bg-red-900 text-red-400"
