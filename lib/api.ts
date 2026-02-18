@@ -66,17 +66,26 @@ export const registrationsApi = {
     api<ApiRegistration>('/api/registrations', { method: 'POST', body: JSON.stringify(data) }),
 }
 
-// Upload
-export async function uploadImage(file: File): Promise<{ url: string }> {
-  const formData = new FormData()
-  formData.append('image', file)
-  const token = getToken()
-  const headers: HeadersInit = {}
-  if (token) headers['Authorization'] = `Bearer ${token}`
-  const res = await fetch(`${API_URL}/api/upload`, { method: 'POST', body: formData, headers })
-  const data = await res.json().catch(() => ({}))
-  if (!res.ok) throw new Error(data.error ?? 'Ошибка загрузки')
-  return data
+// Upload via presigned URL (S3)
+export async function uploadViaPresignedUrl(file: File): Promise<{ fileId: string }> {
+  const { uploadUrl, fileId } = await api<{ uploadUrl: string; fileId: string }>('/api/upload-url', {
+    method: 'POST',
+    body: JSON.stringify({ filename: file.name, contentType: file.type || 'image/jpeg' }),
+  })
+  const putRes = await fetch(uploadUrl, {
+    method: 'PUT',
+    body: file,
+    headers: { 'Content-Type': file.type || 'image/jpeg' },
+  })
+  if (!putRes.ok) throw new Error('Ошибка загрузки в хранилище')
+  return { fileId }
+}
+
+// URL для отображения изображения (fileId, base64 или http)
+export function getImageUrl(image?: string | null): string {
+  if (!image) return ''
+  if (image.startsWith('data:') || image.startsWith('http')) return image
+  return `${API_URL}/api/files/${image}/serve`
 }
 
 // News

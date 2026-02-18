@@ -3,6 +3,7 @@
 import { use, useState } from 'react'
 import { Header } from '@/components/layout/header'
 import { useAdmin } from '@/lib/admin-context'
+import { getImageUrl } from '@/lib/api'
 import { useAuth } from '@/lib/auth-context'
 import { RegistrationModal } from '@/components/exhibitions/registration-modal'
 import { Button } from '@/components/ui/button'
@@ -71,7 +72,7 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
       <section className="relative w-full h-96 bg-muted">
         {exhibition.image && (
           <Image
-            src={exhibition.image || "/placeholder.svg"}
+            src={getImageUrl(exhibition.image) || "/placeholder.svg"}
             alt={exhibition.title}
             fill
             className="object-cover"

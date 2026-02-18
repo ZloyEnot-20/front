@@ -5,6 +5,7 @@ import { ProtectedRoute } from '@/components/auth/protected-route'
 import { AdminSidebar } from '@/components/admin/admin-sidebar'
 import { useAdmin } from '@/lib/admin-context'
 import { useAuth } from '@/lib/auth-context'
+import { uploadViaPresignedUrl, getImageUrl } from '@/lib/api'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -33,6 +34,7 @@ function PublicationsContent() {
   const [modalType, setModalType] = useState<'news' | 'exhibition'>('news')
   const [editingItem, setEditingItem] = useState<any>(null)
   const [formData, setFormData] = useState<any>({})
+  const [uploading, setUploading] = useState(false)
 
   const filteredExhibitions = exhibitions.filter((e) =>
     e.title.toLowerCase().includes(searchQuery.toLowerCase())
@@ -134,7 +136,7 @@ function PublicationsContent() {
                     <Card key={exhibition.id} className="group hover:shadow-lg transition-shadow">
                       <div className="aspect-square bg-muted relative overflow-hidden">
                         {exhibition.image ? (
-                          <img src={exhibition.image || "/placeholder.svg"} alt={exhibition.title} className="w-full h-full object-cover" />
+                          <img src={getImageUrl(exhibition.image) || "/placeholder.svg"} alt={exhibition.title} className="w-full h-full object-cover" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10">
                             <span className="text-2xl font-bold text-muted-foreground/20">
@@ -209,7 +211,7 @@ function PublicationsContent() {
                     <Card key={news.id} className="group hover:shadow-lg transition-shadow">
                       <div className="aspect-square bg-muted relative overflow-hidden">
                         {news.image ? (
-                          <img src={news.image || "/placeholder.svg"} alt={news.title} className="w-full h-full object-cover" />
+                          <img src={getImageUrl(news.image) || "/placeholder.svg"} alt={news.title} className="w-full h-full object-cover" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-accent/10 to-primary/10">
                             <span className="text-2xl font-bold text-muted-foreground/20">
@@ -290,7 +292,7 @@ function PublicationsContent() {
                   <div className="mt-1 flex items-center gap-3">
                     {formData.image ? (
                       <div className="relative">
-                        <img src={formData.image} alt="" className="h-20 w-20 rounded object-cover border" />
+                        <img src={getImageUrl(formData.image)} alt="" className="h-20 w-20 rounded object-cover border" />
                         <Button
                           type="button"
                           variant="ghost"
@@ -307,18 +309,23 @@ function PublicationsContent() {
                         type="file"
                         accept="image/*"
                         className="hidden"
-                        onChange={(e) => {
+                        disabled={uploading}
+                        onChange={async (e) => {
                           const file = e.target.files?.[0]
                           if (!file) return
-                          const reader = new FileReader()
-                          reader.onload = () => {
-                            setFormData({ ...formData, image: reader.result as string })
+                          setUploading(true)
+                          try {
+                            const { fileId } = await uploadViaPresignedUrl(file)
+                            setFormData({ ...formData, image: fileId })
+                          } catch (err) {
+                            console.error(err)
+                          } finally {
+                            setUploading(false)
+                            e.target.value = ''
                           }
-                          reader.readAsDataURL(file)
-                          e.target.value = ''
                         }}
                       />
-                      <span className="text-sm text-primary hover:underline">Выбрать файл</span>
+                      <span className="text-sm text-primary hover:underline">{uploading ? 'Загрузка...' : 'Выбрать файл'}</span>
                     </label>
                   </div>
                 </div>

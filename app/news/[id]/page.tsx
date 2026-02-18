@@ -3,6 +3,7 @@
 import { use } from 'react'
 import { Header } from '@/components/layout/header'
 import { useAdmin } from '@/lib/admin-context'
+import { getImageUrl } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import Link from 'next/link'
@@ -50,7 +51,7 @@ export default function NewsDetailPage({ params }: NewsPageProps) {
       <section className="relative w-full h-96 bg-muted">
         {news.image && (
           <Image
-            src={news.image || "/placeholder.svg"}
+            src={getImageUrl(news.image) || "/placeholder.svg"}
             alt={news.title}
             fill
             className="object-cover"

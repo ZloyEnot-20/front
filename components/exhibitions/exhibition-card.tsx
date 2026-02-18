@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Exhibition } from '@/lib/types'
+import { getImageUrl } from '@/lib/api'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { RegistrationModal } from './registration-modal'
@@ -37,7 +38,7 @@ export function ExhibitionCard({ exhibition }: ExhibitionCardProps) {
       <div className="relative w-full h-48 bg-muted">
         {exhibition.image && (
           <Image
-            src={exhibition.image || "/placeholder.svg"}
+            src={getImageUrl(exhibition.image) || "/placeholder.svg"}
             alt={exhibition.title}
             fill
             className="object-cover"
