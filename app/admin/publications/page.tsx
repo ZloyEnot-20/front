@@ -12,7 +12,8 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { MoreHorizontal, Plus, Edit2, Trash2, Eye } from 'lucide-react'
+import { Plus, Edit2, Trash2, Eye, Loader2 } from 'lucide-react'
+import { PublicationCardSkeleton } from '@/components/admin/publication-card-skeleton'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,7 +28,7 @@ import {
 } from '@/components/ui/dialog'
 
 function PublicationsContent() {
-  const { exhibitions, news, updateExhibition, deleteExhibition, updateNews, deleteNews, addExhibition, addNews } = useAdmin()
+  const { exhibitions, news, updateExhibition, deleteExhibition, updateNews, deleteNews, addExhibition, addNews, isLoading } = useAdmin()
   const { user } = useAuth()
   const [searchQuery, setSearchQuery] = useState('')
   const [modalOpen, setModalOpen] = useState(false)
@@ -35,6 +36,7 @@ function PublicationsContent() {
   const [editingItem, setEditingItem] = useState<any>(null)
   const [formData, setFormData] = useState<any>({})
   const [uploading, setUploading] = useState(false)
+  const [saving, setSaving] = useState(false)
 
   const filteredExhibitions = exhibitions.filter((e) =>
     e.title.toLowerCase().includes(searchQuery.toLowerCase())
@@ -61,6 +63,7 @@ function PublicationsContent() {
   const handleSaveContent = async () => {
     if (!formData.title) return
 
+    setSaving(true)
     try {
       if (editingItem) {
         if (modalType === 'exhibition') {
@@ -94,6 +97,8 @@ function PublicationsContent() {
       setModalOpen(false)
     } catch (e) {
       console.error(e)
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -131,12 +136,16 @@ function PublicationsContent() {
               </div>
 
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3">
-                {filteredExhibitions.length > 0 ? (
+                {isLoading ? (
+                  Array.from({ length: 6 }).map((_, i) => (
+                    <PublicationCardSkeleton key={i} />
+                  ))
+                ) : filteredExhibitions.length > 0 ? (
                   filteredExhibitions.map((exhibition) => (
                     <Card key={exhibition.id} className="group hover:shadow-lg transition-shadow">
                       <div className="aspect-square bg-muted relative overflow-hidden">
                         {exhibition.image ? (
-                          <img src={getImageUrl(exhibition.image) || "/placeholder.svg"} alt={exhibition.title} className="w-full h-full object-cover" />
+                          <img src={getImageUrl(exhibition.image) || "/placeholder.svg"} alt={exhibition.title} className="w-full h-full object-cover" loading="lazy" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10">
                             <span className="text-2xl font-bold text-muted-foreground/20">
@@ -159,13 +168,13 @@ function PublicationsContent() {
                         </div>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="outline" size="sm" className="w-full bg-transparent h-7 text-xs">
-                              <MoreHorizontal className="w-3 h-3" />
+                            <Button variant="outline" size="sm" className="w-full h-7 text-xs bg-violet-600 hover:bg-violet-500 text-white border-violet-600 hover:border-violet-500 transition-colors">
+                              Управление
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem onClick={() => handleEditContent(exhibition, 'exhibition')}>
-                               Редактировать
+                              Редактировать
                             </DropdownMenuItem>
                             <DropdownMenuItem asChild>
                               <a href={`/exhibitions/${exhibition.id}`} target="_blank" rel="noopener noreferrer">
@@ -206,12 +215,16 @@ function PublicationsContent() {
               </div>
 
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3">
-                {filteredNews.length > 0 ? (
+                {isLoading ? (
+                  Array.from({ length: 6 }).map((_, i) => (
+                    <PublicationCardSkeleton key={i} />
+                  ))
+                ) : filteredNews.length > 0 ? (
                   filteredNews.map((news) => (
                     <Card key={news.id} className="group hover:shadow-lg transition-shadow">
                       <div className="aspect-square bg-muted relative overflow-hidden">
                         {news.image ? (
-                          <img src={getImageUrl(news.image) || "/placeholder.svg"} alt={news.title} className="w-full h-full object-cover" />
+                          <img src={getImageUrl(news.image) || "/placeholder.svg"} alt={news.title} className="w-full h-full object-cover" loading="lazy" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-accent/10 to-primary/10">
                             <span className="text-2xl font-bold text-muted-foreground/20">
@@ -233,8 +246,8 @@ function PublicationsContent() {
                         </div>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="outline" size="sm" className="w-full bg-transparent h-7 text-xs">
-                              <MoreHorizontal className="w-3 h-3" />
+                            <Button variant="outline" size="sm" className="w-full h-7 text-xs bg-violet-600 hover:bg-violet-500 text-white border-violet-600 hover:border-violet-500 transition-colors">
+                              Управление
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
@@ -292,7 +305,7 @@ function PublicationsContent() {
                   <div className="mt-1 flex items-center gap-3">
                     {formData.image ? (
                       <div className="relative">
-                        <img src={getImageUrl(formData.image)} alt="" className="h-20 w-20 rounded object-cover border" />
+                        <img src={getImageUrl(formData.image)} alt="" className="h-20 w-20 rounded object-cover border" loading="lazy" />
                         <Button
                           type="button"
                           variant="ghost"
@@ -396,11 +409,18 @@ function PublicationsContent() {
                   </>
                 )}
                 <div className="flex gap-2">
-                  <Button variant="outline" className="flex-1 bg-transparent" onClick={() => setModalOpen(false)}>
+                  <Button variant="outline" className="flex-1 bg-transparent" onClick={() => setModalOpen(false)} disabled={saving}>
                     Отмена
                   </Button>
-                  <Button className="flex-1" onClick={handleSaveContent}>
-                    Сохранить
+                  <Button className="flex-1" onClick={handleSaveContent} disabled={saving}>
+                    {saving ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Сохранение...
+                      </>
+                    ) : (
+                      'Сохранить'
+                    )}
                   </Button>
                 </div>
               </div>

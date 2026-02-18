@@ -9,7 +9,7 @@ import { RegistrationModal } from './registration-modal'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { MapPin, Calendar, Users } from 'lucide-react'
-import Image from 'next/image'
+import { OptimizedImage } from '@/components/ui/optimized-image'
 
 interface ExhibitionCardProps {
   exhibition: Exhibition
@@ -37,11 +37,11 @@ export function ExhibitionCard({ exhibition }: ExhibitionCardProps) {
     <Card className="overflow-hidden hover:shadow-lg transition-shadow h-full flex flex-col">
       <div className="relative w-full h-48 bg-muted">
         {exhibition.image && (
-          <Image
+          <OptimizedImage
             src={getImageUrl(exhibition.image) || "/placeholder.svg"}
             alt={exhibition.title}
             fill
-            className="object-cover"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
         )}
         <Badge className="absolute top-4 left-4" variant={exhibition.status === 'published' ? 'default' : 'secondary'}>

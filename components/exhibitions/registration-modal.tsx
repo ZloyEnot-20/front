@@ -184,7 +184,7 @@ export function RegistrationModal({
                 </Alert>
 
                 <div className="flex justify-center p-4 bg-muted/50 rounded-lg">
-                  <img src={registration.qrCode} alt="QR Code" className="w-48 h-48" />
+                  <img src={registration.qrCode} alt="QR Code" className="w-48 h-48" loading="lazy" />
                 </div>
 
                 <div className="bg-muted/50 border rounded-lg p-3 text-sm space-y-1">

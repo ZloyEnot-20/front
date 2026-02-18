@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import Link from 'next/link'
 import { ArrowLeft, Calendar } from 'lucide-react'
-import Image from 'next/image'
+import { OptimizedImage } from '@/components/ui/optimized-image'
 
 interface NewsPageProps {
   params: Promise<{ id: string }>
@@ -50,11 +50,12 @@ export default function NewsDetailPage({ params }: NewsPageProps) {
       {/* Hero */}
       <section className="relative w-full h-96 bg-muted">
         {news.image && (
-          <Image
+          <OptimizedImage
             src={getImageUrl(news.image) || "/placeholder.svg"}
             alt={news.title}
             fill
-            className="object-cover"
+            sizes="100vw"
+            priority
           />
         )}
         <div className="absolute inset-0 bg-black/40" />

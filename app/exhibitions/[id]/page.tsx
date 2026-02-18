@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
 import { ArrowLeft, MapPin, Calendar, Users } from 'lucide-react'
-import Image from 'next/image'
+import { OptimizedImage } from '@/components/ui/optimized-image'
 
 interface ExhibitionPageProps {
   params: Promise<{ id: string }>
@@ -71,11 +71,12 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
       {/* Hero */}
       <section className="relative w-full h-96 bg-muted">
         {exhibition.image && (
-          <Image
+          <OptimizedImage
             src={getImageUrl(exhibition.image) || "/placeholder.svg"}
             alt={exhibition.title}
             fill
-            className="object-cover"
+            sizes="100vw"
+            priority
           />
         )}
         <div className="absolute inset-0 bg-black/40" />

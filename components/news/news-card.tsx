@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Calendar } from 'lucide-react'
-import Image from 'next/image'
+import { OptimizedImage } from '@/components/ui/optimized-image'
 
 interface NewsCardProps {
   news: News
@@ -24,11 +24,11 @@ export function NewsCard({ news, featured = false }: NewsCardProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="relative w-full h-80 bg-muted">
             {news.image && (
-              <Image
+              <OptimizedImage
                 src={getImageUrl(news.image) || "/placeholder.svg"}
                 alt={news.title}
                 fill
-                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 50vw"
               />
             )}
           </div>
@@ -52,11 +52,11 @@ export function NewsCard({ news, featured = false }: NewsCardProps) {
     <Card className="overflow-hidden hover:shadow-lg transition-shadow h-full flex flex-col">
       <div className="relative w-full h-40 bg-muted">
         {news.image && (
-          <Image
+          <OptimizedImage
             src={getImageUrl(news.image) || "/placeholder.svg"}
             alt={news.title}
             fill
-            className="object-cover"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
         )}
       </div>
