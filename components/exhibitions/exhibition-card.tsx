@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import { Exhibition } from '@/lib/types'
 import { getImageUrl } from '@/lib/api'
+import { useAuth } from '@/lib/auth-context'
+import { useAdmin } from '@/lib/admin-context'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { RegistrationModal } from './registration-modal'
@@ -17,6 +19,10 @@ interface ExhibitionCardProps {
 
 export function ExhibitionCard({ exhibition }: ExhibitionCardProps) {
   const [registrationOpen, setRegistrationOpen] = useState(false)
+  const { user } = useAuth()
+  const { getRegistrationsByUser } = useAdmin()
+  const userRegistrations = user ? getRegistrationsByUser(user.id) : []
+  const isRegistered = userRegistrations.some((r) => r.exhibitionId === exhibition.id && r.status === 'registered')
   const startDate = new Date(exhibition.startDate).toLocaleDateString('ru-RU', {
     month: 'short',
     day: 'numeric',
@@ -74,9 +80,15 @@ export function ExhibitionCard({ exhibition }: ExhibitionCardProps) {
           <Button asChild variant="outline" className="flex-1 bg-transparent">
             <Link href={`/exhibitions/${exhibition.id}`}>Подробнее</Link>
           </Button>
-          <Button className="flex-1" onClick={() => setRegistrationOpen(true)}>
-            Зарегистрироваться
-          </Button>
+          {isRegistered ? (
+            <Button className="flex-1" variant="secondary" disabled>
+              Вы уже зареганы
+            </Button>
+          ) : (
+            <Button className="flex-1" onClick={() => setRegistrationOpen(true)}>
+              Зарегистрироваться
+            </Button>
+          )}
         </div>
 
         <RegistrationModal

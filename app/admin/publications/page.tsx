@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Plus, Edit2, Trash2, Eye, Loader2 } from 'lucide-react'
+import { Plus, Loader2 } from 'lucide-react'
 import { PublicationCardSkeleton } from '@/components/admin/publication-card-skeleton'
 import {
   DropdownMenu,
@@ -252,18 +252,18 @@ function PublicationsContent() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem onClick={() => handleEditContent(news, 'news')}>
-                              <Edit2 className="w-4 h-4 mr-2" /> Редактировать
+                              Редактировать
                             </DropdownMenuItem>
                             <DropdownMenuItem asChild>
                               <a href={`/news/${news.id}`} target="_blank" rel="noopener noreferrer">
-                                <Eye className="w-4 h-4 mr-2" /> Просмотр
+                                Просмотр
                               </a>
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => updateNews(news.id, { status: news.status === 'published' ? 'draft' : 'published' })}>
                               {news.status === 'published' ? 'Снять с публикации' : 'Опубликовать'}
                             </DropdownMenuItem>
                             <DropdownMenuItem className="text-destructive" onClick={() => deleteNews(news.id)}>
-                              <Trash2 className="w-4 h-4 mr-2" /> Удалить
+                              Удалить
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -392,10 +392,11 @@ function PublicationsContent() {
                     </div>
                     <div>
                       <label className="text-sm font-medium">Полный текст</label>
-                      <Input
+                      <Textarea
                         value={formData.content || ''}
                         onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                         placeholder="Введите полный текст новости"
+                        rows={6}
                       />
                     </div>
                     <div>

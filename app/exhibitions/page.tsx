@@ -41,7 +41,7 @@ export default function ExhibitionsPage() {
       <section className="py-12">
         <div className="container mx-auto px-4">
           {/* Filters */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
@@ -69,10 +69,6 @@ export default function ExhibitionsPage() {
                 <SelectItem value="popular">Популярные</SelectItem>
               </SelectContent>
             </Select>
-
-            <Button variant="outline" className="w-full bg-transparent">
-              Дополнительные фильтры
-            </Button>
           </div>
 
           {/* Results */}

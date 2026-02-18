@@ -68,14 +68,17 @@ export const registrationsApi = {
 
 // Upload via presigned URL (S3)
 export async function uploadViaPresignedUrl(file: File): Promise<{ fileId: string }> {
-  const { uploadUrl, fileId } = await api<{ uploadUrl: string; fileId: string }>('/api/upload-url', {
+  const { uploadUrl, fileId } = await api<{ uploadUrl: string; fileId: string; cacheControl?: string }>('/api/upload-url', {
     method: 'POST',
     body: JSON.stringify({ filename: file.name, contentType: file.type || 'image/jpeg' }),
   })
   const putRes = await fetch(uploadUrl, {
     method: 'PUT',
     body: file,
-    headers: { 'Content-Type': file.type || 'image/jpeg' },
+    headers: {
+      'Content-Type': file.type || 'image/jpeg',
+      'Cache-Control': 'public, max-age=31536000, immutable',
+    },
   })
   if (!putRes.ok) throw new Error('Ошибка загрузки в хранилище')
   return { fileId }
@@ -85,7 +88,7 @@ export async function uploadViaPresignedUrl(file: File): Promise<{ fileId: strin
 export function getImageUrl(image?: string | null): string {
   if (!image) return ''
   if (image.startsWith('data:') || image.startsWith('http')) return image
-  return `${API_URL}/api/files/${image}/serve`
+  return `${API_URL}/api/files/${encodeURIComponent(image)}`
 }
 
 // News

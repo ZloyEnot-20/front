@@ -210,12 +210,12 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
                   <CardHeader>
                     <CardTitle>Регистрация</CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="space-y-4">
                     <p className="text-sm text-muted-foreground">
                       Вы уже зарегистрированы на эту выставку.
                     </p>
-                    <Button variant="outline" className="w-full mt-4" asChild>
-                      <Link href="/profile">Перейти в профиль</Link>
+                    <Button variant="secondary" className="w-full" disabled>
+                      Вы уже зареганы
                     </Button>
                   </CardContent>
                 </Card>

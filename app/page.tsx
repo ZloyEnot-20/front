@@ -7,10 +7,12 @@ import { NewsCard } from '@/components/news/news-card'
 import { NewsCardSkeleton } from '@/components/news/news-card-skeleton'
 import { Button } from '@/components/ui/button'
 import { useAdmin } from '@/lib/admin-context'
+import { useAuth } from '@/lib/auth-context'
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 
 export default function Home() {
+  const { user } = useAuth()
   const { exhibitions, news, isLoading } = useAdmin()
   const publishedExhibitions = exhibitions.filter((e) => e.status === 'published')
   const publishedNews = news.filter((n) => n.status === 'published')
@@ -38,9 +40,11 @@ export default function Home() {
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" asChild>
-                <Link href="/auth/signup">Зарегистрироваться</Link>
-              </Button>
+              {!user && (
+                <Button size="lg" variant="outline" asChild>
+                  <Link href="/auth/signup">Зарегистрироваться</Link>
+                </Button>
+              )}
             </div>
           </div>
         </div>
@@ -125,26 +129,30 @@ export default function Home() {
           ) : (
             <div className="text-center py-12">
               <p className="text-muted-foreground mb-4">Сейчас нет опубликованных выставок</p>
-              <Button asChild>
-                <Link href="/auth/signup">Быть в курсе</Link>
-              </Button>
+              {!user && (
+                <Button asChild>
+                  <Link href="/auth/signup">Быть в курсе</Link>
+                </Button>
+              )}
             </div>
           )}
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="border-t border-border/40 bg-gradient-to-b from-primary/5 to-secondary/5 py-16 md:py-24">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Готовы начать?</h2>
-          <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Присоединяйтесь к тысячам пользователей, которые уже находят и создают отличные выставки
-          </p>
-          <Button size="lg" asChild>
-            <Link href="/auth/signup">Зарегистрироваться сейчас</Link>
-          </Button>
-        </div>
-      </section>
+      {!user && (
+        <section className="border-t border-border/40 bg-gradient-to-b from-primary/5 to-secondary/5 py-16 md:py-24">
+          <div className="container mx-auto px-4 text-center">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Готовы начать?</h2>
+            <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
+              Присоединяйтесь к тысячам пользователей, которые уже находят и создают отличные выставки
+            </p>
+            <Button size="lg" asChild>
+              <Link href="/auth/signup">Зарегистрироваться сейчас</Link>
+            </Button>
+          </div>
+        </section>
+      )}
 
       {/* Footer */}
       <footer className="border-t border-border/40 py-12 bg-muted/40">
