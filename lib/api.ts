@@ -41,7 +41,7 @@ export const authApi = {
 export const usersApi = {
   list: () => api<ApiUser[]>('/api/users'),
   get: (id: string) => api<ApiUser>(`/api/users/${id}`),
-  create: (data: Partial<ApiUser> & { email: string; name: string }) =>
+  create: (data: Partial<ApiUser> & { email: string; name: string; password?: string }) =>
     api<ApiUser>('/api/users', { method: 'POST', body: JSON.stringify(data) }),
   update: (id: string, data: Partial<ApiUser>) =>
     api<ApiUser>(`/api/users/${id}`, { method: 'PUT', body: JSON.stringify(data) }),

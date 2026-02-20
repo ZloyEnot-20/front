@@ -10,7 +10,6 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { UserRole } from '@/lib/types'
 
 export function SignupForm() {
@@ -22,7 +21,7 @@ export function SignupForm() {
     name: '',
     password: '',
     confirmPassword: '',
-    role: 'visitor' as UserRole,
+    role: 'visitor' as UserRole, // по БП только Visitor регистрируется сам
   })
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -34,13 +33,6 @@ export function SignupForm() {
     setError('')
   }
 
-  const handleRoleChange = (value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      role: value as UserRole,
-    }))
-  }
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -50,7 +42,7 @@ export function SignupForm() {
     }
 
     try {
-      await signup(formData.email, formData.name, formData.password, formData.role)
+      await signup(formData.email, formData.name, formData.password, 'visitor')
       router.push('/')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Ошибка регистрации')
@@ -127,29 +119,7 @@ export function SignupForm() {
             />
           </div>
 
-          <div className="space-y-3">
-            <Label>Я зарегистрируюсь как:</Label>
-            <RadioGroup value={formData.role} onValueChange={handleRoleChange}>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="visitor" id="visitor" />
-                <Label htmlFor="visitor" className="font-normal cursor-pointer">
-                  Посетитель (просмотр выставок)
-                </Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="participant" id="participant" />
-                <Label htmlFor="participant" className="font-normal cursor-pointer">
-                  Участник (компания-участник)
-                </Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="content_manager" id="content_manager" disabled />
-                <Label htmlFor="content_manager" className="font-normal cursor-pointer text-muted-foreground">
-                  Менеджер контента (только по приглашению)
-                </Label>
-              </div>
-            </RadioGroup>
-          </div>
+          <p className="text-sm text-muted-foreground">Регистрация только как посетитель (Visitor). Остальные роли создаёт администратор.</p>
 
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? 'Регистрация...' : 'Зарегистрироваться'}

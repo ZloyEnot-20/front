@@ -81,6 +81,11 @@ export function LoginForm() {
             />
           </div>
 
+          <div className="flex justify-end">
+            <a href="/auth/forgot-password" className="text-sm text-primary hover:underline">
+              Забыли пароль?
+            </a>
+          </div>
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? 'Вход...' : 'Войти'}
           </Button>

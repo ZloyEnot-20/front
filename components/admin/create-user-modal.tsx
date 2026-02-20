@@ -30,9 +30,9 @@ interface CreateUserModalProps {
 
 const ROLES = [
   { value: 'visitor', label: 'Посетитель' },
-  { value: 'exhibitor', label: 'Экспонент' },
-  { value: 'staff', label: 'Персонал' },
-  { value: 'manager', label: 'Менеджер контента' },
+  { value: 'exhibitor', label: 'Экспонент (Exhibitor)' },
+  { value: 'staff', label: 'Персонал входа (Entrance Staff)' },
+  { value: 'content_manager', label: 'Менеджер контента (Content Manager)' },
   { value: 'admin', label: 'Администратор' },
 ]
 
@@ -43,6 +43,7 @@ export function CreateUserModal({ isOpen, onOpenChange }: CreateUserModalProps) 
     lastName: '',
     email: '',
     phone: '',
+    password: '',
     role: 'visitor',
   })
   const [error, setError] = useState('')
@@ -66,6 +67,10 @@ export function CreateUserModal({ isOpen, onOpenChange }: CreateUserModalProps) 
       setError('Введите номер телефона')
       return false
     }
+    if (!formData.password || formData.password.length < 6) {
+      setError('Задайте пароль (не менее 6 символов)')
+      return false
+    }
     return true
   }
 
@@ -81,7 +86,8 @@ export function CreateUserModal({ isOpen, onOpenChange }: CreateUserModalProps) 
       name: `${formData.firstName} ${formData.lastName}`,
       email: formData.email,
       phone: formData.phone,
-      role: formData.role as 'visitor' | 'exhibitor' | 'staff' | 'manager' | 'admin',
+      password: formData.password,
+      role: formData.role as 'visitor' | 'exhibitor' | 'staff' | 'content_manager' | 'admin',
       status: 'active' as const,
       createdAt: new Date(),
     } as Parameters<typeof addUser>[0]
@@ -103,6 +109,7 @@ export function CreateUserModal({ isOpen, onOpenChange }: CreateUserModalProps) 
         lastName: '',
         email: '',
         phone: '',
+        password: '',
         role: 'visitor',
       })
       onOpenChange(false)
@@ -171,6 +178,16 @@ export function CreateUserModal({ isOpen, onOpenChange }: CreateUserModalProps) 
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                 placeholder="+7 (900) 123-45-67"
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium">Пароль (задаётся администратором)</label>
+              <Input
+                type="password"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                placeholder="••••••••"
               />
             </div>
 

@@ -181,6 +181,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       email: user.email,
       name: user.name,
       role: user.role,
+      password: (user as User & { password?: string }).password,
       status: (user as User & { status?: string }).status ?? 'active',
       avatar: user.avatar,
       phone: (user as User & { phone?: string }).phone,

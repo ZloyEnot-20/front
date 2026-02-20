@@ -435,7 +435,7 @@ function PublicationsContent() {
 
 export default function PublicationsPage() {
   return (
-    <ProtectedRoute requiredRoles={['admin']}>
+    <ProtectedRoute requiredRoles={['admin', 'content_manager']}>
       <PublicationsContent />
     </ProtectedRoute>
   )

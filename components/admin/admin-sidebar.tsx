@@ -7,17 +7,18 @@ import { useAuth } from '@/lib/auth-context'
 import { Button } from '@/components/ui/button'
 import { Users, FileText, BarChart3, LogOut, Menu, X, Home } from 'lucide-react'
 
+const FULL_MENU = [
+  { label: 'Пользователи', href: '/admin/users', icon: Users, roles: ['admin'] },
+  { label: 'Публикации', href: '/admin/publications', icon: FileText, roles: ['admin', 'content_manager'] },
+  { label: 'Отчеты', href: '/admin/reports', icon: BarChart3, roles: ['admin'] },
+  { label: 'Логи', href: '/admin/logs', icon: LogOut, roles: ['admin'] },
+]
+
 export function AdminSidebar() {
   const pathname = usePathname()
-  const { logout } = useAuth()
+  const { user, logout } = useAuth()
   const [mobileOpen, setMobileOpen] = useState(false)
-
-  const menuItems = [
-    { label: 'Пользователи', href: '/admin/users', icon: Users },
-    { label: 'Публикации', href: '/admin/publications', icon: FileText },
-    { label: 'Отчеты', href: '/admin/reports', icon: BarChart3 },
-    { label: 'Логи', href: '/admin/logs', icon: LogOut },
-  ]
+  const menuItems = FULL_MENU.filter((item) => user?.role && item.roles.includes(user.role))
 
   return (
     <>

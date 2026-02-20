@@ -41,9 +41,14 @@ export function Header() {
           </Link>
           {user && (
             <>
-              {(user.role === 'admin' || user.role === 'content_manager') && (
-                <Link href="/" className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors">
+              {user.role === 'admin' && (
+                <Link href="/admin" className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors">
                   Управление
+                </Link>
+              )}
+              {user.role === 'content_manager' && (
+                <Link href="/admin/publications" className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors">
+                  Мои контенты
                 </Link>
               )}
             </>
@@ -83,7 +88,7 @@ export function Header() {
                 )}
                 {user.role === 'content_manager' && (
                   <DropdownMenuItem asChild>
-                    <Link href="/manager">Управление контентом</Link>
+                    <Link href="/admin/publications">Мои контенты</Link>
                   </DropdownMenuItem>
                 )}
                 {user.role === 'participant' && (
