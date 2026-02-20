@@ -173,13 +173,13 @@ export function RegistrationModal({
           registration && (
             <>
               <DialogHeader>
-                <DialogTitle>Регистрация успешна!</DialogTitle>
+                <DialogTitle>Регистрация завершена</DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
                 <Alert className="border-green-200 bg-green-50">
                   <CheckCircle2 className="h-4 w-4 text-green-600" />
                   <AlertDescription className="text-green-800">
-                    Вы успешно зарегистрировались на выставку
+                    Вы зарегистрированы на выставку. Сохраните QR-код и предъявите его на входе.
                   </AlertDescription>
                 </Alert>
 

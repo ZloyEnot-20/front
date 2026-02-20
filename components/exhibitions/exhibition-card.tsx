@@ -81,8 +81,8 @@ export function ExhibitionCard({ exhibition }: ExhibitionCardProps) {
             <Link href={`/exhibitions/${exhibition.id}`}>Подробнее</Link>
           </Button>
           {isRegistered ? (
-            <Button className="flex-1" variant="secondary" disabled>
-              Вы уже зареганы
+            <Button className="flex-1" variant="secondary" asChild>
+              <Link href={`/exhibitions/${exhibition.id}`}>Зарегистрированы · Подробнее</Link>
             </Button>
           ) : (
             <Button className="flex-1" onClick={() => setRegistrationOpen(true)}>

@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { Header } from '@/components/layout/header'
 import { ProtectedRoute } from '@/components/auth/protected-route'
 import { useAuth } from '@/lib/auth-context'
@@ -21,7 +22,13 @@ const TABS = [
 
 function ProfileContent() {
   const { user } = useAuth()
-  const [activeTab, setActiveTab] = useState('personal')
+  const searchParams = useSearchParams()
+  const tabFromUrl = searchParams.get('tab')
+  const [activeTab, setActiveTab] = useState(tabFromUrl === 'exhibitions' ? 'exhibitions' : 'personal')
+
+  useEffect(() => {
+    if (tabFromUrl === 'exhibitions') setActiveTab('exhibitions')
+  }, [tabFromUrl])
 
   if (!user) {
     return <div className="flex items-center justify-center min-h-screen">Загрузка...</div>

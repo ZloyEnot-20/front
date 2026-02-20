@@ -212,10 +212,10 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <p className="text-sm text-muted-foreground">
-                      Вы уже зарегистрированы на эту выставку.
+                      Вы зарегистрированы на эту выставку. QR-код для входа доступен в разделе «Мои выставки» в профиле.
                     </p>
-                    <Button variant="secondary" className="w-full" disabled>
-                      Вы уже зареганы
+                    <Button variant="default" className="w-full" asChild>
+                      <Link href="/profile?tab=exhibitions">Перейти в профиль</Link>
                     </Button>
                   </CardContent>
                 </Card>
