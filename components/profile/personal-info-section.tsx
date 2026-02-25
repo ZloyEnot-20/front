@@ -116,35 +116,39 @@ export function PersonalInfoSection({ user }: PersonalInfoSectionProps) {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-medium mb-2">Страна</label>
-            <select className="w-full px-4 py-2 border border-input rounded-lg bg-background">
-              <option>Россия</option>
-              <option>США</option>
-              <option>Канада</option>
-              <option>Великобритания</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-2">Город</label>
-            <select className="w-full px-4 py-2 border border-input rounded-lg bg-background">
-              <option>Москва</option>
-              <option>Санкт-Петербург</option>
-              <option>Новосибирск</option>
-              <option>Екатеринбург</option>
-            </select>
-          </div>
-        </div>
+        {user.role === 'visitor' && (
+          <>
+            <div className="grid grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium mb-2">Страна</label>
+                <select className="w-full px-4 py-2 border border-input rounded-lg bg-background">
+                  <option>Россия</option>
+                  <option>США</option>
+                  <option>Канада</option>
+                  <option>Великобритания</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Город</label>
+                <select className="w-full px-4 py-2 border border-input rounded-lg bg-background">
+                  <option>Москва</option>
+                  <option>Санкт-Петербург</option>
+                  <option>Новосибирск</option>
+                  <option>Екатеринбург</option>
+                </select>
+              </div>
+            </div>
 
-        <div>
-          <label className="block text-sm font-medium mb-2">Почтовый индекс</label>
-          <Input
-            value={formData.zipCode}
-            onChange={(e) => handleChange('zipCode', e.target.value)}
-            placeholder="Введите индекс"
-          />
-        </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Почтовый индекс</label>
+              <Input
+                value={formData.zipCode}
+                onChange={(e) => handleChange('zipCode', e.target.value)}
+                placeholder="Введите индекс"
+              />
+            </div>
+          </>
+        )}
         <div className="flex justify-center">
         <Button onClick={handleSave} disabled={isSaving} className="mt-8">
           {isSaving ? 'Сохранение...' : 'Сохранить'}
