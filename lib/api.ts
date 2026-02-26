@@ -78,7 +78,13 @@ export async function uploadFile(file: File): Promise<{ fileId: string; url?: st
     body: form,
   })
   const data = await res.json().catch(() => ({}))
-  if (!res.ok) throw new Error((data as { error?: string }).error ?? 'Ошибка загрузки')
+  if (!res.ok) {
+    const msg = (data as { error?: string }).error ?? ''
+    if (res.status === 413 || /entity too large|too large|превышен/i.test(msg)) {
+      throw new Error('Файл слишком большой. Максимум 10 МБ.')
+    }
+    throw new Error(msg || 'Ошибка загрузки')
+  }
   return { fileId: (data as { fileId: string }).fileId, url: (data as { url?: string }).url }
 }
 

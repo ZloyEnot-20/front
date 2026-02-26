@@ -36,7 +36,9 @@ function PublicationsContent() {
   const [editingItem, setEditingItem] = useState<any>(null)
   const [formData, setFormData] = useState<any>({})
   const [uploading, setUploading] = useState(false)
+  const [uploadError, setUploadError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  const MAX_FILE_MB = 10
 
   const filteredExhibitions = exhibitions.filter((e) =>
     e.title.toLowerCase().includes(searchQuery.toLowerCase())
@@ -50,6 +52,7 @@ function PublicationsContent() {
     setModalType(type)
     setEditingItem(null)
     setFormData({})
+    setUploadError(null)
     setModalOpen(true)
   }
 
@@ -57,6 +60,7 @@ function PublicationsContent() {
     setModalType(type)
     setEditingItem(item)
     setFormData({ ...item })
+    setUploadError(null)
     setModalOpen(true)
   }
 
@@ -326,11 +330,18 @@ function PublicationsContent() {
                         onChange={async (e) => {
                           const file = e.target.files?.[0]
                           if (!file) return
+                          setUploadError(null)
+                          if (file.size > MAX_FILE_MB * 1024 * 1024) {
+                            setUploadError(`Файл слишком большой. Максимум ${MAX_FILE_MB} МБ.`)
+                            e.target.value = ''
+                            return
+                          }
                           setUploading(true)
                           try {
                             const { fileId } = await uploadFile(file)
                             setFormData({ ...formData, image: fileId })
                           } catch (err) {
+                            setUploadError(err instanceof Error ? err.message : 'Ошибка загрузки')
                             console.error(err)
                           } finally {
                             setUploading(false)
@@ -339,7 +350,9 @@ function PublicationsContent() {
                         }}
                       />
                       <span className="text-sm text-primary hover:underline">{uploading ? 'Загрузка...' : 'Выбрать файл'}</span>
+                      <span className="text-xs text-muted-foreground ml-1">(макс. {MAX_FILE_MB} МБ)</span>
                     </label>
+                    {uploadError ? <p className="text-sm text-destructive mt-1">{uploadError}</p> : null}
                   </div>
                 </div>
                 {modalType === 'exhibition' ? (
