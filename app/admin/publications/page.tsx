@@ -5,7 +5,7 @@ import { ProtectedRoute } from '@/components/auth/protected-route'
 import { AdminSidebar } from '@/components/admin/admin-sidebar'
 import { useAdmin } from '@/lib/admin-context'
 import { useAuth } from '@/lib/auth-context'
-import { uploadViaPresignedUrl, getImageUrl } from '@/lib/api'
+import { uploadFile, getImageUrl } from '@/lib/api'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -328,7 +328,7 @@ function PublicationsContent() {
                           if (!file) return
                           setUploading(true)
                           try {
-                            const { fileId } = await uploadViaPresignedUrl(file)
+                            const { fileId } = await uploadFile(file)
                             setFormData({ ...formData, image: fileId })
                           } catch (err) {
                             console.error(err)

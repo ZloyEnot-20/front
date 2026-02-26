@@ -66,22 +66,20 @@ export const registrationsApi = {
     api<ApiRegistration>('/api/registrations', { method: 'POST', body: JSON.stringify(data) }),
 }
 
-// Upload via presigned URL (S3)
-export async function uploadViaPresignedUrl(file: File): Promise<{ fileId: string }> {
-  const { uploadUrl, fileId } = await api<{ uploadUrl: string; fileId: string; cacheControl?: string }>('/api/upload-url', {
+// Загрузка файла на бэкенд (S3 публичный бакет)
+export async function uploadFile(file: File): Promise<{ fileId: string; url?: string }> {
+  const token = getToken()
+  if (!token) throw new Error('Требуется авторизация')
+  const form = new FormData()
+  form.append('file', file)
+  const res = await fetch(`${API_URL}/api/upload-url`, {
     method: 'POST',
-    body: JSON.stringify({ filename: file.name, contentType: file.type || 'image/jpeg' }),
+    headers: { Authorization: `Bearer ${token}` },
+    body: form,
   })
-  const putRes = await fetch(uploadUrl, {
-    method: 'PUT',
-    body: file,
-    headers: {
-      'Content-Type': file.type || 'image/jpeg',
-      'Cache-Control': 'public, max-age=31536000, immutable',
-    },
-  })
-  if (!putRes.ok) throw new Error('Ошибка загрузки в хранилище')
-  return { fileId }
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok) throw new Error((data as { error?: string }).error ?? 'Ошибка загрузки')
+  return { fileId: (data as { fileId: string }).fileId, url: (data as { url?: string }).url }
 }
 
 // URL для отображения изображения (fileId, base64 или http)
