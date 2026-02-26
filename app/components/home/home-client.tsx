@@ -1,6 +1,5 @@
 'use client'
 
-import { Header } from '@/components/layout/header'
 import { ExhibitionCard } from '@/components/exhibitions/exhibition-card'
 import { ExhibitionCardSkeleton } from '@/components/exhibitions/exhibition-card-skeleton'
 import { NewsCard } from '@/components/news/news-card'
@@ -20,9 +19,7 @@ export function HomeClient() {
   const otherNews = publishedNews.slice(1)
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-
+    <>
       {/* Featured News - reserve min-height to reduce CLS */}
       {isLoading ? (
         <section className="border-b border-border/40 py-16 md:py-24 min-h-[340px]" aria-busy="true">
@@ -152,6 +149,6 @@ export function HomeClient() {
           </div>
         </div>
       </footer>
-    </div>
+    </>
   )
 }
