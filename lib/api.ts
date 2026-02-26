@@ -28,6 +28,16 @@ export async function api<T>(
   return data as T
 }
 
+/** POST/PUT с FormData (multipart). Не ставит Content-Type — браузер подставит boundary. */
+async function apiFormData<T>(path: string, formData: FormData, method: 'POST' | 'PUT' = 'POST'): Promise<T> {
+  const token = getToken()
+  const headers: HeadersInit = { Authorization: `Bearer ${token}` }
+  const res = await fetch(`${API_URL}${path}`, { method, headers, body: formData })
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok) throw new Error((data as { error?: string }).error ?? 'Ошибка запроса')
+  return data as T
+}
+
 // Auth
 export const authApi = {
   login: (email: string, password: string) =>
@@ -54,8 +64,10 @@ export const exhibitionsApi = {
   get: (id: string) => api<ApiExhibition>(`/api/exhibitions/${id}`),
   create: (data: Partial<ApiExhibition>) =>
     api<ApiExhibition>('/api/exhibitions', { method: 'POST', body: JSON.stringify(data) }),
+  createFormData: (formData: FormData) => apiFormData<ApiExhibition>('/api/exhibitions', formData, 'POST'),
   update: (id: string, data: Partial<ApiExhibition>) =>
     api<ApiExhibition>(`/api/exhibitions/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  updateFormData: (id: string, formData: FormData) => apiFormData<ApiExhibition>(`/api/exhibitions/${id}`, formData, 'PUT'),
   delete: (id: string) => api<void>(`/api/exhibitions/${id}`, { method: 'DELETE' }),
 }
 
@@ -101,8 +113,10 @@ export const newsApi = {
   get: (id: string) => api<ApiNews>(`/api/news/${id}`),
   create: (data: Partial<ApiNews>) =>
     api<ApiNews>('/api/news', { method: 'POST', body: JSON.stringify(data) }),
+  createFormData: (formData: FormData) => apiFormData<ApiNews>('/api/news', formData, 'POST'),
   update: (id: string, data: Partial<ApiNews>) =>
     api<ApiNews>(`/api/news/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  updateFormData: (id: string, formData: FormData) => apiFormData<ApiNews>(`/api/news/${id}`, formData, 'PUT'),
   delete: (id: string) => api<void>(`/api/news/${id}`, { method: 'DELETE' }),
 }
 

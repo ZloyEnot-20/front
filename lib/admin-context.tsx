@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react'
 import { Exhibition, News, User, ExhibitionRegistration } from './types'
-import { exhibitionsApi, newsApi, usersApi, registrationsApi } from './api'
+import { exhibitionsApi, newsApi, usersApi, registrationsApi, ApiUser } from './api'
 
 function toExhibition(e: { id: string; title: string; description: string; startDate: string; endDate: string; location: string; image?: string; status: string; participantCount: number; registrations: number; createdBy: string; createdAt: string; updatedAt: string }): Exhibition {
   return {
@@ -59,10 +59,14 @@ interface AdminContextType {
   isLoading: boolean
   refresh: () => Promise<void>
   addExhibition: (exhibition: Exhibition) => Promise<void>
+  addExhibitionFormData: (formData: FormData) => Promise<void>
   updateExhibition: (id: string, exhibition: Partial<Exhibition>) => Promise<void>
+  updateExhibitionFormData: (id: string, formData: FormData) => Promise<void>
   deleteExhibition: (id: string) => Promise<void>
   addNews: (news: News) => Promise<void>
+  addNewsFormData: (formData: FormData) => Promise<void>
   updateNews: (id: string, news: Partial<News>) => Promise<void>
+  updateNewsFormData: (id: string, formData: FormData) => Promise<void>
   deleteNews: (id: string) => Promise<void>
   updateUser: (id: string, user: Partial<User>) => Promise<void>
   deleteUser: (id: string) => Promise<void>
@@ -129,8 +133,20 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       ...exhibition,
       startDate: exhibition.startDate instanceof Date ? exhibition.startDate.toISOString() : (exhibition.startDate as unknown as string),
       endDate: exhibition.endDate instanceof Date ? exhibition.endDate.toISOString() : (exhibition.endDate as unknown as string),
+      createdAt: exhibition.createdAt instanceof Date ? exhibition.createdAt.toISOString() : (exhibition.createdAt as unknown as string),
+      updatedAt: exhibition.updatedAt instanceof Date ? exhibition.updatedAt.toISOString() : (exhibition.updatedAt as unknown as string),
     })
     setExhibitions((prev) => [toExhibition(created), ...prev])
+  }
+
+  const addExhibitionFormData = async (formData: FormData) => {
+    const created = await exhibitionsApi.createFormData(formData)
+    setExhibitions((prev) => [toExhibition(created), ...prev])
+  }
+
+  const updateExhibitionFormData = async (id: string, formData: FormData) => {
+    const updated = await exhibitionsApi.updateFormData(id, formData)
+    setExhibitions((prev) => prev.map((e) => (e.id === id ? toExhibition(updated) : e)))
   }
 
   const updateExhibition = async (id: string, updates: Partial<Exhibition>) => {
@@ -149,9 +165,31 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   const addNews = async (newsItem: News) => {
     const created = await newsApi.create({
       ...newsItem,
-      publishedAt: newsItem.publishedAt instanceof Date ? newsItem.publishedAt.toISOString() : (newsItem.publishedAt as unknown as string),
+      // Ensure publishedAt is a string, and createdAt/updatedAt are also strings (ISO), to fix type errors
+      publishedAt:
+        newsItem.publishedAt instanceof Date
+          ? newsItem.publishedAt.toISOString()
+          : (newsItem.publishedAt as unknown as string),
+      createdAt:
+        newsItem.createdAt instanceof Date
+          ? newsItem.createdAt.toISOString()
+          : (newsItem.createdAt as unknown as string),
+      updatedAt:
+        newsItem.updatedAt instanceof Date
+          ? newsItem.updatedAt.toISOString()
+          : (newsItem.updatedAt as unknown as string),
     })
     setNews((prev) => [toNews(created), ...prev])
+  }
+
+  const addNewsFormData = async (formData: FormData) => {
+    const created = await newsApi.createFormData(formData)
+    setNews((prev) => [toNews(created), ...prev])
+  }
+
+  const updateNewsFormData = async (id: string, formData: FormData) => {
+    const updated = await newsApi.updateFormData(id, formData)
+    setNews((prev) => prev.map((n) => (n.id === id ? toNews(updated) : n)))
   }
 
   const updateNews = async (id: string, updates: Partial<News>) => {
@@ -167,7 +205,10 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   }
 
   const updateUser = async (id: string, updates: Partial<User>) => {
-    const updated = await usersApi.update(id, updates)
+    const payload: Record<string, unknown> = { ...updates }
+    if (updates.createdAt) payload.createdAt = updates.createdAt instanceof Date ? updates.createdAt.toISOString() : updates.createdAt
+    if (updates.updatedAt) payload.updatedAt = updates.updatedAt instanceof Date ? updates.updatedAt.toISOString() : updates.updatedAt
+    const updated = await usersApi.update(id, payload as Partial<ApiUser>)
     setUsers((prev) => prev.map((u) => (u.id === id ? toUser(updated) : u)))
   }
 
@@ -217,10 +258,14 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         isLoading,
         refresh,
         addExhibition,
+        addExhibitionFormData,
         updateExhibition,
+        updateExhibitionFormData,
         deleteExhibition,
         addNews,
+        addNewsFormData,
         updateNews,
+        updateNewsFormData,
         deleteNews,
         updateUser,
         deleteUser,

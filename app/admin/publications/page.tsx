@@ -5,7 +5,7 @@ import { ProtectedRoute } from '@/components/auth/protected-route'
 import { AdminSidebar } from '@/components/admin/admin-sidebar'
 import { useAdmin } from '@/lib/admin-context'
 import { useAuth } from '@/lib/auth-context'
-import { uploadFile, getImageUrl } from '@/lib/api'
+import { getImageUrl } from '@/lib/api'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -28,7 +28,7 @@ import {
 } from '@/components/ui/dialog'
 
 function PublicationsContent() {
-  const { exhibitions, news, updateExhibition, deleteExhibition, updateNews, deleteNews, addExhibition, addNews, isLoading } = useAdmin()
+  const { exhibitions, news, updateExhibition, updateExhibitionFormData, deleteExhibition, deleteNews, updateNews, updateNewsFormData, addExhibition, addExhibitionFormData, addNews, addNewsFormData, isLoading } = useAdmin()
   const { user } = useAuth()
   const [searchQuery, setSearchQuery] = useState('')
   const [modalOpen, setModalOpen] = useState(false)
@@ -86,49 +86,76 @@ function PublicationsContent() {
     setSaving(true)
     setUploadError(null)
     try {
-      let dataToSave = { ...formData }
-      if (pendingImageFile) {
-        try {
-          const { fileId } = await uploadFile(pendingImageFile)
-          dataToSave = { ...dataToSave, image: fileId }
-          setPendingImageFile(null)
-        } catch (err) {
-          setUploadError(err instanceof Error ? err.message : 'Ошибка загрузки файла')
-          return
-        }
-      }
+      const useFormData = !!pendingImageFile
 
-      if (editingItem) {
+      if (useFormData) {
+        const fd = new FormData()
+        fd.append('title', formData.title)
         if (modalType === 'exhibition') {
-          await updateExhibition(editingItem.id, dataToSave)
+          fd.append('description', formData.description ?? '')
+          fd.append('location', formData.location ?? '')
+          const start = formData.startDate ? (formData.startDate instanceof Date ? formData.startDate : new Date(formData.startDate)) : new Date()
+          const end = formData.endDate ? (formData.endDate instanceof Date ? formData.endDate : new Date(formData.endDate)) : new Date()
+          fd.append('startDate', start.toISOString())
+          fd.append('endDate', end.toISOString())
+          fd.append('status', formData.status ?? 'draft')
         } else {
-          await updateNews(editingItem.id, dataToSave)
+          fd.append('content', formData.content ?? '')
+          fd.append('excerpt', formData.excerpt ?? '')
+          const pub = formData.publishedAt ? (formData.publishedAt instanceof Date ? formData.publishedAt : new Date(formData.publishedAt)) : new Date()
+          fd.append('publishedAt', pub.toISOString())
+          fd.append('status', formData.status ?? 'draft')
+        }
+        fd.append('createdBy', user?.id || '')
+        fd.append('image', pendingImageFile)
+        setPendingImageFile(null)
+
+        if (editingItem) {
+          if (modalType === 'exhibition') await updateExhibitionFormData(editingItem.id, fd)
+          else await updateNewsFormData(editingItem.id, fd)
+        } else {
+          if (modalType === 'exhibition') await addExhibitionFormData(fd)
+          else await addNewsFormData(fd)
         }
       } else {
-        if (modalType === 'exhibition') {
-          const newExhibition = {
-            ...dataToSave,
-            id: `exp-${Date.now()}`,
-            createdBy: user?.id || '3',
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            participantCount: 0,
-            registrations: 0,
-          }
-          await addExhibition(newExhibition)
+        const dataToSave = { ...formData }
+        if (editingItem) {
+          if (modalType === 'exhibition') await updateExhibition(editingItem.id, dataToSave)
+          else await updateNews(editingItem.id, dataToSave)
         } else {
-          const newNews = {
-            ...dataToSave,
-            id: `news-${Date.now()}`,
-            createdBy: user?.id || '3',
-            createdAt: new Date(),
-            updatedAt: new Date(),
+          if (modalType === 'exhibition') {
+            const newExhibition = {
+              id: `exp-${Date.now()}`,
+              title: dataToSave.title,
+              description: dataToSave.description ?? '',
+              startDate: dataToSave.startDate ?? new Date(),
+              endDate: dataToSave.endDate ?? new Date(),
+              location: dataToSave.location ?? '',
+              image: dataToSave.image,
+              status: (dataToSave.status as 'draft' | 'published') ?? 'draft',
+              participantCount: 0,
+              registrations: 0,
+              createdBy: user?.id || '3',
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            }
+            await addExhibition(newExhibition)
+          } else {
+            const newNews = {
+              ...dataToSave,
+              id: `news-${Date.now()}`,
+              createdBy: user?.id || '3',
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            }
+            await addNews(newNews)
           }
-          await addNews(newNews)
         }
       }
       setModalOpen(false)
     } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Ошибка сохранения'
+      setUploadError(msg)
       console.error(e)
     } finally {
       setSaving(false)
