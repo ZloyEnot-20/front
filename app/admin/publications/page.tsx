@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ProtectedRoute } from '@/components/auth/protected-route'
 import { AdminSidebar } from '@/components/admin/admin-sidebar'
 import { useAdmin } from '@/lib/admin-context'
@@ -35,10 +35,24 @@ function PublicationsContent() {
   const [modalType, setModalType] = useState<'news' | 'exhibition'>('news')
   const [editingItem, setEditingItem] = useState<any>(null)
   const [formData, setFormData] = useState<any>({})
-  const [uploading, setUploading] = useState(false)
+  const [pendingImageFile, setPendingImageFile] = useState<File | null>(null)
+  const [pendingPreviewUrl, setPendingPreviewUrl] = useState<string | null>(null)
   const [uploadError, setUploadError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const MAX_FILE_MB = 10
+
+  useEffect(() => {
+    if (!pendingImageFile) {
+      setPendingPreviewUrl((prev) => {
+        if (prev) URL.revokeObjectURL(prev)
+        return null
+      })
+      return
+    }
+    const url = URL.createObjectURL(pendingImageFile)
+    setPendingPreviewUrl(url)
+    return () => URL.revokeObjectURL(url)
+  }, [pendingImageFile])
 
   const filteredExhibitions = exhibitions.filter((e) =>
     e.title.toLowerCase().includes(searchQuery.toLowerCase())
@@ -52,6 +66,7 @@ function PublicationsContent() {
     setModalType(type)
     setEditingItem(null)
     setFormData({})
+    setPendingImageFile(null)
     setUploadError(null)
     setModalOpen(true)
   }
@@ -60,6 +75,7 @@ function PublicationsContent() {
     setModalType(type)
     setEditingItem(item)
     setFormData({ ...item })
+    setPendingImageFile(null)
     setUploadError(null)
     setModalOpen(true)
   }
@@ -68,17 +84,30 @@ function PublicationsContent() {
     if (!formData.title) return
 
     setSaving(true)
+    setUploadError(null)
     try {
+      let dataToSave = { ...formData }
+      if (pendingImageFile) {
+        try {
+          const { fileId } = await uploadFile(pendingImageFile)
+          dataToSave = { ...dataToSave, image: fileId }
+          setPendingImageFile(null)
+        } catch (err) {
+          setUploadError(err instanceof Error ? err.message : 'Ошибка загрузки файла')
+          return
+        }
+      }
+
       if (editingItem) {
         if (modalType === 'exhibition') {
-          await updateExhibition(editingItem.id, formData)
+          await updateExhibition(editingItem.id, dataToSave)
         } else {
-          await updateNews(editingItem.id, formData)
+          await updateNews(editingItem.id, dataToSave)
         }
       } else {
         if (modalType === 'exhibition') {
           const newExhibition = {
-            ...formData,
+            ...dataToSave,
             id: `exp-${Date.now()}`,
             createdBy: user?.id || '3',
             createdAt: new Date(),
@@ -89,7 +118,7 @@ function PublicationsContent() {
           await addExhibition(newExhibition)
         } else {
           const newNews = {
-            ...formData,
+            ...dataToSave,
             id: `news-${Date.now()}`,
             createdBy: user?.id || '3',
             createdAt: new Date(),
@@ -307,15 +336,23 @@ function PublicationsContent() {
                 <div>
                   <label className="text-sm font-medium">Изображение</label>
                   <div className="mt-1 flex items-center gap-3">
-                    {formData.image ? (
+                    {(pendingPreviewUrl || formData.image) ? (
                       <div className="relative">
-                        <img src={getImageUrl(formData.image)} alt="" className="h-20 w-20 rounded object-cover border" loading="lazy" />
+                        <img
+                          src={pendingPreviewUrl ?? getImageUrl(formData.image)}
+                          alt=""
+                          className="h-20 w-20 rounded object-cover border"
+                          loading="lazy"
+                        />
                         <Button
                           type="button"
                           variant="ghost"
                           size="sm"
                           className="absolute -top-1 -right-1 h-6 w-6 rounded-full p-0 text-destructive hover:text-destructive"
-                          onClick={() => setFormData({ ...formData, image: '' })}
+                          onClick={() => {
+                            setFormData({ ...formData, image: '' })
+                            setPendingImageFile(null)
+                          }}
                         >
                           ×
                         </Button>
@@ -326,8 +363,8 @@ function PublicationsContent() {
                         type="file"
                         accept="image/*"
                         className="hidden"
-                        disabled={uploading}
-                        onChange={async (e) => {
+                        disabled={saving}
+                        onChange={(e) => {
                           const file = e.target.files?.[0]
                           if (!file) return
                           setUploadError(null)
@@ -336,20 +373,11 @@ function PublicationsContent() {
                             e.target.value = ''
                             return
                           }
-                          setUploading(true)
-                          try {
-                            const { fileId } = await uploadFile(file)
-                            setFormData({ ...formData, image: fileId })
-                          } catch (err) {
-                            setUploadError(err instanceof Error ? err.message : 'Ошибка загрузки')
-                            console.error(err)
-                          } finally {
-                            setUploading(false)
-                            e.target.value = ''
-                          }
+                          setPendingImageFile(file)
+                          e.target.value = ''
                         }}
                       />
-                      <span className="text-sm text-primary hover:underline">{uploading ? 'Загрузка...' : 'Выбрать файл'}</span>
+                      <span className="text-sm text-primary hover:underline">Выбрать файл</span>
                       <span className="text-xs text-muted-foreground ml-1">(макс. {MAX_FILE_MB} МБ)</span>
                     </label>
                     {uploadError ? <p className="text-sm text-destructive mt-1">{uploadError}</p> : null}
