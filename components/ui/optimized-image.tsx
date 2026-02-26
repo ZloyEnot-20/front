@@ -33,6 +33,7 @@ export function OptimizedImage({
       height={!fill ? height : undefined}
       sizes={sizes}
       className={cn('object-cover', className)}
+      priority={priority}
       loading={priority ? 'eager' : 'lazy'}
     />
   )

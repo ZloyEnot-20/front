@@ -6,8 +6,18 @@ import { AuthProvider } from '@/lib/auth-context'
 import { AdminProvider } from '@/lib/admin-context'
 import './globals.css'
 
-const _geist = Geist({ subsets: ["latin"] });
-const _geistMono = Geist_Mono({ subsets: ["latin"] });
+const geist = Geist({
+  subsets: ['latin'],
+  display: 'swap',
+  preload: true,
+  variable: '--font-geist-sans',
+})
+const geistMono = Geist_Mono({
+  subsets: ['latin'],
+  display: 'swap',
+  preload: false,
+  variable: '--font-geist-mono',
+})
 
 export const metadata: Metadata = {
   title: 'Myfair - Управление выставками',
@@ -38,8 +48,8 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
-      <body className={`font-sans antialiased`}>
+    <html lang="ru" className={`${geist.variable} ${geistMono.variable}`}>
+      <body className="font-sans antialiased">
         <AuthProvider>
           <AdminProvider>
             {children}

@@ -9,9 +9,10 @@ import { OptimizedImage } from '@/components/ui/optimized-image'
 interface NewsCardProps {
   news: News
   featured?: boolean
+  priority?: boolean
 }
 
-export function NewsCard({ news, featured = false }: NewsCardProps) {
+export function NewsCard({ news, featured = false, priority = false }: NewsCardProps) {
   const publishedDate = new Date(news.publishedAt).toLocaleDateString('ru-RU', {
     year: 'numeric',
     month: 'long',
@@ -29,6 +30,7 @@ export function NewsCard({ news, featured = false }: NewsCardProps) {
                 alt={news.title}
                 fill
                 sizes="(max-width: 768px) 100vw, 50vw"
+                priority={priority}
               />
             )}
           </div>
