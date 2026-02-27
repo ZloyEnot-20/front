@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge'
 import { RegistrationModal } from './registration-modal'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { MapPin, Calendar, Users } from 'lucide-react'
+import { MapPin, Calendar, Users, CheckCircle2 } from 'lucide-react'
 import { OptimizedImage } from '@/components/ui/optimized-image'
 
 interface ExhibitionCardProps {
@@ -81,11 +81,11 @@ export function ExhibitionCard({ exhibition }: ExhibitionCardProps) {
             <Link href={`/exhibitions/${exhibition.id}`}>Подробнее</Link>
           </Button>
           {isRegistered ? (
-            <div className="flex flex-col gap-2 flex-1">
-              <p className="text-sm font-medium text-green-600">Вы зарегистрированы</p>
-              <Button className="flex-1" variant="outline" asChild>
-                <Link href={`/exhibitions/${exhibition.id}`}>Подробнее</Link>
-              </Button>
+            <div className="flex flex-col items-center justify-center gap-2 py-1 flex-1">
+              <div className="flex items-center gap-2 text-sm font-medium text-green-600">
+                <CheckCircle2 className="w-4 h-4" />
+                <p className="text-sm font-medium text-green-600">Вы зарегистрированы</p>
+              </div>
             </div>
           ) : (
             <Button className="flex-1" onClick={() => setRegistrationOpen(true)}>

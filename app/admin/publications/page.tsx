@@ -139,10 +139,48 @@ function PublicationsContent() {
   }
 
   const handleSaveContent = async () => {
-    if (!formData.title) return
+    setUploadError(null)
+
+    if (modalType === 'exhibition') {
+      const title = (formData.title ?? '').trim()
+      const description = (formData.description ?? '').trim()
+      const start = formData.startDate ? (formData.startDate instanceof Date ? formData.startDate : new Date(formData.startDate)) : null
+      const end = formData.endDate ? (formData.endDate instanceof Date ? formData.endDate : new Date(formData.endDate)) : null
+      if (!title) {
+        setUploadError('Введите название выставки')
+        return
+      }
+      if (!description) {
+        setUploadError('Введите описание выставки')
+        return
+      }
+      if (!start || !end) {
+        setUploadError('Укажите дату начала и дату окончания')
+        return
+      }
+      if (start > end) {
+        setUploadError('Дата окончания должна быть не раньше даты начала')
+        return
+      }
+    } else {
+      const title = (formData.title ?? '').trim()
+      const excerpt = (formData.excerpt ?? '').trim()
+      const content = (formData.content ?? '').trim()
+      if (!title) {
+        setUploadError('Введите название новости')
+        return
+      }
+      if (!excerpt) {
+        setUploadError('Введите краткое описание новости')
+        return
+      }
+      if (!content) {
+        setUploadError('Введите полный текст новости')
+        return
+      }
+    }
 
     setSaving(true)
-    setUploadError(null)
     try {
       const useFormData = !!pendingImageFile
 
@@ -501,14 +539,6 @@ function PublicationsContent() {
                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                         placeholder="Введите описание"
                         rows={4}
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium">Место проведения</label>
-                      <Input
-                        value={formData.location || ''}
-                        onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                        placeholder="Введите место"
                       />
                     </div>
                     <div>
