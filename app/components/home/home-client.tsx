@@ -129,7 +129,7 @@ export function HomeClient() {
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center gap-8">
             <div>
-              <div className="font-bold text-lg mb-2">Myfair</div>
+              <div className="font-bold text-lg mb-2">EDU Expo</div>
               <p className="text-sm text-muted-foreground">Платформа для управления выставками</p>
             </div>
             <div className="flex gap-8 text-sm text-muted-foreground">
@@ -145,7 +145,7 @@ export function HomeClient() {
             </div>
           </div>
           <div className="border-t border-border/40 mt-8 pt-8 text-center text-sm text-muted-foreground">
-            <p>&copy; 2026 Myfair. Все права защищены.</p>
+            <p>&copy; 2026 EDU Expo. Все права защищены.</p>
           </div>
         </div>
       </footer>

@@ -20,9 +20,10 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'Myfair - Управление выставками',
+  title: 'EDU Expo - Управление выставками',
   description: 'Платформа для управления выставками, билетами и участниками',
   generator: 'v0.app',
+  viewport: { width: 'device-width', initialScale: 1, maximumScale: 5 },
   icons: {
     icon: [
       {

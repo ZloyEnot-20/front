@@ -24,7 +24,7 @@ export function AdminSidebar() {
     <>
       {/* Mobile top bar */}
       <div className="lg:hidden fixed top-0 left-0 right-0 h-14 bg-slate-900 text-white flex items-center justify-between px-4 z-50 border-b border-slate-800">
-        <h1 className="text-lg font-bold">Myfair</h1>
+        <h1 className="text-lg font-bold">EDU Expo</h1>
         <Button
           variant="ghost"
           size="icon"
@@ -55,7 +55,7 @@ export function AdminSidebar() {
       >
         <div className="p-4 lg:p-6 border-b border-slate-800 flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-bold">Myfair</h1>
+            <h1 className="text-xl font-bold">EDU Expo</h1>
             <p className="text-xs text-slate-400 mt-1">Панель управления</p>
           </div>
           <Button

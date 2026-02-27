@@ -55,7 +55,7 @@ export default function NewsPage() {
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center gap-8">
             <div>
-              <div className="font-bold text-lg mb-2">Myfair</div>
+              <div className="font-bold text-lg mb-2">EDU Expo</div>
               <p className="text-sm text-muted-foreground">Платформа для управления выставками</p>
             </div>
             <div className="flex gap-8 text-sm text-muted-foreground">

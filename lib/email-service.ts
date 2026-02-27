@@ -28,7 +28,7 @@ export async function sendRegistrationEmail(data: EmailData): Promise<boolean> {
       QR-код вложен к письму. Предъявите его на входе на выставку.
 
       С уважением,
-      Команда Myfair
+      Команда EDU Expo
     `
 
     console.log('[v0] Email отправлен:')

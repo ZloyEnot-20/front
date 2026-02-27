@@ -74,8 +74,49 @@ export const exhibitionsApi = {
 // Registrations
 export const registrationsApi = {
   list: () => api<ApiRegistration[]>('/api/registrations'),
+  /** Все регистрации (админ) */
+  listAll: () => api<ApiRegistration[]>('/api/registrations/all'),
   create: (data: { exhibitionId: string; city: string }) =>
     api<ApiRegistration>('/api/registrations', { method: 'POST', body: JSON.stringify(data) }),
+}
+
+export interface ApiScanLogItem {
+  id: string
+  scannedAt: string
+  scannedByUserId: string
+  deviceId?: string
+  success: boolean
+  errorMessage?: string
+  registration: { id: string; firstName: string; lastName: string; email: string; city: string } | null
+  exhibition: { id: string; title: string } | null
+}
+
+/** Все логи сканов (админ) */
+export const scansApi = {
+  listAll: (opts?: { limit?: number }) =>
+    api<ApiScanLogItem[]>('/api/registrations/scans/all', {
+      params: opts?.limit ? { limit: String(opts.limit) } : undefined,
+    }),
+}
+
+export type AuditLogType = 'LOGIN' | 'LOGIN_FAILED' | 'CREATE_USER' | 'EDIT' | 'DELETE' | 'PUBLISH'
+
+export interface ApiAuditLogItem {
+  id: string
+  type: AuditLogType
+  userEmail: string
+  userId?: string
+  action: string
+  details?: string
+  createdAt: string
+}
+
+/** Аудит-логи (админ) */
+export const auditLogsApi = {
+  list: (opts?: { limit?: number }) =>
+    api<ApiAuditLogItem[]>('/api/admin/audit-logs', {
+      params: opts?.limit ? { limit: String(opts.limit) } : undefined,
+    }),
 }
 
 // Загрузка файла на бэкенд (S3 публичный бакет)

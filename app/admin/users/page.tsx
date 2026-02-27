@@ -59,7 +59,7 @@ function UsersModeration() {
     <div className="flex min-h-screen bg-background">
       <AdminSidebar />
 
-      <main className="flex-1 pt-14 lg:pt-0 ml-0 lg:ml-64 min-h-screen">
+      <main className="flex-1 pt-14 lg:pt-0 ml-0 lg:ml-64 min-h-screen min-w-0">
         {/* Header */}
         <div className="border-b border-border/40 bg-white/50 backdrop-blur">
           <div className="px-4 sm:px-6 lg:px-8 py-4 lg:py-6">

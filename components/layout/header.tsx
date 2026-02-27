@@ -29,7 +29,7 @@ export function Header() {
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold">
             M
           </div>
-          <span className="hidden sm:inline font-bold text-lg">Myfair</span>
+          <span className="hidden sm:inline font-bold text-lg">EDU Expo</span>
         </Link>
 
         <nav className="hidden md:flex items-center gap-8">
