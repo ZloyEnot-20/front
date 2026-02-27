@@ -25,6 +25,7 @@ export interface Exhibition {
   startDate: Date
   endDate: Date
   location: string
+  cities?: string[]
   image?: string
   status: ExhibitionStatus
   participantCount: number

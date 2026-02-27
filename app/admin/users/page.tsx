@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { MoreHorizontal, Users, Activity, TrendingUp, Plus, Loader2 } from 'lucide-react'
+import { MoreHorizontal, Users, Activity, TrendingUp, Plus, Loader2, Clock } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
   DropdownMenu,
@@ -62,18 +62,18 @@ function UsersModeration() {
       <main className="flex-1 pt-14 lg:pt-0 ml-0 lg:ml-64 min-h-screen min-w-0">
         {/* Header */}
         <div className="border-b border-border/40 bg-white/50 backdrop-blur">
-          <div className="px-4 sm:px-6 lg:px-8 py-4 lg:py-6">
+          <div className="px-4 sm:px-6 lg:px-8 py-3 lg:py-4 max-w-7xl mx-auto">
             <h1 className="text-2xl lg:text-3xl font-bold">Модерация пользователей</h1>
             <p className="text-muted-foreground mt-1">Управление пользователями системы</p>
           </div>
         </div>
 
         {/* Content */}
-        <div className="p-4 sm:p-6 lg:p-8">
+        <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
           {/* Stats */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             <Card>
-              <CardContent className="pt-6">
+              <CardContent className="p-6 flex items-center">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600">
                     <Users className="w-6 h-6" />
@@ -88,7 +88,7 @@ function UsersModeration() {
             </Card>
 
             <Card>
-              <CardContent className="pt-6">
+              <CardContent className="p-6 flex items-center">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-lg bg-green-100 flex items-center justify-center text-green-600">
                     <Activity className="w-6 h-6" />
@@ -103,30 +103,28 @@ function UsersModeration() {
             </Card>
 
             <Card>
-              <CardContent className="pt-6">
+              <CardContent className="p-6 flex items-center">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600">
-                    <TrendingUp className="w-6 h-6" />
+                    <Clock className="w-6 h-6" />
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Новых сегодня</p>
-                    <p className="text-2xl font-bold">{stats.newToday}</p>
-                    <p className="text-xs text-green-600 mt-1">+8% vs прошлый месяц</p>
+                    <p className="text-2xl font-bold">Скоро</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
             <Card>
-              <CardContent className="pt-6">
+              <CardContent className="p-6 flex items-center">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-lg bg-yellow-100 flex items-center justify-center text-yellow-600">
-                    <Users className="w-6 h-6" />
+                    <Clock className="w-6 h-6" />
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Ожидают модерации</p>
-                    <p className="text-2xl font-bold">{stats.awaitingModeration}</p>
-                    <p className="text-xs text-red-600 mt-1">-2% vs прошлый месяц</p>
+                    <p className="text-2xl font-bold">Скоро</p>
                   </div>
                 </div>
               </CardContent>
@@ -175,8 +173,8 @@ function UsersModeration() {
                     <tr key={user.id} className="border-b border-border/40 hover:bg-muted/30">
                       <td className="p-4 font-medium">{user.name}</td>
                       <td className="p-4 text-sm text-muted-foreground">{user.email}</td>
-                      <td className="p-4 text-sm capitalize">{getRoleLabel(user.role)}</td>
-                      <td className="p-4">{getStatusBadge(user.status)}</td>
+                      <td className="p-4 text-sm capitalize">{getRoleLabel(user.role ?? '')}</td>
+                      <td className="p-4">{getStatusBadge(user.status ?? 'active')}</td>
                       <td className="p-4 text-center">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>

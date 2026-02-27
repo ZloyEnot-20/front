@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Plus, Loader2 } from 'lucide-react'
+import { Plus, Loader2, Trash2 } from 'lucide-react'
 import { PublicationCardSkeleton } from '@/components/admin/publication-card-skeleton'
 import {
   DropdownMenu,
@@ -39,7 +39,29 @@ function PublicationsContent() {
   const [pendingPreviewUrl, setPendingPreviewUrl] = useState<string | null>(null)
   const [uploadError, setUploadError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  const [togglingStatusExhibitionId, setTogglingStatusExhibitionId] = useState<string | null>(null)
+  const [togglingStatusNewsId, setTogglingStatusNewsId] = useState<string | null>(null)
+  const [cityInput, setCityInput] = useState('')
+  const [recentCities, setRecentCities] = useState<string[]>([])
   const MAX_FILE_MB = 10
+
+  const handleToggleExhibitionStatus = async (id: string, currentStatus: string) => {
+    setTogglingStatusExhibitionId(id)
+    try {
+      await updateExhibition(id, { status: currentStatus === 'published' ? 'draft' : 'published' })
+    } finally {
+      setTogglingStatusExhibitionId(null)
+    }
+  }
+
+  const handleToggleNewsStatus = async (id: string, currentStatus: string) => {
+    setTogglingStatusNewsId(id)
+    try {
+      await updateNews(id, { status: currentStatus === 'published' ? 'draft' : 'published' })
+    } finally {
+      setTogglingStatusNewsId(null)
+    }
+  }
 
   useEffect(() => {
     if (!pendingImageFile) {
@@ -62,10 +84,29 @@ function PublicationsContent() {
     n.title.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
+  const EXHIBITION_RECENT_CITIES_KEY = 'exhibition_recent_cities'
+  const getRecentCities = (): string[] => {
+    if (typeof window === 'undefined') return []
+    try {
+      const raw = localStorage.getItem(EXHIBITION_RECENT_CITIES_KEY)
+      return raw ? JSON.parse(raw) : []
+    } catch {
+      return []
+    }
+  }
+  const saveRecentCities = (cities: string[]) => {
+    if (typeof window === 'undefined' || !cities.length) return
+    const prev = getRecentCities()
+    const merged = [...new Set([...cities, ...prev])].slice(0, 20)
+    localStorage.setItem(EXHIBITION_RECENT_CITIES_KEY, JSON.stringify(merged))
+  }
+
   const handleCreateContent = (type: 'news' | 'exhibition') => {
     setModalType(type)
     setEditingItem(null)
-    setFormData({})
+    setFormData(type === 'exhibition' ? { cities: [] } : {})
+    setCityInput('')
+    setRecentCities(type === 'exhibition' ? getRecentCities() : [])
     setPendingImageFile(null)
     setUploadError(null)
     setModalOpen(true)
@@ -74,10 +115,27 @@ function PublicationsContent() {
   const handleEditContent = (item: any, type: 'news' | 'exhibition') => {
     setModalType(type)
     setEditingItem(item)
-    setFormData({ ...item })
+    setFormData({ ...item, cities: item.cities ?? [] })
+    setCityInput('')
+    setRecentCities(type === 'exhibition' ? getRecentCities() : [])
     setPendingImageFile(null)
     setUploadError(null)
     setModalOpen(true)
+  }
+
+  const addCity = (city: string) => {
+    const trimmed = city.trim()
+    if (!trimmed) return
+    const list = formData.cities ?? []
+    if (list.includes(trimmed)) return
+    setFormData({ ...formData, cities: [...list, trimmed] })
+    setCityInput('')
+  }
+
+  const removeCity = (index: number) => {
+    const list = [...(formData.cities ?? [])]
+    list.splice(index, 1)
+    setFormData({ ...formData, cities: list })
   }
 
   const handleSaveContent = async () => {
@@ -94,6 +152,7 @@ function PublicationsContent() {
         if (modalType === 'exhibition') {
           fd.append('description', formData.description ?? '')
           fd.append('location', formData.location ?? '')
+          fd.append('cities', JSON.stringify(formData.cities ?? []))
           const start = formData.startDate ? (formData.startDate instanceof Date ? formData.startDate : new Date(formData.startDate)) : new Date()
           const end = formData.endDate ? (formData.endDate instanceof Date ? formData.endDate : new Date(formData.endDate)) : new Date()
           fd.append('startDate', start.toISOString())
@@ -110,17 +169,23 @@ function PublicationsContent() {
         fd.append('image', pendingImageFile)
 
         if (editingItem) {
-          if (modalType === 'exhibition') await updateExhibitionFormData(editingItem.id, fd)
-          else await updateNewsFormData(editingItem.id, fd)
+          if (modalType === 'exhibition') {
+            await updateExhibitionFormData(editingItem.id, fd)
+            saveRecentCities(formData.cities ?? [])
+          } else await updateNewsFormData(editingItem.id, fd)
         } else {
-          if (modalType === 'exhibition') await addExhibitionFormData(fd)
-          else await addNewsFormData(fd)
+          if (modalType === 'exhibition') {
+            await addExhibitionFormData(fd)
+            saveRecentCities(formData.cities ?? [])
+          } else await addNewsFormData(fd)
         }
       } else {
         const dataToSave = { ...formData }
         if (editingItem) {
-          if (modalType === 'exhibition') await updateExhibition(editingItem.id, dataToSave)
-          else await updateNews(editingItem.id, dataToSave)
+          if (modalType === 'exhibition') {
+            await updateExhibition(editingItem.id, dataToSave)
+            saveRecentCities(dataToSave.cities ?? [])
+          } else await updateNews(editingItem.id, dataToSave)
         } else {
           if (modalType === 'exhibition') {
             const newExhibition = {
@@ -130,6 +195,7 @@ function PublicationsContent() {
               startDate: dataToSave.startDate ?? new Date(),
               endDate: dataToSave.endDate ?? new Date(),
               location: dataToSave.location ?? '',
+              cities: dataToSave.cities ?? [],
               image: dataToSave.image,
               status: (dataToSave.status as 'draft' | 'published') ?? 'draft',
               participantCount: 0,
@@ -139,6 +205,7 @@ function PublicationsContent() {
               updatedAt: new Date(),
             }
             await addExhibition(newExhibition)
+            saveRecentCities(dataToSave.cities ?? [])
           } else {
             const newNews = {
               ...dataToSave,
@@ -226,6 +293,12 @@ function PublicationsContent() {
                           <div>{new Date(exhibition.startDate).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })}</div>
                           <div>{exhibition.registrations} чел.</div>
                         </div>
+                        {togglingStatusExhibitionId === exhibition.id ? (
+                          <Button variant="outline" size="sm" className="w-full h-7 text-xs bg-violet-600 text-white border-violet-600" disabled>
+                            <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" />
+                            Сохранение...
+                          </Button>
+                        ) : (
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="outline" size="sm" className="w-full h-7 text-xs bg-violet-600 hover:bg-violet-500 text-white border-violet-600 hover:border-violet-500 transition-colors">
@@ -241,7 +314,7 @@ function PublicationsContent() {
                                  Просмотр
                               </a>
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => updateExhibition(exhibition.id, { status: exhibition.status === 'published' ? 'draft' : 'published' })}>
+                            <DropdownMenuItem onClick={() => handleToggleExhibitionStatus(exhibition.id, exhibition.status)}>
                               {exhibition.status === 'published' ? 'Снять с публикации' : 'Опубликовать'}
                             </DropdownMenuItem>
                             <DropdownMenuItem className="text-destructive" onClick={() => deleteExhibition(exhibition.id)}>
@@ -249,6 +322,7 @@ function PublicationsContent() {
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
+                        )}
                       </CardContent>
                     </Card>
                   ))
@@ -304,6 +378,12 @@ function PublicationsContent() {
                         <div className="text-[10px] text-muted-foreground mb-2">
                           {new Date(news.publishedAt).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })}
                         </div>
+                        {togglingStatusNewsId === news.id ? (
+                          <Button variant="outline" size="sm" className="w-full h-7 text-xs bg-violet-600 text-white border-violet-600" disabled>
+                            <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" />
+                            Сохранение...
+                          </Button>
+                        ) : (
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="outline" size="sm" className="w-full h-7 text-xs bg-violet-600 hover:bg-violet-500 text-white border-violet-600 hover:border-violet-500 transition-colors">
@@ -319,7 +399,7 @@ function PublicationsContent() {
                                 Просмотр
                               </a>
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => updateNews(news.id, { status: news.status === 'published' ? 'draft' : 'published' })}>
+                            <DropdownMenuItem onClick={() => handleToggleNewsStatus(news.id, news.status)}>
                               {news.status === 'published' ? 'Снять с публикации' : 'Опубликовать'}
                             </DropdownMenuItem>
                             <DropdownMenuItem className="text-destructive" onClick={() => deleteNews(news.id)}>
@@ -327,6 +407,7 @@ function PublicationsContent() {
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
+                        )}
                       </CardContent>
                     </Card>
                   ))
@@ -362,26 +443,27 @@ function PublicationsContent() {
                 </div>
                 <div>
                   <label className="text-sm font-medium">Изображение</label>
-                  <div className="mt-1 flex items-center gap-3">
+                  <div className="mt-1 flex flex-wrap items-start gap-3">
                     {(pendingPreviewUrl || formData.image) ? (
-                      <div className="relative">
+                      <div className="flex flex-col gap-2">
                         <img
                           src={pendingPreviewUrl ?? getImageUrl(formData.image)}
                           alt=""
-                          className="h-20 w-20 rounded object-cover border"
+                          className="h-36 w-36 rounded-lg object-cover border"
                           loading="lazy"
                         />
                         <Button
                           type="button"
-                          variant="ghost"
+                          variant="outline"
                           size="sm"
-                          className="absolute -top-1 -right-1 h-6 w-6 rounded-full p-0 text-destructive hover:text-destructive"
+                          className="w-full bg-violet-600 hover:bg-violet-500 text-white border-violet-600 hover:border-violet-500"
                           onClick={() => {
                             setFormData({ ...formData, image: '' })
                             setPendingImageFile(null)
                           }}
                         >
-                          ×
+                          <Trash2 className="w-4 h-4 mr-1.5" />
+                          Удалить изображение
                         </Button>
                       </div>
                     ) : null}
@@ -428,6 +510,40 @@ function PublicationsContent() {
                         onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                         placeholder="Введите место"
                       />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium">Города</label>
+                      <div className="mt-1 flex flex-wrap gap-2 items-center">
+                        <Input
+                          value={cityInput}
+                          onChange={(e) => setCityInput(e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addCity(cityInput))}
+                          placeholder="Город"
+                          className="w-36"
+                        />
+                        <Button type="button" variant="outline" size="sm" onClick={() => addCity(cityInput)}>
+                          Добавить
+                        </Button>
+                      </div>
+                      <div className="flex flex-wrap gap-1.5 mt-2">
+                        {(formData.cities ?? []).map((c: string, i: number) => (
+                          <Badge key={`${c}-${i}`} variant="secondary" className="cursor-pointer" onClick={() => removeCity(i)}>
+                            {c} ×
+                          </Badge>
+                        ))}
+                      </div>
+                      {recentCities.length > 0 && (
+                        <div className="mt-2">
+                          <span className="text-xs text-muted-foreground mr-2">Недавние:</span>
+                          <div className="flex flex-wrap gap-1.5 mt-1">
+                            {recentCities.filter((c) => !(formData.cities ?? []).includes(c)).map((c) => (
+                              <Badge key={c} variant="outline" className="cursor-pointer hover:bg-muted" onClick={() => addCity(c)}>
+                                {c}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>

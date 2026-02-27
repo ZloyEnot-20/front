@@ -181,6 +181,7 @@ export interface ApiExhibition {
   startDate: string
   endDate: string
   location: string
+  cities?: string[]
   image?: string
   status: string
   participantCount: number

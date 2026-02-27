@@ -17,7 +17,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { CheckCircle2, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 
-const CITIES = [
+const DEFAULT_CITIES = [
   'Москва',
   'Санкт-Петербург',
   'Казань',
@@ -26,11 +26,31 @@ const CITIES = [
   'Сочи',
 ]
 
+const REGISTRATION_RECENT_CITIES_KEY = 'registration_recent_cities'
+
+function getRecentCities(): string[] {
+  if (typeof window === 'undefined') return []
+  try {
+    const raw = localStorage.getItem(REGISTRATION_RECENT_CITIES_KEY)
+    return raw ? JSON.parse(raw) : []
+  } catch {
+    return []
+  }
+}
+
+function saveCityToRecent(city: string) {
+  if (typeof window === 'undefined') return
+  const prev = getRecentCities()
+  const next = [city, ...prev.filter((c) => c !== city)].slice(0, 15)
+  localStorage.setItem(REGISTRATION_RECENT_CITIES_KEY, JSON.stringify(next))
+}
+
 interface RegistrationModalProps {
   isOpen: boolean
   onOpenChange: (open: boolean) => void
   exhibitionId: string
   exhibitionTitle: string
+  cities?: string[]
 }
 
 export function RegistrationModal({
@@ -38,6 +58,7 @@ export function RegistrationModal({
   onOpenChange,
   exhibitionId,
   exhibitionTitle,
+  cities: exhibitionCities = [],
 }: RegistrationModalProps) {
   const { user } = useAuth()
   const { addRegistration, incrementExhibitionRegistrations } = useAdmin()
@@ -45,6 +66,9 @@ export function RegistrationModal({
   const [registration, setRegistration] = useState<any>(null)
   const [error, setError] = useState('')
   const [loadingCity, setLoadingCity] = useState<string | null>(null)
+  const [recentCities, setRecentCities] = useState<string[]>([])
+
+  const displayCities = exhibitionCities.length > 0 ? exhibitionCities : DEFAULT_CITIES
 
   useEffect(() => {
     if (isOpen) {
@@ -52,6 +76,7 @@ export function RegistrationModal({
       setRegistration(null)
       setError('')
       setLoadingCity(null)
+      setRecentCities(getRecentCities())
     }
   }, [isOpen])
 
@@ -77,6 +102,7 @@ export function RegistrationModal({
         registeredAt: new Date(created.registeredAt),
       }
 
+      saveCityToRecent(city)
       addRegistration(newRegistration)
       incrementExhibitionRegistrations(exhibitionId)
       setRegistration(newRegistration)
@@ -138,7 +164,7 @@ export function RegistrationModal({
           <>
             <DialogHeader>
               <DialogTitle>Выберите город</DialogTitle>
-              <DialogDescription>Данные из профиля будут отправлены автоматически</DialogDescription>
+              <DialogDescription>Выберите город для посещения выставки</DialogDescription>
             </DialogHeader>
             <div className="space-y-3">
               {error && (
@@ -147,7 +173,7 @@ export function RegistrationModal({
                 </Alert>
               )}
               <div className="grid grid-cols-1 gap-2">
-                {CITIES.map((city) => (
+                {displayCities.map((city) => (
                   <Button
                     key={city}
                     variant="outline"
@@ -166,6 +192,31 @@ export function RegistrationModal({
                   </Button>
                 ))}
               </div>
+              {recentCities.filter((c) => !displayCities.includes(c)).length > 0 && (
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1.5">Недавние:</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {recentCities
+                      .filter((c) => !displayCities.includes(c))
+                      .map((city) => (
+                        <Button
+                          key={city}
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 text-xs"
+                          onClick={() => handleCitySelect(city)}
+                          disabled={!!loadingCity}
+                        >
+                          {loadingCity === city ? (
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                          ) : (
+                            city
+                          )}
+                        </Button>
+                      ))}
+                  </div>
+                </div>
+              )}
             </div>
           </>
         ) : (

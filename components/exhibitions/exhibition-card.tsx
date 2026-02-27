@@ -81,9 +81,12 @@ export function ExhibitionCard({ exhibition }: ExhibitionCardProps) {
             <Link href={`/exhibitions/${exhibition.id}`}>Подробнее</Link>
           </Button>
           {isRegistered ? (
-            <Button className="flex-1" variant="secondary" asChild>
-              <Link href={`/exhibitions/${exhibition.id}`}>Зарегистрированы · Подробнее</Link>
-            </Button>
+            <div className="flex flex-col gap-2 flex-1">
+              <p className="text-sm font-medium text-green-600">Вы зарегистрированы</p>
+              <Button className="flex-1" variant="outline" asChild>
+                <Link href={`/exhibitions/${exhibition.id}`}>Подробнее</Link>
+              </Button>
+            </div>
           ) : (
             <Button className="flex-1" onClick={() => setRegistrationOpen(true)}>
               Зарегистрироваться
@@ -96,6 +99,7 @@ export function ExhibitionCard({ exhibition }: ExhibitionCardProps) {
           onOpenChange={setRegistrationOpen}
           exhibitionId={exhibition.id}
           exhibitionTitle={exhibition.title}
+          cities={exhibition.cities}
         />
       </CardContent>
     </Card>

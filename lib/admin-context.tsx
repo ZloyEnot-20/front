@@ -4,7 +4,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { Exhibition, News, User, ExhibitionRegistration } from './types'
 import { exhibitionsApi, newsApi, usersApi, registrationsApi, ApiUser } from './api'
 
-function toExhibition(e: { id: string; title: string; description: string; startDate: string; endDate: string; location: string; image?: string; status: string; participantCount: number; registrations: number; createdBy: string; createdAt: string; updatedAt: string }): Exhibition {
+function toExhibition(e: { id: string; title: string; description: string; startDate: string; endDate: string; location: string; cities?: string[]; image?: string; status: string; participantCount: number; registrations: number; createdBy: string; createdAt: string; updatedAt: string }): Exhibition {
   return {
     id: e.id,
     title: e.title,
@@ -12,6 +12,7 @@ function toExhibition(e: { id: string; title: string; description: string; start
     startDate: new Date(e.startDate),
     endDate: new Date(e.endDate),
     location: e.location,
+    cities: e.cities,
     image: e.image,
     status: e.status as Exhibition['status'],
     participantCount: e.participantCount,

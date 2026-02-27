@@ -68,47 +68,48 @@ export function AdminSidebar() {
           </Button>
         </div>
 
-        <nav className="flex-1 p-4 lg:p-6 space-y-2">
-          {menuItems.map((item) => {
-            const Icon = item.icon
-            const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
+        <div className="flex-1 min-h-0 overflow-y-auto p-4 lg:p-6 flex flex-col">
+          <nav className="space-y-2">
+            {menuItems.map((item) => {
+              const Icon = item.icon
+              const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
 
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setMobileOpen(false)}
-              >
-                <Button
-                  variant={isActive ? 'default' : 'ghost'}
-                  className={`w-full justify-start gap-3 ${isActive ? 'bg-primary' : 'hover:bg-slate-800'}`}
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setMobileOpen(false)}
                 >
-                  <Icon className="w-5 h-5" />
-                  <span>{item.label}</span>
-                </Button>
-              </Link>
-            )
-          })}
-        </nav>
-
-        <div className="p-4 lg:p-6 border-t border-slate-800 space-y-2">
-          <Link href="/" onClick={() => setMobileOpen(false)}>
+                  <Button
+                    variant={isActive ? 'default' : 'ghost'}
+                    className={`w-full justify-start gap-3 ${isActive ? 'bg-primary' : 'hover:bg-slate-800'}`}
+                  >
+                    <Icon className="w-5 h-5" />
+                    <span>{item.label}</span>
+                  </Button>
+                </Link>
+              )
+            })}
+          </nav>
+          <div className="border-t border-slate-800 mt-4 pt-4 space-y-2">
+            <Link href="/" onClick={() => setMobileOpen(false)}>
+              <Button
+                variant="ghost"
+                className="w-full justify-start gap-3 hover:bg-slate-800"
+              >
+                <Home className="w-5 h-5" />
+                <span>Вернуться на сайт</span>
+              </Button>
+            </Link>
             <Button
               variant="ghost"
-              className="w-full justify-start gap-3 hover:bg-slate-800"
+              className="w-full justify-start gap-3 hover:bg-red-900 text-red-400"
+              onClick={() => { setMobileOpen(false); logout() }}
             >
-              <Home className="w-5 h-5" />
-              <span>Вернуться на сайт</span>
+              <LogOut className="w-5 h-5" />
+              <span>Выход</span>
             </Button>
-          </Link>
-          <Button
-            variant="ghost"
-            className="w-full justify-start gap-3 hover:bg-red-900 text-red-400"
-            onClick={() => { setMobileOpen(false); logout() }}
-          >
-            <LogOut className="w-5 h-5" />
-            <span>Выход</span>
-          </Button>
+          </div>
         </div>
       </aside>
     </>

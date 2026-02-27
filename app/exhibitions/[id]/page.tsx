@@ -189,7 +189,7 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
                   <CardContent className="space-y-4">
                     <p className="text-sm text-muted-foreground">
                       {user
-                        ? 'Выберите город — данные из профиля будут отправлены автоматически.'
+                        ? 'Выберите город для посещения выставки.'
                         : 'Войдите в аккаунт для регистрации на выставку.'}
                     </p>
                     <Button className="w-full" onClick={() => setRegistrationOpen(true)}>
@@ -211,7 +211,7 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
                     <CardTitle>Регистрация</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm font-medium text-green-600">
                       Вы зарегистрированы на эту выставку. QR-код для входа доступен в разделе «Мои выставки» в профиле.
                     </p>
                     <Button variant="default" className="w-full" asChild>
@@ -231,6 +231,7 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
         onOpenChange={setRegistrationOpen}
         exhibitionId={exhibition.id}
         exhibitionTitle={exhibition.title}
+        cities={exhibition.cities}
       />
 
       {/* Footer */}
