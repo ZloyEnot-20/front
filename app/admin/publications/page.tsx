@@ -223,7 +223,17 @@ function PublicationsContent() {
           if (modalType === 'exhibition') {
             await updateExhibition(editingItem.id, dataToSave)
             saveRecentCities(dataToSave.cities ?? [])
-          } else await updateNews(editingItem.id, dataToSave)
+          } else {
+            const newsPayload = {
+              title: dataToSave.title,
+              content: dataToSave.content ?? '',
+              excerpt: dataToSave.excerpt ?? '',
+              image: dataToSave.image,
+              publishedAt: dataToSave.publishedAt ?? new Date(),
+              status: (dataToSave.status as 'draft' | 'published') ?? 'draft',
+            }
+            await updateNews(editingItem.id, newsPayload)
+          }
         } else {
           if (modalType === 'exhibition') {
             const newExhibition = {
@@ -246,8 +256,13 @@ function PublicationsContent() {
             saveRecentCities(dataToSave.cities ?? [])
           } else {
             const newNews = {
-              ...dataToSave,
               id: `news-${Date.now()}`,
+              title: dataToSave.title,
+              content: dataToSave.content ?? '',
+              excerpt: dataToSave.excerpt ?? '',
+              image: dataToSave.image,
+              publishedAt: dataToSave.publishedAt ?? new Date(),
+              status: (dataToSave.status as 'draft' | 'published') ?? 'draft',
               createdBy: user?.id || '3',
               createdAt: new Date(),
               updatedAt: new Date(),
@@ -539,6 +554,14 @@ function PublicationsContent() {
                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                         placeholder="Введите описание"
                         rows={4}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium">Место проведения</label>
+                      <Input
+                        value={formData.location || ''}
+                        onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                        placeholder="Например: Москва, ВДНХ"
                       />
                     </div>
                     <div>
