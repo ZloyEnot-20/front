@@ -12,15 +12,9 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Plus, Loader2, Trash2, LayoutGrid, Pencil, ExternalLink, MoreVertical } from 'lucide-react'
+import { Plus, Loader2, Trash2, LayoutGrid, Pencil, ExternalLink } from 'lucide-react'
 import Link from 'next/link'
 import { PublicationCardSkeleton } from '@/components/admin/publication-card-skeleton'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import {
   Dialog,
   DialogContent,
@@ -389,23 +383,6 @@ function PublicationsContent() {
                               >
                                 <Pencil className="w-4 h-4" />
                               </Button>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="outline" size="icon" className="h-8 w-8 rounded-full shrink-0 bg-white/20 hover:bg-white/30 border-white/30 shadow-lg" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
-                                    <MoreVertical className="w-4 h-4" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuItem asChild>
-                                    <a href={`/exhibitions/${exhibition.id}`} target="_blank" rel="noopener noreferrer">
-                                      Просмотр
-                                    </a>
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-destructive" onClick={() => deleteExhibition(exhibition.id)}>
-                                    Удалить
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
                             </>
                           )}
                         </div>
@@ -491,23 +468,6 @@ function PublicationsContent() {
                               >
                                 <Pencil className="w-4 h-4" />
                               </Button>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="outline" size="icon" className="h-8 w-8 rounded-full shrink-0 bg-white/20 hover:bg-white/30 border-white/30 shadow-lg" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
-                                    <MoreVertical className="w-4 h-4" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuItem asChild>
-                                    <a href={`/news/${news.id}`} target="_blank" rel="noopener noreferrer">
-                                      Просмотр
-                                    </a>
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-destructive" onClick={() => deleteNews(news.id)}>
-                                    Удалить
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
                             </>
                           )}
                         </div>
