@@ -299,27 +299,30 @@ function PublicationsContent() {
         {/* Content */}
         <div className="p-4 sm:p-6 lg:p-8">
           <Tabs defaultValue="exhibitions" className="space-y-0">
-            <div className="border-b border-border/60 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
-              <TabsList className="h-auto w-full sm:w-fit rounded-none bg-transparent p-0 gap-6 sm:gap-8 shadow-none min-h-0">
+            <div className="-mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
+              <TabsList className="h-auto w-full sm:w-fit rounded-none bg-transparent p-0 gap-6 sm:gap-8 shadow-none min-h-0 pb-0">
                 <TabsTrigger
                   value="exhibitions"
-                  className="group relative rounded-none bg-transparent px-0 py-3 text-muted-foreground data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none border-0 shadow-none -mb-px focus-visible:ring-0 focus-visible:ring-offset-0"
+                  className="group relative rounded-none bg-transparent px-0 pt-3 pb-0 text-muted-foreground data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 flex flex-col items-center"
                 >
-                  <span className="relative inline-block">
+                  <span className="inline-block">
                     Выставки
-                    <span className="absolute left-0 right-0 bottom-0 h-[3px] rounded-full bg-primary opacity-0 group-data-[state=active]:opacity-100" aria-hidden />
+                    <span className="block w-full h-[3px] rounded-full bg-primary opacity-0 group-data-[state=active]:opacity-100 mt-0 shrink-0" aria-hidden />
                   </span>
                 </TabsTrigger>
                 <TabsTrigger
                   value="news"
-                  className="group relative rounded-none bg-transparent px-0 py-3 text-muted-foreground data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none border-0 shadow-none -mb-px focus-visible:ring-0 focus-visible:ring-offset-0"
+                  className="group relative rounded-none bg-transparent px-0 pt-3 pb-0 text-muted-foreground data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 flex flex-col items-center"
                 >
-                  <span className="relative inline-block">
+                  <span className="inline-block">
                     Новости
-                    <span className="absolute left-0 right-0 bottom-0 h-[3px] rounded-full bg-primary opacity-0 group-data-[state=active]:opacity-100" aria-hidden />
+                    <span className="block w-full h-[3px] rounded-full bg-primary opacity-0 group-data-[state=active]:opacity-100 mt-0 shrink-0" aria-hidden />
                   </span>
                 </TabsTrigger>
               </TabsList>
+              <div className="h-[3px] -mt-[3px] flex items-end">
+                <div className="w-[30%] h-px bg-border rounded-full" aria-hidden />
+              </div>
             </div>
 
             {/* Exhibitions Tab */}
