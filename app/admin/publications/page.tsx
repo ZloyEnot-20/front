@@ -299,8 +299,9 @@ function PublicationsContent() {
         {/* Content */}
         <div className="p-4 sm:p-6 lg:p-8">
           <Tabs defaultValue="exhibitions" className="space-y-0">
-            <TabsList className="h-auto w-full sm:w-fit rounded-none bg-transparent p-0 gap-6 sm:gap-8 border-b border-border/60 shadow-none min-h-0">
-              <TabsTrigger
+            <div className="border-b border-border/60">
+              <TabsList className="h-auto w-full sm:w-fit rounded-none bg-transparent p-0 gap-6 sm:gap-8 shadow-none min-h-0">
+                <TabsTrigger
                 value="exhibitions"
                 className="relative rounded-none bg-transparent px-0 py-3 text-muted-foreground data-[state=active]:text-primary data-[state=active]:bg-transparent border-0 shadow-none -mb-px focus-visible:ring-0 focus-visible:ring-offset-0 after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2 after:bottom-0 after:h-[3px] after:w-[75%] after:rounded-full data-[state=inactive]:after:bg-transparent data-[state=active]:after:bg-primary"
               >
@@ -312,11 +313,12 @@ function PublicationsContent() {
               >
                 Новости
               </TabsTrigger>
-            </TabsList>
+              </TabsList>
+            </div>
 
             {/* Exhibitions Tab */}
             <TabsContent value="exhibitions" className="space-y-6 p-0 pt-6">
-              <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex flex-col sm:flex-row gap-4 pb-4 border-b border-border/60">
                 <Input
                   placeholder="Поиск выставок..."
                   value={searchQuery}
@@ -326,13 +328,15 @@ function PublicationsContent() {
                 <Button onClick={() => handleCreateContent('exhibition')}>+ Новая выставка</Button>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
-                {isLoading ? (
-                  Array.from({ length: 6 }).map((_, i) => (
+              {isLoading ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+                  {Array.from({ length: 6 }).map((_, i) => (
                     <PublicationCardSkeleton key={i} />
-                  ))
-                ) : filteredExhibitions.length > 0 ? (
-                  filteredExhibitions.map((exhibition) => (
+                  ))}
+                </div>
+              ) : filteredExhibitions.length > 0 ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+                  {filteredExhibitions.map((exhibition) => (
                     <Card key={exhibition.id} className="group hover:shadow-lg transition-shadow">
                       <div className="aspect-square bg-muted relative overflow-hidden">
                         {exhibition.image ? (
@@ -389,19 +393,19 @@ function PublicationsContent() {
                         )}
                       </CardContent>
                     </Card>
-                  ))
-                ) : (
-                  <div className="flex flex-col items-center justify-center py-24 min-h-[320px]">
-                    <LayoutGrid className="w-16 h-16 text-muted-foreground/50 mb-4" strokeWidth={1.25} />
-                    <p className="text-lg font-medium text-muted-foreground">Не найдено</p>
-                  </div>
-                )}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="w-full flex flex-col items-center justify-center py-24 min-h-[50vh]">
+                  <LayoutGrid className="w-16 h-16 text-muted-foreground/50 mb-4" strokeWidth={1.25} />
+                  <p className="text-lg font-medium text-muted-foreground">Не найдено</p>
+                </div>
+              )}
             </TabsContent>
 
             {/* News Tab */}
             <TabsContent value="news" className="space-y-6 p-0 pt-6">
-              <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex flex-col sm:flex-row gap-4 pb-4 border-b border-border/60">
                 <Input
                   placeholder="Поиск новостей..."
                   value={searchQuery}
@@ -411,13 +415,15 @@ function PublicationsContent() {
                 <Button onClick={() => handleCreateContent('news')}>+ Новая новость</Button>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
-                {isLoading ? (
-                  Array.from({ length: 6 }).map((_, i) => (
+              {isLoading ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+                  {Array.from({ length: 6 }).map((_, i) => (
                     <PublicationCardSkeleton key={i} />
-                  ))
-                ) : filteredNews.length > 0 ? (
-                  filteredNews.map((news) => (
+                  ))}
+                </div>
+              ) : filteredNews.length > 0 ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+                  {filteredNews.map((news) => (
                     <Card key={news.id} className="group hover:shadow-lg transition-shadow">
                       <div className="aspect-square bg-muted relative overflow-hidden">
                         {news.image ? (
@@ -473,14 +479,14 @@ function PublicationsContent() {
                         )}
                       </CardContent>
                     </Card>
-                  ))
-                ) : (
-                  <div className="flex flex-col items-center justify-center py-24 min-h-[320px]">
-                    <LayoutGrid className="w-16 h-16 text-muted-foreground/50 mb-4" strokeWidth={1.25} />
-                    <p className="text-lg font-medium text-muted-foreground">Не найдено</p>
-                  </div>
-                )}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="w-full flex flex-col items-center justify-center py-24 min-h-[50vh]">
+                  <LayoutGrid className="w-16 h-16 text-muted-foreground/50 mb-4" strokeWidth={1.25} />
+                  <p className="text-lg font-medium text-muted-foreground">Не найдено</p>
+                </div>
+              )}
             </TabsContent>
           </Tabs>
 

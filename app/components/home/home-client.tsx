@@ -23,7 +23,7 @@ export function HomeClient() {
   return (
     <>
       {/* Exhibitions — выше, акцент на выставках */}
-      <section className="border-b border-border/40 py-16 md:py-24 min-h-[520px]" id="exhibitions">
+      <section className="border-t border-b border-border/40 py-16 md:py-24 min-h-[520px]" id="exhibitions">
         <div className="container mx-auto px-4">
           <div className="mb-12">
             <h2 className="text-3xl font-bold mb-2">{t('exhibitions')}</h2>
@@ -67,7 +67,7 @@ export function HomeClient() {
 
       {/* Новости — ниже выставок */}
       {isLoading ? (
-        <section className="border-b border-border/40 py-16 md:py-24 min-h-[340px]" aria-busy="true">
+        <section className="border-t border-b border-border/40 py-16 md:py-24 min-h-[340px]" aria-busy="true">
           <div className="container mx-auto px-4">
             <div className="mb-8">
               <h2 className="text-3xl font-bold">{t('latestNews')}</h2>
@@ -77,7 +77,7 @@ export function HomeClient() {
           </div>
         </section>
       ) : featuredNews ? (
-        <section className="border-b border-border/40 py-16 md:py-24 min-h-[340px]">
+        <section className="border-t border-b border-border/40 py-16 md:py-24 min-h-[340px]">
           <div className="container mx-auto px-4">
             <div className="mb-8">
               <h2 className="text-3xl font-bold">{t('latestNews')}</h2>
@@ -89,7 +89,7 @@ export function HomeClient() {
       ) : null}
 
       {isLoading ? (
-        <section className="border-b border-border/40 py-16 md:py-24 min-h-[380px]">
+        <section className="border-t border-b border-border/40 py-16 md:py-24 min-h-[380px]">
           <div className="container mx-auto px-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[1, 2, 3].map((i) => (
@@ -99,7 +99,7 @@ export function HomeClient() {
           </div>
         </section>
       ) : otherNews.length > 0 ? (
-        <section className="border-b border-border/40 py-16 md:py-24 min-h-[380px]">
+        <section className="border-t border-b border-border/40 py-16 md:py-24 min-h-[380px]">
           <div className="container mx-auto px-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {otherNews.map((news) => (
