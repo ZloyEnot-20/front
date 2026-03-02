@@ -334,9 +334,9 @@ function PublicationsContent() {
                   ))}
                 </div>
               ) : filteredExhibitions.length > 0 ? (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 max-w-[1200px]">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                   {filteredExhibitions.map((exhibition) => (
-                    <Card key={exhibition.id} className="group overflow-hidden rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 relative aspect-[2/3] w-full max-w-[200px] mx-auto">
+                    <Card key={exhibition.id} className="group overflow-hidden rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 relative aspect-[2/3] w-full">
                       <Link href={`/exhibitions/${exhibition.id}`} className="absolute inset-0 z-0" target="_blank" rel="noopener noreferrer">
                         {exhibition.image ? (
                           <img src={getImageUrl(exhibition.image) || "/placeholder.svg"} alt={exhibition.title} className="absolute inset-0 w-full h-full object-cover scale-105 group-hover:scale-110 group-hover:blur-[3px] transition-all duration-500" loading="lazy" />
@@ -420,9 +420,9 @@ function PublicationsContent() {
                   ))}
                 </div>
               ) : filteredNews.length > 0 ? (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 max-w-[1200px]">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                   {filteredNews.map((news) => (
-                    <Card key={news.id} className="group overflow-hidden rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 relative aspect-[2/3] w-full max-w-[200px] mx-auto">
+                    <Card key={news.id} className="group overflow-hidden rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 relative aspect-[2/3] w-full">
                       <a href={`/news/${news.id}`} target="_blank" rel="noopener noreferrer" className="absolute inset-0 z-0">
                         {news.image ? (
                           <img src={getImageUrl(news.image) || "/placeholder.svg"} alt={news.title} className="absolute inset-0 w-full h-full object-cover scale-105 group-hover:scale-110 group-hover:blur-[3px] transition-all duration-500" loading="lazy" />
