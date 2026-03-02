@@ -1,12 +1,15 @@
 'use client'
 
+import { useState } from 'react'
 import { useAuth } from '@/lib/auth-context'
 import { useAdmin } from '@/lib/admin-context'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Calendar, MapPin, QrCode } from 'lucide-react'
+import { Calendar, MapPin, QrCode, MapPinned } from 'lucide-react'
 import Link from 'next/link'
+import { ChangeCityModal } from '@/components/exhibitions/change-city-modal'
+import type { ExhibitionRegistration } from '@/lib/types'
 
 function formatDate(d: Date | string) {
   return new Date(d).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric' })
@@ -14,7 +17,8 @@ function formatDate(d: Date | string) {
 
 export function ExhibitionsSection() {
   const { user } = useAuth()
-  const { exhibitions, getRegistrationsByUser } = useAdmin()
+  const { exhibitions, getRegistrationsByUser, refresh } = useAdmin()
+  const [changeCityReg, setChangeCityReg] = useState<ExhibitionRegistration | null>(null)
 
   const userRegistrations = user ? getRegistrationsByUser(user.id) : []
 
@@ -47,9 +51,16 @@ export function ExhibitionsSection() {
                     )}
                     <div className="flex items-center gap-1">
                       <MapPin className="w-4 h-4" />
-                      {exhibition?.location ?? reg.city}
+                      {exhibition?.cities?.length ? exhibition.cities.map((c) => c.name).join(', ') : reg.city}
                     </div>
                   </div>
+
+                  {reg.status === 'registered' && exhibition?.cities && exhibition.cities.length > 1 && (
+                    <Button variant="outline" size="sm" className="mb-4" onClick={() => setChangeCityReg(reg)}>
+                      <MapPinned className="w-4 h-4 mr-2" />
+                      Изменить город
+                    </Button>
+                  )}
 
                   {reg.status === 'registered' && reg.qrCode && (
                     <div className="rounded-lg border bg-muted/30 p-4 mb-4">
@@ -76,7 +87,25 @@ export function ExhibitionsSection() {
               </Card>
             )
           })
-        ) : (
+        ) : null}
+        {changeCityReg && (() => {
+          const exhibition = exhibitions.find((e) => e.id === changeCityReg.exhibitionId)
+          const cities = exhibition?.cities?.map((c) => c.name) ?? []
+          return (
+            <ChangeCityModal
+              isOpen={!!changeCityReg}
+              onOpenChange={(open) => !open && setChangeCityReg(null)}
+              registrationId={changeCityReg.id}
+              currentCity={changeCityReg.city}
+              cities={cities}
+              onSuccess={() => {
+                refresh()
+                setChangeCityReg(null)
+              }}
+            />
+          )
+        })()}
+        {userRegistrations.length === 0 ? (
           <Card>
             <CardContent className="pt-12 pb-12 text-center">
               <p className="text-muted-foreground mb-4">Вы ещё не зарегистрированы ни на одну выставку</p>

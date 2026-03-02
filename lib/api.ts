@@ -104,6 +104,9 @@ export const registrationsApi = {
   listAll: () => api<ApiRegistration[]>('/api/registrations/all'),
   create: (data: { exhibitionId: string; city: string }) =>
     api<ApiRegistration>('/api/registrations', { method: 'POST', body: JSON.stringify(data) }),
+  /** Изменить город и перевыпустить QR (только владелец) */
+  updateCity: (id: string, city: string) =>
+    api<ApiRegistration>(`/api/registrations/${id}`, { method: 'PATCH', body: JSON.stringify({ city }) }),
 }
 
 export interface ApiScanLogItem {

@@ -6,6 +6,7 @@ import { useAdmin } from '@/lib/admin-context'
 import { getImageUrl } from '@/lib/api'
 import { useAuth } from '@/lib/auth-context'
 import { RegistrationModal } from '@/components/exhibitions/registration-modal'
+import { ChangeCityModal } from '@/components/exhibitions/change-city-modal'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -28,13 +29,17 @@ interface ExhibitionPageProps {
 export default function ExhibitionPage({ params }: ExhibitionPageProps) {
   const { id } = use(params)
   const [registrationOpen, setRegistrationOpen] = useState(false)
+  const [changeCityOpen, setChangeCityOpen] = useState(false)
   const [exhibitorModal, setExhibitorModal] = useState<ExhibitorInfo | null>(null)
   const { user } = useAuth()
-  const { exhibitions, getRegistrationsByUser, isLoading } = useAdmin()
+  const { exhibitions, getRegistrationsByUser, isLoading, refresh } = useAdmin()
   const exhibition = exhibitions.find((e) => e.id === id)
   const userRegistrations = user ? getRegistrationsByUser(user.id) : []
-  const isRegistered = userRegistrations.some((r) => r.exhibitionId === id && r.status === 'registered')
+  const currentRegistration = userRegistrations.find((r) => r.exhibitionId === id && r.status === 'registered')
+  const isRegistered = !!currentRegistration
   const participants = exhibition?.participants ?? []
+  const exhibitionCities = exhibition?.cities?.map((c) => c.name) ?? []
+  const canChangeCity = isRegistered && exhibitionCities.length > 1
 
   if (isLoading) {
     return <ExhibitionDetailSkeleton />
@@ -238,9 +243,19 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
                     <CardTitle>Регистрация</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
+                    {currentRegistration && (
+                      <p className="text-sm text-muted-foreground">
+                        Город: <strong>{currentRegistration.city}</strong>
+                      </p>
+                    )}
                     <p className="text-sm font-medium text-green-600">
                       Вы зарегистрированы на эту выставку. QR-код для входа доступен в разделе «Мои выставки» в профиле.
                     </p>
+                    {canChangeCity && currentRegistration && (
+                      <Button variant="outline" className="w-full" onClick={() => setChangeCityOpen(true)}>
+                        Изменить город
+                      </Button>
+                    )}
                     <Button variant="default" className="w-full" asChild>
                       <Link href="/profile?tab=exhibitions">Перейти в профиль</Link>
                     </Button>
@@ -260,6 +275,18 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
         exhibitionTitle={exhibition.title}
         cities={exhibition.cities?.map((c) => c.name) ?? []}
       />
+
+      {/* Change city modal */}
+      {currentRegistration && (
+        <ChangeCityModal
+          isOpen={changeCityOpen}
+          onOpenChange={setChangeCityOpen}
+          registrationId={currentRegistration.id}
+          currentCity={currentRegistration.city}
+          cities={exhibitionCities}
+          onSuccess={refresh}
+        />
+      )}
 
       {/* Exhibitor detail modal */}
       <Dialog open={!!exhibitorModal} onOpenChange={(open) => !open && setExhibitorModal(null)}>
