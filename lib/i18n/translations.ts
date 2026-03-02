@@ -139,7 +139,7 @@ const ru = {
   shortDescription: 'Краткое описание',
   fullText: 'Полный текст новости',
   publicationDate: 'Дата публикации',
-  deleteImage: 'Удалить изображение',
+  deleteImage: 'Удалить',
   chooseFile: 'Выбрать файл',
   recent: 'Недавние',
   cities: 'Города',

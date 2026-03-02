@@ -55,7 +55,7 @@ export function ExhibitionsSection() {
                     </div>
                   </div>
 
-                  {reg.status === 'registered' && exhibition?.cities && exhibition.cities.length > 1 && (
+                  {reg.status === 'registered' && (
                     <Button variant="outline" size="sm" className="mb-4" onClick={() => setChangeCityReg(reg)}>
                       <MapPinned className="w-4 h-4 mr-2" />
                       Изменить город

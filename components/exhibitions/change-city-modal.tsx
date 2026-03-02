@@ -51,7 +51,6 @@ export function ChangeCityModal({
   }
 
   const otherCities = cities.filter((c) => c.trim() && c !== currentCity)
-  if (otherCities.length === 0) return null
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -66,26 +65,30 @@ export function ChangeCityModal({
           <p className="text-sm text-muted-foreground">Текущий город: <strong>{currentCity}</strong></p>
           <div className="space-y-2">
             <label className="text-sm font-medium">Новый город</label>
-            <div className="flex flex-wrap gap-2">
-              {otherCities.map((city) => (
-                <Button
-                  key={city}
-                  type="button"
-                  variant={selectedCity === city ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setSelectedCity(city)}
-                >
-                  {city}
-                </Button>
-              ))}
-            </div>
+            {otherCities.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {otherCities.map((city) => (
+                  <Button
+                    key={city}
+                    type="button"
+                    variant={selectedCity === city ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setSelectedCity(city)}
+                  >
+                    {city}
+                  </Button>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">Нет других городов для выбора.</p>
+            )}
           </div>
           {error && <p className="text-sm text-destructive">{error}</p>}
           <div className="flex gap-2 justify-end pt-2">
             <Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>
               Отмена
             </Button>
-            <Button onClick={handleSubmit} disabled={saving || selectedCity === currentCity}>
+            <Button onClick={handleSubmit} disabled={saving || selectedCity === currentCity || otherCities.length === 0}>
               {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
               Сохранить
             </Button>

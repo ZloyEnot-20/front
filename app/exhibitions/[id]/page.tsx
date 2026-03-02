@@ -39,7 +39,7 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
   const isRegistered = !!currentRegistration
   const participants = exhibition?.participants ?? []
   const exhibitionCities = exhibition?.cities?.map((c) => c.name) ?? []
-  const canChangeCity = isRegistered && exhibitionCities.length > 1
+  const canChangeCity = isRegistered && exhibitionCities.length >= 1
 
   if (isLoading) {
     return <ExhibitionDetailSkeleton />
@@ -144,12 +144,12 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
                     </div>
                   </div>
 
-                  {exhibition.cities?.length > 0 && (
+                  {(exhibition.cities?.length ?? 0) > 0 && (
                     <div className="flex items-start gap-4">
                       <MapPin className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
                       <div>
                         <p className="font-medium">Города</p>
-                        <p className="text-sm text-muted-foreground">{exhibition.cities.map((c) => c.name).join(', ')}</p>
+                        <p className="text-sm text-muted-foreground">{exhibition.cities?.map((c) => c.name).join(', ') ?? ''}</p>
                       </div>
                     </div>
                   )}
@@ -229,7 +229,7 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
                     </Button>
                     {user && (
                       <p className="text-xs text-muted-foreground text-center">
-                        Только выбор города — без заполнения форм
+                        {/* Только выбор города — без заполнения форм */}
                       </p>
                     )}
                   </CardContent>

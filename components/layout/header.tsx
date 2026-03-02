@@ -1,5 +1,6 @@
 'use client'
 
+import type { LucideIcon } from 'lucide-react'
 import { useAuth } from '@/lib/auth-context'
 import { useLocale } from '@/lib/i18n'
 import { Button } from '@/components/ui/button'
@@ -14,7 +15,22 @@ import {
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
-export function Header() {
+export interface ProfileTabItem {
+  id: string
+  label: string
+  icon: LucideIcon
+}
+
+export interface HeaderProps {
+  /** Вкладки профиля: при передаче в шапке показываются они вместо «Выставки» и «Новости» */
+  profileTabs?: {
+    tabs: ProfileTabItem[]
+    activeTab: string
+    setActiveTab: (id: string) => void
+  }
+}
+
+export function Header({ profileTabs }: HeaderProps) {
   const { user, logout } = useAuth()
   const { t, lang, setLang } = useLocale()
   const router = useRouter()
@@ -35,23 +51,45 @@ export function Header() {
         </Link>
 
         <nav className="hidden md:flex items-center gap-6">
-          <Link href="/" className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors">
-            {t('exhibitions')}
-          </Link>
-          <Link href="/" className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors">
-            {t('news')}
-          </Link>
-          {user && (
+          {profileTabs ? (
+            profileTabs.tabs.map((tab) => {
+              const Icon = tab.icon
+              const isActive = profileTabs.activeTab === tab.id
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => profileTabs.setActiveTab(tab.id)}
+                  className={`flex items-center gap-2 text-sm font-medium transition-colors ${
+                    isActive ? 'text-primary' : 'text-foreground/80 hover:text-foreground'
+                  }`}
+                >
+                  <Icon className="w-4 h-4" />
+                  {tab.label}
+                </button>
+              )
+            })
+          ) : (
             <>
-              {user.role === 'admin' && (
-                <Link href="/admin" className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors">
-                  {t('management')}
-                </Link>
-              )}
-              {user.role === 'content_manager' && (
-                <Link href="/admin/publications" className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors">
-                  {t('myContent')}
-                </Link>
+              <Link href="/" className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors">
+                {t('exhibitions')}
+              </Link>
+              <Link href="/" className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors">
+                {t('news')}
+              </Link>
+              {user && (
+                <>
+                  {user.role === 'admin' && (
+                    <Link href="/admin" className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors">
+                      {t('management')}
+                    </Link>
+                  )}
+                  {user.role === 'content_manager' && (
+                    <Link href="/admin/publications" className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors">
+                      {t('myContent')}
+                    </Link>
+                  )}
+                </>
               )}
             </>
           )}

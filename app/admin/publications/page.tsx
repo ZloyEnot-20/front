@@ -124,23 +124,23 @@ function PublicationsContent() {
   }
 
   const toggleCity = (cityId: string) => {
-    const list = formData.cities ?? []
-    const next = list.includes(cityId) ? list.filter((id) => id !== cityId) : [...list, cityId]
+    const list: string[] = formData.cities ?? []
+    const next = list.includes(cityId) ? list.filter((id: string) => id !== cityId) : [...list, cityId]
     setFormData({ ...formData, cities: next })
   }
 
   const removeCity = (cityId: string) => {
-    setFormData({ ...formData, cities: (formData.cities ?? []).filter((id) => id !== cityId) })
+    setFormData({ ...formData, cities: (formData.cities ?? []).filter((id: string) => id !== cityId) })
   }
 
   const toggleParticipant = (userId: string) => {
     const list = formData.participants ?? []
-    const next = list.includes(userId) ? list.filter((id) => id !== userId) : [...list, userId]
+    const next = list.includes(userId) ? list.filter((id:string) => id !== userId) : [...list, userId]
     setFormData({ ...formData, participants: next })
   }
 
   const removeParticipant = (userId: string) => {
-    setFormData({ ...formData, participants: (formData.participants ?? []).filter((id) => id !== userId) })
+    setFormData({ ...formData, participants: (formData.participants ?? []).filter((id:string) => id !== userId) })
   }
 
   const handleSaveContent = async () => {
@@ -540,7 +540,7 @@ function PublicationsContent() {
                           }}
                         >
                           <Trash2 className="w-4 h-4 mr-1.5" />
-                          Удалить изображение
+                          Удалить
                         </Button>
                       </div>
                     ) : null}

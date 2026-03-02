@@ -1,40 +1,88 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { User } from '@/lib/types'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { authApi, getImageUrl, uploadFile } from '@/lib/api'
 import { useAuth } from '@/lib/auth-context'
-import { Loader2, CheckCircle2, Trash2, Plus } from 'lucide-react'
+import { Loader2, CheckCircle2, Trash2, Plus, Building2 } from 'lucide-react'
 
 const MAX_PHOTOS = 10
 const MAX_FILE_MB = 5
+const MAX_AVATAR_MB = 2
 
 export function ExhibitorProfileSection() {
   const { user, refreshUser } = useAuth()
   const [isSaving, setIsSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [formData, setFormData] = useState({
+    name: (user as User)?.name ?? '',
+    email: (user as User)?.email ?? '',
+    phone: (user as User)?.phone ?? '',
+    avatar: (user as User)?.avatar ?? '',
     exhibitorDescription: (user as User)?.exhibitorDescription ?? '',
     exhibitorAddress: (user as User)?.exhibitorAddress ?? '',
     exhibitorWebsite: (user as User)?.exhibitorWebsite ?? '',
     exhibitorPhotos: (user as User)?.exhibitorPhotos ?? [] as string[],
   })
   const [uploadingPhoto, setUploadingPhoto] = useState(false)
+  const [uploadingAvatar, setUploadingAvatar] = useState(false)
+  const avatarInputRef = React.useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (user) {
       const u = user as User
-      setFormData({
+      setFormData((prev) => ({
+        ...prev,
+        name: u.name ?? '',
+        email: u.email ?? '',
+        phone: u.phone ?? '',
+        avatar: u.avatar ?? '',
         exhibitorDescription: u.exhibitorDescription ?? '',
         exhibitorAddress: u.exhibitorAddress ?? '',
         exhibitorWebsite: u.exhibitorWebsite ?? '',
         exhibitorPhotos: u.exhibitorPhotos ?? [],
-      })
+      }))
     }
   }, [user])
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (file.size > MAX_AVATAR_MB * 1024 * 1024) {
+      alert(`Файл не более ${MAX_AVATAR_MB} МБ`)
+      e.target.value = ''
+      return
+    }
+    setUploadingAvatar(true)
+    try {
+      const { fileId, url } = await uploadFile(file)
+      const avatarUrl = url ?? getImageUrl(fileId) ?? fileId
+      await authApi.updateMe({ avatar: avatarUrl })
+      await refreshUser()
+      setSaved(true)
+      setTimeout(() => setSaved(false), 3000)
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Ошибка загрузки')
+    } finally {
+      setUploadingAvatar(false)
+      e.target.value = ''
+    }
+  }
+
+  const handleAvatarRemove = async () => {
+    if (!user) return
+    setUploadingAvatar(true)
+    try {
+      await authApi.updateMe({ avatar: '' })
+      await refreshUser()
+      setFormData((prev) => ({ ...prev, avatar: '' }))
+    } finally {
+      setUploadingAvatar(false)
+    }
+  }
 
   const handleSave = async () => {
     if (!user) return
@@ -42,6 +90,9 @@ export function ExhibitorProfileSection() {
     setSaved(false)
     try {
       await authApi.updateMe({
+        name: formData.name,
+        phone: formData.phone || undefined,
+        avatar: formData.avatar || undefined,
         exhibitorDescription: formData.exhibitorDescription,
         exhibitorAddress: formData.exhibitorAddress,
         exhibitorWebsite: formData.exhibitorWebsite,
@@ -102,6 +153,65 @@ export function ExhibitorProfileSection() {
       </div>
 
       <div className="space-y-6 max-w-2xl w-full">
+        <div>
+          <label className="block text-sm font-medium mb-2">Аватар профиля университета</label>
+          <p className="text-xs text-muted-foreground mb-2">Отображается на карточках участников на странице выставки</p>
+          <div className="flex items-center gap-4">
+            <div className="w-24 h-24 rounded-xl overflow-hidden border bg-muted flex-shrink-0 flex items-center justify-center">
+              {formData.avatar ? (
+                <img src={getImageUrl(formData.avatar) || formData.avatar} alt="" className="w-full h-full object-cover" />
+              ) : (
+                <Building2 className="w-10 h-10 text-muted-foreground" />
+              )}
+            </div>
+            <div className="flex flex-col gap-2">
+              <input
+                ref={avatarInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                disabled={uploadingAvatar}
+                onChange={handleAvatarUpload}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={uploadingAvatar}
+                onClick={() => avatarInputRef.current?.click()}
+              >
+                {uploadingAvatar ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Загрузить аватар'}
+              </Button>
+              {formData.avatar && (
+                <Button type="button" variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={handleAvatarRemove} disabled={uploadingAvatar}>
+                  Удалить аватар
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium mb-2">Название университета</label>
+            <Input
+              value={formData.name}
+              onChange={(e) => setFormData((p) => ({ ...p, name: e.target.value }))}
+              placeholder="Введите название"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-2">Email</label>
+            <Input type="email" value={formData.email} disabled className="bg-muted" placeholder="Email" />
+          </div>
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-2">Телефон</label>
+          <Input
+            value={formData.phone}
+            onChange={(e) => setFormData((p) => ({ ...p, phone: e.target.value }))}
+            placeholder="+7 (___) ___-__-__"
+          />
+        </div>
         <div>
           <label className="block text-sm font-medium mb-2">Описание университета</label>
           <Textarea
