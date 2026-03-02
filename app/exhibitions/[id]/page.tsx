@@ -336,20 +336,24 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
                 )}
                 {exhibitorModal.exhibitorPhotos && exhibitorModal.exhibitorPhotos.length > 0 && (
                   <div className="relative w-full">
-                    <Carousel opts={{ align: 'start', loop: true }} className="w-full">
-                      <CarouselContent className="-ml-0">
+                    <Carousel opts={{ align: 'start', loop: exhibitorModal.exhibitorPhotos.length > 1, containScroll: 'trimSnaps' }} className="w-full">
+                      <CarouselContent className="-ml-2">
                         {exhibitorModal.exhibitorPhotos.map((url, i) => (
-                          <CarouselItem key={i} className="pl-0 basis-full">
+                          <CarouselItem key={i} className="pl-2 basis-1/3">
                             <img
                               src={getImageUrl(url) || url}
                               alt=""
-                              className="rounded-lg object-cover aspect-video w-full"
+                              className="rounded-lg object-cover aspect-square w-full"
                             />
                           </CarouselItem>
                         ))}
                       </CarouselContent>
-                      <CarouselPrevious className="left-2 border-0 bg-black/50 text-white hover:bg-black/70 disabled:opacity-30" />
-                      <CarouselNext className="right-2 border-0 bg-black/50 text-white hover:bg-black/70 disabled:opacity-30" />
+                      {exhibitorModal.exhibitorPhotos.length > 1 && (
+                        <>
+                          <CarouselPrevious className="left-2 border-0 bg-black/50 text-white hover:bg-black/70 disabled:opacity-30" />
+                          <CarouselNext className="right-2 border-0 bg-black/50 text-white hover:bg-black/70 disabled:opacity-30" />
+                        </>
+                      )}
                     </Carousel>
                   </div>
                 )}

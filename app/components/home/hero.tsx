@@ -2,9 +2,12 @@
 
 import Link from 'next/link'
 import { useLocale } from '@/lib/i18n'
+import { useAuth } from '@/lib/auth-context'
 
 export function Hero() {
   const { t } = useLocale()
+  const { user } = useAuth()
+  const showRegister = !user || (user.role !== 'exhibitor')
   return (
     <section className="border-b border-border/40" style={{ minHeight: '320px' }}>
       <div className="container mx-auto px-4 py-20 md:py-32">
@@ -25,12 +28,14 @@ export function Hero() {
             >
               {t('viewExhibitions')}
             </a>
-            <Link
-              href="/auth/signup"
-              className="inline-flex items-center justify-center rounded-md text-sm font-medium border border-input bg-background h-11 px-8 hover:bg-accent"
-            >
-              {t('registerNow')}
-            </Link>
+            {showRegister && (
+              <Link
+                href="/auth/signup"
+                className="inline-flex items-center justify-center rounded-md text-sm font-medium border border-input bg-background h-11 px-8 hover:bg-accent"
+              >
+                {t('registerNow')}
+              </Link>
+            )}
           </div>
         </div>
       </div>
