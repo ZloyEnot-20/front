@@ -36,7 +36,7 @@ export function NewsCard({ news, featured = false, priority = false }: NewsCardP
           </div>
           <div className="flex flex-col justify-center p-6">
             <CardTitle className="text-2xl mb-2">{news.title}</CardTitle>
-            <CardDescription className="text-base mb-4">{news.excerpt}</CardDescription>
+            <CardDescription className="text-base mb-4 line-clamp-3">{(news.content ?? '').replace(/<[^>]*>/g, '').trim().slice(0, 200)}{(news.content ?? '').length > 200 ? '…' : ''}</CardDescription>
             <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
               <Calendar className="w-4 h-4" />
               {publishedDate}
@@ -65,7 +65,7 @@ export function NewsCard({ news, featured = false, priority = false }: NewsCardP
 
       <CardHeader className="flex-1">
         <CardTitle className="line-clamp-2">{news.title}</CardTitle>
-        <CardDescription className="line-clamp-2">{news.excerpt}</CardDescription>
+        <CardDescription className="line-clamp-2">{(news.content ?? '').replace(/<[^>]*>/g, '').trim().slice(0, 120)}{(news.content ?? '').length > 120 ? '…' : ''}</CardDescription>
       </CardHeader>
 
       <CardContent className="space-y-4">

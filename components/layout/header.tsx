@@ -71,10 +71,10 @@ export function Header({ profileTabs }: HeaderProps) {
             })
           ) : (
             <>
-              <Link href="/" className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors">
+              <Link href="/exhibitions" className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors">
                 {t('exhibitions')}
               </Link>
-              <Link href="/" className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors">
+              <Link href="/news" className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors">
                 {t('news')}
               </Link>
               {user && (

@@ -164,14 +164,9 @@ function PublicationsContent() {
       }
     } else {
       const title = (formData.title ?? '').trim()
-      const excerpt = (formData.excerpt ?? '').trim()
       const content = (formData.content ?? '').trim()
       if (!title) {
         setUploadError('Введите название новости')
-        return
-      }
-      if (!excerpt) {
-        setUploadError('Введите краткое описание новости')
         return
       }
       if (!content) {
@@ -198,7 +193,7 @@ function PublicationsContent() {
           fd.append('status', formData.status ?? 'draft')
         } else {
           fd.append('content', formData.content ?? '')
-          fd.append('excerpt', formData.excerpt ?? '')
+          fd.append('excerpt', (formData.content ?? '').replace(/<[^>]*>/g, '').trim().slice(0, 300))
           const pub = formData.publishedAt ? (formData.publishedAt instanceof Date ? formData.publishedAt : new Date(formData.publishedAt)) : new Date()
           fd.append('publishedAt', pub.toISOString())
           fd.append('status', formData.status ?? 'draft')
@@ -224,7 +219,7 @@ function PublicationsContent() {
             const newsPayload = {
               title: dataToSave.title,
               content: dataToSave.content ?? '',
-              excerpt: dataToSave.excerpt ?? '',
+              excerpt: (dataToSave.content ?? '').replace(/<[^>]*>/g, '').trim().slice(0, 300),
               image: dataToSave.image,
               publishedAt: dataToSave.publishedAt ?? new Date(),
               status: (dataToSave.status as 'draft' | 'published') ?? 'draft',
@@ -255,7 +250,7 @@ function PublicationsContent() {
               id: `news-${Date.now()}`,
               title: dataToSave.title,
               content: dataToSave.content ?? '',
-              excerpt: dataToSave.excerpt ?? '',
+              excerpt: (dataToSave.content ?? '').replace(/<[^>]*>/g, '').trim().slice(0, 300),
               image: dataToSave.image,
               publishedAt: dataToSave.publishedAt ?? new Date(),
               status: (dataToSave.status as 'draft' | 'published') ?? 'draft',
@@ -440,7 +435,7 @@ function PublicationsContent() {
                       <div className="absolute inset-0 bg-gradient-to-t from-black/85 from-30% via-black/20 to-transparent pointer-events-none z-10" />
                       <div className="absolute inset-0 z-20 flex flex-col justify-end p-3 pointer-events-none">
                         <h3 className="font-bold text-white text-sm drop-shadow-md line-clamp-1">{news.title}</h3>
-                        <p className="text-white/90 text-xs mt-0.5 line-clamp-2">{news.excerpt}</p>
+                        <p className="text-white/90 text-xs mt-0.5 line-clamp-2">{(news.content ?? '').replace(/<[^>]*>/g, '').slice(0, 100)}</p>
                         <p className="text-white/80 text-[10px] mt-1">
                           {new Date(news.publishedAt).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric' })}
                         </p>
@@ -686,14 +681,6 @@ function PublicationsContent() {
                   </>
                 ) : (
                   <>
-                    <div>
-                      <label className="text-sm font-medium">Краткое описание</label>
-                      <Input
-                        value={formData.excerpt || ''}
-                        onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
-                        placeholder="Введите краткое описание"
-                      />
-                    </div>
                     <div>
                       <label className="text-sm font-medium">Полный текст</label>
                       <Textarea

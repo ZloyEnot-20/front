@@ -25,6 +25,7 @@ export function ExhibitionCard({ exhibition }: ExhibitionCardProps) {
   const { getRegistrationsByUser } = useAdmin()
   const userRegistrations = user ? getRegistrationsByUser(user.id) : []
   const isRegistered = userRegistrations.some((r) => r.exhibitionId === exhibition.id && r.status === 'registered')
+  const canRegister = !user || user.role === 'admin' || user.role === 'visitor'
   const locale = lang === 'uz' ? 'uz-UZ' : lang === 'en' ? 'en-US' : 'ru-RU'
   const startDate = new Date(exhibition.startDate).toLocaleDateString(locale, {
     month: 'short',
@@ -90,11 +91,11 @@ export function ExhibitionCard({ exhibition }: ExhibitionCardProps) {
                 <p className="text-sm font-medium text-green-600">{t('youAreRegistered')}</p>
               </div>
             </div>
-          ) : (
+          ) : canRegister ? (
             <Button className="flex-1" onClick={() => setRegistrationOpen(true)}>
               {t('registerToExhibition')}
             </Button>
-          )}
+          ) : null}
         </div>
 
         <RegistrationModal

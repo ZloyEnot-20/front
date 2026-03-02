@@ -218,31 +218,30 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
               )}
             </div>
 
-            {/* Sidebar */}
-            {!isRegistered && (
-              <div className="lg:col-span-1">
-                <Card className="sticky top-24">
-                  <CardHeader>
-                    <CardTitle>Регистрация</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <p className="text-sm text-muted-foreground">
-                      {user
-                        ? 'Выберите город для посещения выставки.'
-                        : 'Войдите в аккаунт для регистрации на выставку.'}
-                    </p>
-                    <Button className="w-full" onClick={() => setRegistrationOpen(true)}>
-                      {user ? 'Зарегистрироваться' : 'Войти и зарегистрироваться'}
-                    </Button>
-                    {user && (
-                      <p className="text-xs text-muted-foreground text-center">
-                        {/* Только выбор города — без заполнения форм */}
+            {/* Sidebar: регистрация только для гостей, admin и visitor */}
+            {!isRegistered && (() => {
+              const canRegister = !user || user.role === 'admin' || user.role === 'visitor'
+              if (!canRegister) return null
+              return (
+                <div className="lg:col-span-1">
+                  <Card className="sticky top-24">
+                    <CardHeader>
+                      <CardTitle>Регистрация</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <p className="text-sm text-muted-foreground">
+                        {user
+                          ? 'Выберите город для посещения выставки.'
+                          : 'Войдите в аккаунт для регистрации на выставку.'}
                       </p>
-                    )}
-                  </CardContent>
-                </Card>
-              </div>
-            )}
+                      <Button className="w-full" onClick={() => setRegistrationOpen(true)}>
+                        {user ? 'Зарегистрироваться' : 'Войти и зарегистрироваться'}
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </div>
+              )
+            })()}
             {isRegistered && (
               <div className="lg:col-span-1">
                 <Card className="sticky top-24">
