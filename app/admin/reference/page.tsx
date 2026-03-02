@@ -87,7 +87,7 @@ function ReferenceContent() {
               <TabsTrigger value="cities">Города</TabsTrigger>
             </TabsList>
             <TabsContent value="cities" className="space-y-6">
-              <div className="flex flex-col sm:flex-row gap-4 justify-between items-start">
+              <div className="flex flex-col sm:flex-row gap-4 justify-between items-start pb-4 border-b border-border/60">
                 <p className="text-sm text-muted-foreground">
                   Города из этого списка можно выбирать при создании выставки (множественный выбор).
                 </p>

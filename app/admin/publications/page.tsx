@@ -299,20 +299,26 @@ function PublicationsContent() {
         {/* Content */}
         <div className="p-4 sm:p-6 lg:p-8">
           <Tabs defaultValue="exhibitions" className="space-y-0">
-            <div className="border-b border-border/60">
+            <div className="border-b border-border/60 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
               <TabsList className="h-auto w-full sm:w-fit rounded-none bg-transparent p-0 gap-6 sm:gap-8 shadow-none min-h-0">
                 <TabsTrigger
-                value="exhibitions"
-                className="relative rounded-none bg-transparent px-0 py-3 text-muted-foreground data-[state=active]:text-primary data-[state=active]:bg-transparent border-0 shadow-none -mb-px focus-visible:ring-0 focus-visible:ring-offset-0 after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2 after:bottom-0 after:h-[3px] after:w-[75%] after:rounded-full data-[state=inactive]:after:bg-transparent data-[state=active]:after:bg-primary"
-              >
-                Выставки
-              </TabsTrigger>
-              <TabsTrigger
-                value="news"
-                className="relative rounded-none bg-transparent px-0 py-3 text-muted-foreground data-[state=active]:text-primary data-[state=active]:bg-transparent border-0 shadow-none -mb-px focus-visible:ring-0 focus-visible:ring-offset-0 after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2 after:bottom-0 after:h-[3px] after:w-[75%] after:rounded-full data-[state=inactive]:after:bg-transparent data-[state=active]:after:bg-primary"
-              >
-                Новости
-              </TabsTrigger>
+                  value="exhibitions"
+                  className="group relative rounded-none bg-transparent px-0 py-3 text-muted-foreground data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none border-0 shadow-none -mb-px focus-visible:ring-0 focus-visible:ring-offset-0"
+                >
+                  <span className="relative inline-block">
+                    Выставки
+                    <span className="absolute left-0 right-0 bottom-0 h-[3px] rounded-full bg-primary opacity-0 group-data-[state=active]:opacity-100" aria-hidden />
+                  </span>
+                </TabsTrigger>
+                <TabsTrigger
+                  value="news"
+                  className="group relative rounded-none bg-transparent px-0 py-3 text-muted-foreground data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none border-0 shadow-none -mb-px focus-visible:ring-0 focus-visible:ring-offset-0"
+                >
+                  <span className="relative inline-block">
+                    Новости
+                    <span className="absolute left-0 right-0 bottom-0 h-[3px] rounded-full bg-primary opacity-0 group-data-[state=active]:opacity-100" aria-hidden />
+                  </span>
+                </TabsTrigger>
               </TabsList>
             </div>
 
@@ -513,7 +519,7 @@ function PublicationsContent() {
                   <label className="text-sm font-medium">Изображение</label>
                   <div className="mt-1 flex flex-wrap items-start gap-3">
                     {(pendingPreviewUrl || formData.image) ? (
-                      <div className="flex flex-col gap-2">
+                      <div className="flex flex-col gap-2 w-36">
                         <img
                           src={pendingPreviewUrl ?? getImageUrl(formData.image)}
                           alt=""
@@ -524,7 +530,7 @@ function PublicationsContent() {
                           type="button"
                           variant="outline"
                           size="sm"
-                          className="w-full bg-violet-600 hover:bg-violet-500 text-white border-violet-600 hover:border-violet-500"
+                          className="w-full min-w-0 bg-violet-600 hover:bg-violet-500 text-white border-violet-600 hover:border-violet-500"
                           onClick={() => {
                             setFormData({ ...formData, image: '' })
                             setPendingImageFile(null)
