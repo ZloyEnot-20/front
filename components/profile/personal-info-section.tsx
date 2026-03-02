@@ -72,7 +72,7 @@ export function PersonalInfoSection({ user }: PersonalInfoSectionProps) {
           )}
           {!isEditing ? (
             <Button
-              variant="secondary"
+              variant="default"
               size="sm"
               className="rounded-full gap-2"
               onClick={() => setIsEditing(true)}

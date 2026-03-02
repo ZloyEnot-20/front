@@ -183,7 +183,7 @@ export function ExhibitorProfileSection() {
                 {uploadingAvatar ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Загрузить аватар'}
               </Button>
               {formData.avatar && (
-                <Button type="button" variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={handleAvatarRemove} disabled={uploadingAvatar}>
+                <Button type="button" variant="destructive" size="sm" className="hover:opacity-90 transition-opacity" onClick={handleAvatarRemove} disabled={uploadingAvatar}>
                   Удалить аватар
                 </Button>
               )}

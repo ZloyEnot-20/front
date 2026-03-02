@@ -371,14 +371,14 @@ function PublicationsContent() {
                           <div>{exhibition.registrations} чел.</div>
                         </div>
                         {togglingStatusExhibitionId === exhibition.id ? (
-                          <Button variant="outline" size="sm" className="w-full h-7 text-xs bg-violet-600 text-white border-violet-600" disabled>
+                          <Button variant="default" size="sm" className="w-full h-7 text-xs" disabled>
                             <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" />
                             Сохранение...
                           </Button>
                         ) : (
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="outline" size="sm" className="w-full h-7 text-xs bg-violet-600 hover:bg-violet-500 text-white border-violet-600 hover:border-violet-500 transition-colors">
+                            <Button variant="default" size="sm" className="w-full h-7 text-xs">
                               Управление
                             </Button>
                           </DropdownMenuTrigger>
@@ -457,14 +457,14 @@ function PublicationsContent() {
                           {new Date(news.publishedAt).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })}
                         </div>
                         {togglingStatusNewsId === news.id ? (
-                          <Button variant="outline" size="sm" className="w-full h-7 text-xs bg-violet-600 text-white border-violet-600" disabled>
+                          <Button variant="default" size="sm" className="w-full h-7 text-xs" disabled>
                             <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" />
                             Сохранение...
                           </Button>
                         ) : (
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="outline" size="sm" className="w-full h-7 text-xs bg-violet-600 hover:bg-violet-500 text-white border-violet-600 hover:border-violet-500 transition-colors">
+                            <Button variant="default" size="sm" className="w-full h-7 text-xs">
                               Управление
                             </Button>
                           </DropdownMenuTrigger>
@@ -531,9 +531,9 @@ function PublicationsContent() {
                         />
                         <Button
                           type="button"
-                          variant="outline"
+                          variant="destructive"
                           size="sm"
-                          className="w-full min-w-0 bg-violet-600 hover:bg-violet-500 text-white border-violet-600 hover:border-violet-500"
+                          className="w-full min-w-0"
                           onClick={() => {
                             setFormData({ ...formData, image: '' })
                             setPendingImageFile(null)
