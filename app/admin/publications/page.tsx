@@ -345,12 +345,12 @@ function PublicationsContent() {
                   ))}
                 </div>
               ) : filteredExhibitions.length > 0 ? (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 max-w-[1400px]">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 max-w-[1200px]">
                   {filteredExhibitions.map((exhibition) => (
-                    <Card key={exhibition.id} className="group overflow-hidden rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 relative aspect-[2/3] w-full max-w-[280px] mx-auto">
+                    <Card key={exhibition.id} className="group overflow-hidden rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 relative aspect-[2/3] w-full max-w-[200px] mx-auto">
                       <Link href={`/exhibitions/${exhibition.id}`} className="absolute inset-0 z-0" target="_blank" rel="noopener noreferrer">
                         {exhibition.image ? (
-                          <img src={getImageUrl(exhibition.image) || "/placeholder.svg"} alt={exhibition.title} className="absolute inset-0 w-full h-full object-cover scale-105 group-hover:scale-110 transition-transform duration-500" loading="lazy" />
+                          <img src={getImageUrl(exhibition.image) || "/placeholder.svg"} alt={exhibition.title} className="absolute inset-0 w-full h-full object-cover scale-105 group-hover:scale-110 group-hover:blur-[3px] transition-all duration-500" loading="lazy" />
                         ) : (
                           <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/20 to-secondary/20">
                             <span className="text-3xl font-bold text-muted-foreground/30">{exhibition.title.charAt(0)}</span>
@@ -365,9 +365,9 @@ function PublicationsContent() {
                           <span>{new Date(exhibition.startDate).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })}</span>
                           <span>{exhibition.registrations} чел.</span>
                         </div>
-                        <div className="flex items-center justify-between gap-2 mt-3 pt-2 border-t border-white/20">
+                        <div className="flex items-center justify-between gap-2 mt-2 pt-2 border-t border-white/20">
                           {togglingStatusExhibitionId === exhibition.id ? (
-                            <Button variant="default" size="sm" className="flex-1 h-9 text-xs rounded-full shadow-lg" disabled>
+                            <Button variant="default" size="sm" className="flex-1 h-8 text-xs rounded-md shadow-lg" disabled>
                               <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" />
                               Сохранение...
                             </Button>
@@ -376,14 +376,14 @@ function PublicationsContent() {
                               <Button
                                 variant="default"
                                 size="sm"
-                                className="flex-1 h-9 text-xs rounded-full max-w-[160px] mx-auto bg-white text-black hover:bg-white/90 shadow-lg"
+                                className="flex-1 h-8 text-xs rounded-md max-w-[140px] mx-auto shadow-lg"
                                 onClick={(e) => { e.preventDefault(); handleToggleExhibitionStatus(exhibition.id, exhibition.status); }}
                               >
                                 {exhibition.status === 'published' ? 'Снять с публикации' : 'Опубликовать'}
                               </Button>
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                  <Button variant="secondary" size="icon" className="h-9 w-9 rounded-full shrink-0 bg-white/90 hover:bg-white shadow-lg" onClick={(e) => e.preventDefault()}>
+                                  <Button variant="default" size="icon" className="h-8 w-8 rounded-full shrink-0 shadow-lg" onClick={(e) => e.preventDefault()}>
                                     <Pencil className="w-4 h-4" />
                                   </Button>
                                 </DropdownMenuTrigger>
@@ -405,7 +405,7 @@ function PublicationsContent() {
                           )}
                         </div>
                       </div>
-                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10 bg-black/25">
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10 bg-black/30 backdrop-blur-[2px]">
                         <span className="rounded-full bg-white/95 p-3 shadow-xl">
                           <ExternalLink className="w-5 h-5 text-foreground" />
                         </span>
@@ -443,12 +443,12 @@ function PublicationsContent() {
                   ))}
                 </div>
               ) : filteredNews.length > 0 ? (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 max-w-[1400px]">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 max-w-[1200px]">
                   {filteredNews.map((news) => (
-                    <Card key={news.id} className="group overflow-hidden rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 relative aspect-[2/3] w-full max-w-[280px] mx-auto">
+                    <Card key={news.id} className="group overflow-hidden rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 relative aspect-[2/3] w-full max-w-[200px] mx-auto">
                       <a href={`/news/${news.id}`} target="_blank" rel="noopener noreferrer" className="absolute inset-0 z-0">
                         {news.image ? (
-                          <img src={getImageUrl(news.image) || "/placeholder.svg"} alt={news.title} className="absolute inset-0 w-full h-full object-cover scale-105 group-hover:scale-110 transition-transform duration-500" loading="lazy" />
+                          <img src={getImageUrl(news.image) || "/placeholder.svg"} alt={news.title} className="absolute inset-0 w-full h-full object-cover scale-105 group-hover:scale-110 group-hover:blur-[3px] transition-all duration-500" loading="lazy" />
                         ) : (
                           <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-accent/20 to-primary/20">
                             <span className="text-3xl font-bold text-muted-foreground/30">{news.title.charAt(0)}</span>
@@ -462,9 +462,9 @@ function PublicationsContent() {
                         <p className="text-white/80 text-[10px] mt-1">
                           {new Date(news.publishedAt).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric' })}
                         </p>
-                        <div className="flex items-center justify-between gap-2 mt-3 pt-2 border-t border-white/20">
+                        <div className="flex items-center justify-between gap-2 mt-2 pt-2 border-t border-white/20">
                           {togglingStatusNewsId === news.id ? (
-                            <Button variant="default" size="sm" className="flex-1 h-9 text-xs rounded-full shadow-lg" disabled>
+                            <Button variant="default" size="sm" className="flex-1 h-8 text-xs rounded-md shadow-lg" disabled>
                               <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" />
                               Сохранение...
                             </Button>
@@ -473,14 +473,14 @@ function PublicationsContent() {
                               <Button
                                 variant="default"
                                 size="sm"
-                                className="flex-1 h-9 text-xs rounded-full max-w-[160px] mx-auto bg-white text-black hover:bg-white/90 shadow-lg"
+                                className="flex-1 h-8 text-xs rounded-md max-w-[140px] mx-auto shadow-lg"
                                 onClick={(e) => { e.preventDefault(); handleToggleNewsStatus(news.id, news.status); }}
                               >
                                 {news.status === 'published' ? 'Снять с публикации' : 'Опубликовать'}
                               </Button>
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                  <Button variant="secondary" size="icon" className="h-9 w-9 rounded-full shrink-0 bg-white/90 hover:bg-white shadow-lg" onClick={(e) => e.preventDefault()}>
+                                  <Button variant="default" size="icon" className="h-8 w-8 rounded-full shrink-0 shadow-lg" onClick={(e) => e.preventDefault()}>
                                     <Pencil className="w-4 h-4" />
                                   </Button>
                                 </DropdownMenuTrigger>
@@ -501,6 +501,11 @@ function PublicationsContent() {
                             </>
                           )}
                         </div>
+                      </div>
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10 bg-black/30 backdrop-blur-[2px]">
+                        <span className="rounded-full bg-white/95 p-3 shadow-xl">
+                          <ExternalLink className="w-5 h-5 text-foreground" />
+                        </span>
                       </div>
                       <Badge className="absolute top-2 right-2 z-30 text-[10px] px-1.5 py-0" variant={news.status === 'published' ? 'default' : 'secondary'}>
                         {news.status === 'draft' ? 'Черн.' : 'Опубл.'}
