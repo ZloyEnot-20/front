@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Plus, Loader2, Trash2 } from 'lucide-react'
+import { Plus, Loader2, Trash2, LayoutGrid } from 'lucide-react'
 import { PublicationCardSkeleton } from '@/components/admin/publication-card-skeleton'
 import {
   DropdownMenu,
@@ -297,14 +297,24 @@ function PublicationsContent() {
 
         {/* Content */}
         <div className="p-4 sm:p-6 lg:p-8">
-          <Tabs defaultValue="exhibitions" className="space-y-6">
-            <TabsList className="grid w-fit grid-cols-2">
-              <TabsTrigger value="exhibitions">Выставки</TabsTrigger>
-              <TabsTrigger value="news">Новости</TabsTrigger>
+          <Tabs defaultValue="exhibitions" className="space-y-0">
+            <TabsList className="h-auto w-fit rounded-none bg-transparent p-0 gap-0 border-b border-border/60 shadow-none">
+              <TabsTrigger
+                value="exhibitions"
+                className="rounded-t-lg border border-transparent border-b-0 bg-transparent px-5 py-2.5 text-muted-foreground data-[state=active]:bg-muted/70 data-[state=active]:text-foreground data-[state=active]:border-border data-[state=active]:border-b-0 data-[state=active]:-mb-px data-[state=active]:shadow-sm"
+              >
+                Выставки
+              </TabsTrigger>
+              <TabsTrigger
+                value="news"
+                className="rounded-t-lg border border-transparent border-b-0 border-l border-border/50 bg-transparent px-5 py-2.5 text-muted-foreground data-[state=active]:bg-muted/70 data-[state=active]:text-foreground data-[state=active]:border-border data-[state=active]:border-b-0 data-[state=active]:-mb-px data-[state=active]:shadow-sm data-[state=active]:border-l-0"
+              >
+                Новости
+              </TabsTrigger>
             </TabsList>
 
             {/* Exhibitions Tab */}
-            <TabsContent value="exhibitions" className="space-y-6">
+            <TabsContent value="exhibitions" className="space-y-6 rounded-b border border-t-0 border-border/60 p-0 pt-6">
               <div className="flex flex-col sm:flex-row gap-4">
                 <Input
                   placeholder="Поиск выставок..."
@@ -380,17 +390,16 @@ function PublicationsContent() {
                     </Card>
                   ))
                 ) : (
-                  <Card>
-                    <CardContent className="pt-6">
-                      <p className="text-center text-muted-foreground">Выставки не найдены</p>
-                    </CardContent>
-                  </Card>
+                  <div className="flex flex-col items-center justify-center py-24 min-h-[320px]">
+                    <LayoutGrid className="w-16 h-16 text-muted-foreground/50 mb-4" strokeWidth={1.25} />
+                    <p className="text-lg font-medium text-muted-foreground">Не найдено</p>
+                  </div>
                 )}
               </div>
             </TabsContent>
 
             {/* News Tab */}
-            <TabsContent value="news" className="space-y-6">
+            <TabsContent value="news" className="space-y-6 rounded-b border border-t-0 border-border/60 p-0 pt-6">
               <div className="flex flex-col sm:flex-row gap-4">
                 <Input
                   placeholder="Поиск новостей..."
@@ -465,11 +474,10 @@ function PublicationsContent() {
                     </Card>
                   ))
                 ) : (
-                  <Card>
-                    <CardContent className="pt-6">
-                      <p className="text-center text-muted-foreground">Новости не найдены</p>
-                    </CardContent>
-                  </Card>
+                  <div className="flex flex-col items-center justify-center py-24 min-h-[320px]">
+                    <LayoutGrid className="w-16 h-16 text-muted-foreground/50 mb-4" strokeWidth={1.25} />
+                    <p className="text-lg font-medium text-muted-foreground">Не найдено</p>
+                  </div>
                 )}
               </div>
             </TabsContent>

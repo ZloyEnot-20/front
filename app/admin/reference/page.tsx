@@ -102,7 +102,7 @@ function ReferenceContent() {
               {citiesLoading ? (
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                   {Array.from({ length: 6 }).map((_, i) => (
-                    <Card key={i} className="overflow-hidden">
+                    <Card key={i} className="overflow-hidden py-0">
                       <CardContent className="p-4 flex items-center gap-3">
                         <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
                         <span className="text-sm text-muted-foreground">Загрузка...</span>
@@ -113,7 +113,7 @@ function ReferenceContent() {
               ) : cities.length > 0 ? (
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
                   {cities.map((city) => (
-                    <Card key={city.id} className="overflow-hidden group hover:shadow-md transition-shadow">
+                    <Card key={city.id} className="overflow-hidden py-0 group hover:shadow-md transition-shadow">
                       <CardContent className="p-4 flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2 min-w-0">
                           <MapPin className="w-4 h-4 text-muted-foreground flex-shrink-0" />
