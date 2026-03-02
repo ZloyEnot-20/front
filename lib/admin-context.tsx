@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react'
 import { Exhibition, News, User, ExhibitionRegistration } from './types'
 import { exhibitionsApi, newsApi, usersApi, registrationsApi, ApiUser } from './api'
+import { useAuth } from './auth-context'
 
 function toExhibition(e: { id: string; title: string; description: string; startDate: string; endDate: string; cities?: { id: string; name: string }[]; participants?: { id: string; name: string; avatar?: string; exhibitorDescription?: string; exhibitorAddress?: string; exhibitorWebsite?: string; exhibitorPhotos?: string[] }[]; image?: string; status: string; participantCount: number; registrations: number; createdBy: string; createdAt: string; updatedAt: string }): Exhibition {
   return {
@@ -81,6 +82,7 @@ interface AdminContextType {
 const AdminContext = createContext<AdminContextType | undefined>(undefined)
 
 export function AdminProvider({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth()
   const [exhibitions, setExhibitions] = useState<Exhibition[]>([])
   const [news, setNews] = useState<News[]>([])
   const [users, setUsers] = useState<User[]>([])
@@ -128,6 +130,11 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     refresh()
   }, [refresh])
+
+  // Повторная загрузка когда пользователь уже залогинен (исправляет случай, когда при первом mount токен ещё не применён)
+  useEffect(() => {
+    if (user?.id) refresh()
+  }, [user?.id, refresh])
 
   const addExhibition = async (exhibition: Exhibition) => {
     const cityIds = Array.isArray(exhibition.cities)

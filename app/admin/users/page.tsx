@@ -1,15 +1,15 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ProtectedRoute } from '@/components/auth/protected-route'
 import { AdminSidebar } from '@/components/admin/admin-sidebar'
 import { CreateUserModal } from '@/components/admin/create-user-modal'
 import { useAdmin } from '@/lib/admin-context'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { MoreHorizontal, Users, Activity, TrendingUp, Plus, Loader2, Clock } from 'lucide-react'
+import { MoreHorizontal, Users, Activity, Plus, Loader2, Clock } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
   DropdownMenu,
@@ -17,11 +17,44 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import type { User } from '@/lib/types'
+
+const ROLE_LABELS: Record<string, string> = {
+  visitor: 'Посетитель',
+  exhibitor: 'Экспонент',
+  participant: 'Участник',
+  staff: 'Сотрудник',
+  manager: 'Менеджер',
+  content_manager: 'Менеджер контента',
+  admin: 'Администратор',
+}
 
 function UsersModeration() {
-  const { users, updateUser, deleteUser, isLoading } = useAdmin()
+  const { users, updateUser, isLoading, refresh } = useAdmin()
   const [searchQuery, setSearchQuery] = useState('')
+
+  useEffect(() => {
+    refresh()
+  }, [refresh])
   const [createUserOpen, setCreateUserOpen] = useState(false)
+  const [viewUser, setViewUser] = useState<User | null>(null)
+  const [editUser, setEditUser] = useState<User | null>(null)
+  const [editForm, setEditForm] = useState({ name: '', email: '', role: '', status: '', phone: '' })
+  const [editSaving, setEditSaving] = useState(false)
+  const [editError, setEditError] = useState('')
 
   const filteredUsers = users.filter(
     (u) =>
@@ -183,10 +216,20 @@ function UsersModeration() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setViewUser(user)}>
                               Просмотр профиля
                             </DropdownMenuItem>
-                            <DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => {
+                              setEditUser(user)
+                              setEditForm({
+                                name: user.name,
+                                email: user.email,
+                                role: user.role ?? '',
+                                status: user.status ?? 'active',
+                                phone: user.phone ?? '',
+                              })
+                              setEditError('')
+                            }}>
                               Редактировать
                             </DropdownMenuItem>
                             <DropdownMenuItem>
@@ -197,9 +240,6 @@ function UsersModeration() {
                               className={user.status === 'blocked' ? 'text-green-600' : 'text-destructive'}
                             >
                               {user.status === 'blocked' ? 'Разблокировать' : 'Заблокировать'}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="text-destructive" onClick={() => deleteUser(user.id)}>
-                              Удалить пользователя
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -214,6 +254,155 @@ function UsersModeration() {
         </div>
 
         <CreateUserModal isOpen={createUserOpen} onOpenChange={setCreateUserOpen} />
+
+        {/* View profile modal */}
+        <Dialog open={!!viewUser} onOpenChange={(open) => !open && setViewUser(null)}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Профиль пользователя</DialogTitle>
+            </DialogHeader>
+            {viewUser && (
+              <div className="space-y-4 pt-2">
+                <div>
+                  <p className="text-xs text-muted-foreground">Имя</p>
+                  <p className="font-medium">{viewUser.name}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Email</p>
+                  <p className="font-medium">{viewUser.email}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Роль</p>
+                  <p className="font-medium">{ROLE_LABELS[viewUser.role] ?? viewUser.role}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Статус</p>
+                  <p className="font-medium">{getStatusBadge(viewUser.status ?? 'active')}</p>
+                </div>
+                {viewUser.phone && (
+                  <div>
+                    <p className="text-xs text-muted-foreground">Телефон</p>
+                    <p className="font-medium">{viewUser.phone}</p>
+                  </div>
+                )}
+                <div>
+                  <p className="text-xs text-muted-foreground">Зарегистрирован</p>
+                  <p className="font-medium text-sm">{viewUser.createdAt instanceof Date ? viewUser.createdAt.toLocaleDateString('ru-RU') : new Date(viewUser.createdAt).toLocaleDateString('ru-RU')}</p>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit user modal */}
+        <Dialog open={!!editUser} onOpenChange={(open) => {
+          if (!open) {
+            setEditUser(null)
+            setEditError('')
+          }
+        }}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Редактировать пользователя</DialogTitle>
+            </DialogHeader>
+            {editUser && (
+              <form
+                className="space-y-4 pt-2"
+                onSubmit={async (e) => {
+                  e.preventDefault()
+                  setEditError('')
+                  if (!editForm.name.trim()) {
+                    setEditError('Введите имя')
+                    return
+                  }
+                  if (!editForm.email.trim() || !editForm.email.includes('@')) {
+                    setEditError('Введите корректный email')
+                    return
+                  }
+                  setEditSaving(true)
+                  try {
+                    await updateUser(editUser.id, {
+                      name: editForm.name.trim(),
+                      email: editForm.email.trim(),
+                      role: editForm.role as User['role'],
+                      status: (editForm.status || 'active') as User['status'],
+                      phone: editForm.phone.trim() || undefined,
+                    })
+                    setEditUser(null)
+                  } catch (err) {
+                    setEditError(err instanceof Error ? err.message : 'Ошибка сохранения')
+                  } finally {
+                    setEditSaving(false)
+                  }
+                }}
+              >
+                <div>
+                  <label className="text-sm font-medium">Имя</label>
+                  <Input
+                    className="mt-1"
+                    value={editForm.name}
+                    onChange={(e) => setEditForm((p) => ({ ...p, name: e.target.value }))}
+                    placeholder="Имя"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Email</label>
+                  <Input
+                    type="email"
+                    className="mt-1"
+                    value={editForm.email}
+                    onChange={(e) => setEditForm((p) => ({ ...p, email: e.target.value }))}
+                    placeholder="email@example.com"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Роль</label>
+                  <Select value={editForm.role} onValueChange={(v) => setEditForm((p) => ({ ...p, role: v }))}>
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="Выберите роль" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(ROLE_LABELS).map(([value, label]) => (
+                        <SelectItem key={value} value={value}>{label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Статус</label>
+                  <Select value={editForm.status} onValueChange={(v) => setEditForm((p) => ({ ...p, status: v }))}>
+                    <SelectTrigger className="mt-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="active">Активен</SelectItem>
+                      <SelectItem value="blocked">Заблокирован</SelectItem>
+                      <SelectItem value="pending">Ожидает</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Телефон</label>
+                  <Input
+                    className="mt-1"
+                    value={editForm.phone}
+                    onChange={(e) => setEditForm((p) => ({ ...p, phone: e.target.value }))}
+                    placeholder="+7 ..."
+                  />
+                </div>
+                {editError && <p className="text-sm text-destructive">{editError}</p>}
+                <div className="flex gap-2 justify-end">
+                  <Button type="button" variant="outline" onClick={() => setEditUser(null)}>
+                    Отмена
+                  </Button>
+                  <Button type="submit" disabled={editSaving}>
+                    {editSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Сохранить'}
+                  </Button>
+                </div>
+              </form>
+            )}
+          </DialogContent>
+        </Dialog>
       </main>
     </div>
   )

@@ -345,76 +345,74 @@ function PublicationsContent() {
                   ))}
                 </div>
               ) : filteredExhibitions.length > 0 ? (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 max-w-[1400px]">
                   {filteredExhibitions.map((exhibition) => (
-                    <Card key={exhibition.id} className="group overflow-hidden rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col">
-                      <Link href={`/exhibitions/${exhibition.id}`} className="relative block aspect-[4/3] bg-muted overflow-hidden">
+                    <Card key={exhibition.id} className="group overflow-hidden rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 relative aspect-[2/3] w-full max-w-[280px] mx-auto">
+                      <Link href={`/exhibitions/${exhibition.id}`} className="absolute inset-0 z-0" target="_blank" rel="noopener noreferrer">
                         {exhibition.image ? (
-                          <img src={getImageUrl(exhibition.image) || "/placeholder.svg"} alt={exhibition.title} className="w-full h-full object-cover transition-all duration-300 group-hover:blur-[2px] group-hover:scale-105" loading="lazy" />
+                          <img src={getImageUrl(exhibition.image) || "/placeholder.svg"} alt={exhibition.title} className="absolute inset-0 w-full h-full object-cover scale-105 group-hover:scale-110 transition-transform duration-500" loading="lazy" />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10">
-                            <span className="text-2xl font-bold text-muted-foreground/20">
-                              {exhibition.title.charAt(0)}
-                            </span>
+                          <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/20 to-secondary/20">
+                            <span className="text-3xl font-bold text-muted-foreground/30">{exhibition.title.charAt(0)}</span>
                           </div>
                         )}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent pointer-events-none" />
-                        <div className="absolute bottom-0 left-0 right-0 p-3 pointer-events-none">
-                          <h3 className="font-bold text-white text-sm drop-shadow-md line-clamp-1">{exhibition.title}</h3>
-                          <p className="text-white/90 text-xs mt-0.5 line-clamp-1">{exhibition.description}</p>
-                          <div className="flex gap-3 mt-1 text-white/80 text-[10px]">
-                            <span>{new Date(exhibition.startDate).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })}</span>
-                            <span>{exhibition.registrations} чел.</span>
-                          </div>
-                        </div>
-                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none bg-black/20">
-                          <span className="rounded-full bg-white/90 p-3 shadow-lg">
-                            <ExternalLink className="w-5 h-5 text-foreground" />
-                          </span>
-                        </div>
-                        <Badge className="absolute top-2 right-2 text-[10px] px-1.5 py-0" variant={exhibition.status === 'published' ? 'default' : 'secondary'}>
-                          {exhibition.status === 'draft' ? 'Черн.' : 'Опубл.'}
-                        </Badge>
                       </Link>
-                      <CardContent className="p-3 flex-1 flex items-center justify-between gap-2 min-h-[52px]">
-                        {togglingStatusExhibitionId === exhibition.id ? (
-                          <Button variant="default" size="sm" className="flex-1 h-8 text-xs rounded-full" disabled>
-                            <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" />
-                            Сохранение...
-                          </Button>
-                        ) : (
-                          <>
-                            <Button
-                              variant="default"
-                              size="sm"
-                              className="flex-1 h-8 text-xs rounded-full max-w-[180px] mx-auto"
-                              onClick={() => handleToggleExhibitionStatus(exhibition.id, exhibition.status)}
-                            >
-                              {exhibition.status === 'published' ? 'Снять с публикации' : 'Опубликовать'}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/85 from-30% via-black/20 to-transparent pointer-events-none z-10" />
+                      <div className="absolute inset-0 z-20 flex flex-col justify-end p-3">
+                        <h3 className="font-bold text-white text-sm drop-shadow-md line-clamp-1">{exhibition.title}</h3>
+                        <p className="text-white/90 text-xs mt-0.5 line-clamp-1">{exhibition.description}</p>
+                        <div className="flex gap-3 mt-1 text-white/80 text-[10px]">
+                          <span>{new Date(exhibition.startDate).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })}</span>
+                          <span>{exhibition.registrations} чел.</span>
+                        </div>
+                        <div className="flex items-center justify-between gap-2 mt-3 pt-2 border-t border-white/20">
+                          {togglingStatusExhibitionId === exhibition.id ? (
+                            <Button variant="default" size="sm" className="flex-1 h-9 text-xs rounded-full shadow-lg" disabled>
+                              <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" />
+                              Сохранение...
                             </Button>
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="outline" size="icon" className="h-8 w-8 rounded-full shrink-0">
-                                  <Pencil className="w-4 h-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={() => handleEditContent(exhibition, 'exhibition')}>
-                                  Редактировать
-                                </DropdownMenuItem>
-                                <DropdownMenuItem asChild>
-                                  <a href={`/exhibitions/${exhibition.id}`} target="_blank" rel="noopener noreferrer">
-                                    Просмотр
-                                  </a>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem className="text-destructive" onClick={() => deleteExhibition(exhibition.id)}>
-                                  Удалить
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </>
-                        )}
-                      </CardContent>
+                          ) : (
+                            <>
+                              <Button
+                                variant="default"
+                                size="sm"
+                                className="flex-1 h-9 text-xs rounded-full max-w-[160px] mx-auto bg-white text-black hover:bg-white/90 shadow-lg"
+                                onClick={(e) => { e.preventDefault(); handleToggleExhibitionStatus(exhibition.id, exhibition.status); }}
+                              >
+                                {exhibition.status === 'published' ? 'Снять с публикации' : 'Опубликовать'}
+                              </Button>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="secondary" size="icon" className="h-9 w-9 rounded-full shrink-0 bg-white/90 hover:bg-white shadow-lg" onClick={(e) => e.preventDefault()}>
+                                    <Pencil className="w-4 h-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem onClick={() => handleEditContent(exhibition, 'exhibition')}>
+                                    Редактировать
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem asChild>
+                                    <a href={`/exhibitions/${exhibition.id}`} target="_blank" rel="noopener noreferrer">
+                                      Просмотр
+                                    </a>
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem className="text-destructive" onClick={() => deleteExhibition(exhibition.id)}>
+                                    Удалить
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10 bg-black/25">
+                        <span className="rounded-full bg-white/95 p-3 shadow-xl">
+                          <ExternalLink className="w-5 h-5 text-foreground" />
+                        </span>
+                      </div>
+                      <Badge className="absolute top-2 right-2 z-30 text-[10px] px-1.5 py-0" variant={exhibition.status === 'published' ? 'default' : 'secondary'}>
+                        {exhibition.status === 'draft' ? 'Черн.' : 'Опубл.'}
+                      </Badge>
                     </Card>
                   ))}
                 </div>
@@ -445,34 +443,28 @@ function PublicationsContent() {
                   ))}
                 </div>
               ) : filteredNews.length > 0 ? (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 max-w-[1400px]">
                   {filteredNews.map((news) => (
-                    <Card key={news.id} className="group overflow-hidden rounded-2xl shadow-sm hover:shadow-lg transition-shadow flex flex-col bg-card">
-                      <div className="aspect-[4/3] bg-muted relative overflow-hidden rounded-t-2xl">
+                    <Card key={news.id} className="group overflow-hidden rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 relative aspect-[2/3] w-full max-w-[280px] mx-auto">
+                      <a href={`/news/${news.id}`} target="_blank" rel="noopener noreferrer" className="absolute inset-0 z-0">
                         {news.image ? (
-                          <img src={getImageUrl(news.image) || "/placeholder.svg"} alt={news.title} className="w-full h-full object-cover" loading="lazy" />
+                          <img src={getImageUrl(news.image) || "/placeholder.svg"} alt={news.title} className="absolute inset-0 w-full h-full object-cover scale-105 group-hover:scale-110 transition-transform duration-500" loading="lazy" />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-accent/10 to-primary/10">
-                            <span className="text-2xl font-bold text-muted-foreground/20">
-                              {news.title.charAt(0)}
-                            </span>
+                          <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-accent/20 to-primary/20">
+                            <span className="text-3xl font-bold text-muted-foreground/30">{news.title.charAt(0)}</span>
                           </div>
                         )}
-                        <Badge className="absolute top-2 right-2 text-[10px] px-1.5 py-0" variant={news.status === 'published' ? 'default' : 'secondary'}>
-                          {news.status === 'draft' ? 'Черн.' : 'Опубл.'}
-                        </Badge>
-                      </div>
-                      <CardContent className="p-4 flex-1 flex flex-col bg-background">
-                        <h3 className="font-bold text-foreground text-base line-clamp-1 mb-1">{news.title}</h3>
-                        <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
-                          {news.excerpt}
-                        </p>
-                        <p className="text-xs text-muted-foreground mt-auto">
+                      </a>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/85 from-30% via-black/20 to-transparent pointer-events-none z-10" />
+                      <div className="absolute inset-0 z-20 flex flex-col justify-end p-3">
+                        <h3 className="font-bold text-white text-sm drop-shadow-md line-clamp-1">{news.title}</h3>
+                        <p className="text-white/90 text-xs mt-0.5 line-clamp-2">{news.excerpt}</p>
+                        <p className="text-white/80 text-[10px] mt-1">
                           {new Date(news.publishedAt).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric' })}
                         </p>
-                        <div className="flex items-center gap-2 mt-3">
+                        <div className="flex items-center justify-between gap-2 mt-3 pt-2 border-t border-white/20">
                           {togglingStatusNewsId === news.id ? (
-                            <Button variant="default" size="sm" className="flex-1 h-8 text-xs rounded-full" disabled>
+                            <Button variant="default" size="sm" className="flex-1 h-9 text-xs rounded-full shadow-lg" disabled>
                               <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" />
                               Сохранение...
                             </Button>
@@ -481,14 +473,14 @@ function PublicationsContent() {
                               <Button
                                 variant="default"
                                 size="sm"
-                                className="flex-1 h-8 text-xs rounded-full"
-                                onClick={() => handleToggleNewsStatus(news.id, news.status)}
+                                className="flex-1 h-9 text-xs rounded-full max-w-[160px] mx-auto bg-white text-black hover:bg-white/90 shadow-lg"
+                                onClick={(e) => { e.preventDefault(); handleToggleNewsStatus(news.id, news.status); }}
                               >
                                 {news.status === 'published' ? 'Снять с публикации' : 'Опубликовать'}
                               </Button>
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                  <Button variant="outline" size="icon" className="h-8 w-8 rounded-full shrink-0">
+                                  <Button variant="secondary" size="icon" className="h-9 w-9 rounded-full shrink-0 bg-white/90 hover:bg-white shadow-lg" onClick={(e) => e.preventDefault()}>
                                     <Pencil className="w-4 h-4" />
                                   </Button>
                                 </DropdownMenuTrigger>
@@ -509,7 +501,10 @@ function PublicationsContent() {
                             </>
                           )}
                         </div>
-                      </CardContent>
+                      </div>
+                      <Badge className="absolute top-2 right-2 z-30 text-[10px] px-1.5 py-0" variant={news.status === 'published' ? 'default' : 'secondary'}>
+                        {news.status === 'draft' ? 'Черн.' : 'Опубл.'}
+                      </Badge>
                     </Card>
                   ))}
                 </div>
