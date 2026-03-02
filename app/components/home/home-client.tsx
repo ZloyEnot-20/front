@@ -7,10 +7,12 @@ import { NewsCardSkeleton } from '@/components/news/news-card-skeleton'
 import { Button } from '@/components/ui/button'
 import { useAdmin } from '@/lib/admin-context'
 import { useAuth } from '@/lib/auth-context'
+import { useLocale } from '@/lib/i18n'
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 
 export function HomeClient() {
+  const { t } = useLocale()
   const { user } = useAuth()
   const { exhibitions, news, isLoading } = useAdmin()
   const publishedExhibitions = exhibitions.filter((e) => e.status === 'published')
@@ -25,8 +27,8 @@ export function HomeClient() {
         <section className="border-b border-border/40 py-16 md:py-24 min-h-[340px]" aria-busy="true">
           <div className="container mx-auto px-4">
             <div className="mb-8">
-              <h2 className="text-3xl font-bold">Последние новости</h2>
-              <p className="text-muted-foreground mt-2">Узнайте о самых важных событиях в мире выставок</p>
+              <h2 className="text-3xl font-bold">{t('latestNews')}</h2>
+              <p className="text-muted-foreground mt-2">{t('latestNewsDesc')}</p>
             </div>
             <NewsCardSkeleton featured />
           </div>
@@ -35,8 +37,8 @@ export function HomeClient() {
         <section className="border-b border-border/40 py-16 md:py-24 min-h-[340px]">
           <div className="container mx-auto px-4">
             <div className="mb-8">
-              <h2 className="text-3xl font-bold">Последние новости</h2>
-              <p className="text-muted-foreground mt-2">Узнайте о самых важных событиях в мире выставок</p>
+              <h2 className="text-3xl font-bold">{t('latestNews')}</h2>
+              <p className="text-muted-foreground mt-2">{t('latestNewsDesc')}</p>
             </div>
             <NewsCard news={featuredNews} featured priority />
           </div>
@@ -70,8 +72,8 @@ export function HomeClient() {
       <section className="py-16 md:py-24 min-h-[520px]" id="exhibitions">
         <div className="container mx-auto px-4">
           <div className="mb-12">
-            <h2 className="text-3xl font-bold mb-2">Выставки</h2>
-            <p className="text-muted-foreground">Выберите интересующую вас выставку и зарегистрируйтесь</p>
+            <h2 className="text-3xl font-bold mb-2">{t('exhibitions')}</h2>
+            <p className="text-muted-foreground">{t('exhibitionsSubtitle')}</p>
           </div>
 
           {isLoading ? (
@@ -90,7 +92,7 @@ export function HomeClient() {
               <div className="text-center">
                 <Button variant="outline" asChild>
                   <Link href="/exhibitions">
-                    Все выставки
+                    {t('allExhibitions')}
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Link>
                 </Button>
@@ -98,10 +100,10 @@ export function HomeClient() {
             </>
           ) : (
             <div className="text-center py-12">
-              <p className="text-muted-foreground mb-4">Сейчас нет опубликованных выставок</p>
+              <p className="text-muted-foreground mb-4">{t('noExhibitionsNow')}</p>
               {!user && (
                 <Button asChild>
-                  <Link href="/auth/signup">Быть в курсе</Link>
+                  <Link href="/auth/signup">{t('stayTuned')}</Link>
                 </Button>
               )}
             </div>
@@ -113,12 +115,12 @@ export function HomeClient() {
       {!user && (
         <section className="border-t border-border/40 bg-gradient-to-b from-primary/5 to-secondary/5 py-16 md:py-24">
           <div className="container mx-auto px-4 text-center">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Готовы начать?</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">{t('readyToStart')}</h2>
             <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Присоединяйтесь к тысячам пользователей, которые уже находят и создают отличные выставки
+              {t('ctaSubtitle')}
             </p>
             <Button size="lg" asChild>
-              <Link href="/auth/signup">Зарегистрироваться сейчас</Link>
+              <Link href="/auth/signup">{t('registerNowCta')}</Link>
             </Button>
           </div>
         </section>
@@ -129,23 +131,23 @@ export function HomeClient() {
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center gap-8">
             <div>
-              <div className="font-bold text-lg mb-2">EDU Expo</div>
-              <p className="text-sm text-muted-foreground">Платформа для управления выставками</p>
+              <div className="font-bold text-lg mb-2">{t('appName')}</div>
+              <p className="text-sm text-muted-foreground">{t('platformSubtitle')}</p>
             </div>
             <div className="flex gap-8 text-sm text-muted-foreground">
               <Link href="/" className="hover:text-foreground transition-colors">
-                О нас
+                {t('aboutUs')}
               </Link>
               <Link href="/" className="hover:text-foreground transition-colors">
-                Контакты
+                {t('contacts')}
               </Link>
               <Link href="/" className="hover:text-foreground transition-colors">
-                Политика конфиденциальности
+                {t('privacyPolicy')}
               </Link>
             </div>
           </div>
           <div className="border-t border-border/40 mt-8 pt-8 text-center text-sm text-muted-foreground">
-            <p>&copy; 2026 EDU Expo. Все права защищены.</p>
+            <p>&copy; 2026 {t('appName')}. {t('allRightsReserved')}.</p>
           </div>
         </div>
       </footer>

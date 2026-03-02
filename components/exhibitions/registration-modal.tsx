@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useAdmin } from '@/lib/admin-context'
 import { useAuth } from '@/lib/auth-context'
+import { useLocale } from '@/lib/i18n'
 import { registrationsApi } from '@/lib/api'
 import { sendRegistrationEmail, sendBitrixIntegration } from '@/lib/email-service'
 import {
@@ -60,6 +61,7 @@ export function RegistrationModal({
   exhibitionTitle,
   cities: exhibitionCities = [],
 }: RegistrationModalProps) {
+  const { t } = useLocale()
   const { user } = useAuth()
   const { addRegistration, incrementExhibitionRegistrations } = useAdmin()
   const [step, setStep] = useState<'city' | 'success'>('city')
@@ -127,7 +129,7 @@ export function RegistrationModal({
         registrationId: created.id,
       }).catch(console.error)
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Ошибка при регистрации. Попробуйте снова.'
+      const message = err instanceof Error ? err.message : t('registrationError')
       setError(message)
       console.error('[Registration]', err)
     } finally {
@@ -148,23 +150,21 @@ export function RegistrationModal({
         {!user ? (
           <>
             <DialogHeader>
-              <DialogTitle>Регистрация на выставку</DialogTitle>
+              <DialogTitle>{t('registrationTitle')}</DialogTitle>
               <DialogDescription>{exhibitionTitle}</DialogDescription>
             </DialogHeader>
             <Alert>
-              <AlertDescription>
-                Войдите в аккаунт, чтобы зарегистрироваться на выставку.
-              </AlertDescription>
+              <AlertDescription>{t('signInToRegister')}</AlertDescription>
             </Alert>
             <Button asChild>
-              <Link href="/login">Войти</Link>
+              <Link href="/auth/login">{t('login')}</Link>
             </Button>
           </>
         ) : step === 'city' ? (
           <>
             <DialogHeader>
-              <DialogTitle>Выберите город</DialogTitle>
-              <DialogDescription>Выберите город для посещения выставки</DialogDescription>
+              <DialogTitle>{t('chooseCity')}</DialogTitle>
+              <DialogDescription>{t('chooseCityDesc')}</DialogDescription>
             </DialogHeader>
             <div className="space-y-3">
               {error && (
@@ -184,7 +184,7 @@ export function RegistrationModal({
                     {loadingCity === city ? (
                       <>
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Обработка...
+                        {t('processing')}
                       </>
                     ) : (
                       city
@@ -194,7 +194,7 @@ export function RegistrationModal({
               </div>
               {recentCities.filter((c) => !displayCities.includes(c)).length > 0 && (
                 <div>
-                  <p className="text-xs text-muted-foreground mb-1.5">Недавние:</p>
+                  <p className="text-xs text-muted-foreground mb-1.5">{t('recent')}:</p>
                   <div className="flex flex-wrap gap-1.5">
                     {recentCities
                       .filter((c) => !displayCities.includes(c))
@@ -224,13 +224,13 @@ export function RegistrationModal({
           registration && (
             <>
               <DialogHeader>
-                <DialogTitle>Регистрация завершена</DialogTitle>
+                <DialogTitle>{t('registrationComplete')}</DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
                 <Alert className="border-green-200 bg-green-50">
                   <CheckCircle2 className="h-4 w-4 text-green-600" />
                   <AlertDescription className="text-green-800">
-                    Вы зарегистрированы на выставку. Сохраните QR-код и предъявите его на входе.
+                    {t('registrationSuccessQr')}
                   </AlertDescription>
                 </Alert>
 
@@ -239,13 +239,13 @@ export function RegistrationModal({
                 </div>
 
                 <div className="bg-muted/50 border rounded-lg p-3 text-sm space-y-1">
-                  <p className="font-medium">Ваш уникальный QR-код</p>
-                  <p className="text-muted-foreground text-xs">Город: {registration.city}</p>
+                  <p className="font-medium">{t('yourQrCode')}</p>
+                  <p className="text-muted-foreground text-xs">{t('cityLabel')}: {registration.city}</p>
                   <p className="text-muted-foreground text-xs">ID: {registration.id}</p>
                 </div>
 
                 <Button className="w-full" onClick={handleClose}>
-                  Закрыть
+                  {t('close')}
                 </Button>
               </div>
             </>

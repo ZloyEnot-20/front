@@ -16,7 +16,12 @@ export default function ExhibitionsPage() {
   const [sortBy, setSortBy] = useState('upcoming')
 
   const filteredExhibitions = publishedExhibitions
-    .filter((e) => e.title.toLowerCase().includes(searchQuery.toLowerCase()) || e.location.toLowerCase().includes(searchQuery.toLowerCase()))
+    .filter((e) => {
+      const q = searchQuery.toLowerCase()
+      const matchTitle = e.title.toLowerCase().includes(q)
+      const matchCities = e.cities?.some((c) => c.name.toLowerCase().includes(q))
+      return matchTitle || matchCities
+    })
     .sort((a, b) => {
       if (sortBy === 'upcoming') {
         return new Date(a.startDate).getTime() - new Date(b.startDate).getTime()

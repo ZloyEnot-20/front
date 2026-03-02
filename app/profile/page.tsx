@@ -9,25 +9,30 @@ import { PersonalInfoSection } from '@/components/profile/personal-info-section'
 import { SecuritySection } from '@/components/profile/security-section'
 import { NotificationsSection } from '@/components/profile/notifications-section'
 import { ExhibitionsSection } from '@/components/profile/exhibitions-section'
+import { ExhibitorProfileSection } from '@/components/profile/exhibitor-profile-section'
 import { IntegrationSection } from '@/components/profile/integration-section'
-import { User, Shield, Bell, Briefcase, Link as LinkIcon } from 'lucide-react'
+import { User, Shield, Bell, Briefcase, Link as LinkIcon, Building2 } from 'lucide-react'
 
-const TABS = [
-  { id: 'personal', label: 'Личные данные', icon: User },
-  { id: 'security', label: 'Почта и пароль', icon: Shield },
-  // { id: 'notifications', label: 'Уведомления', icon: Bell },
-  { id: 'exhibitions', label: 'Мои выставки', icon: Briefcase },
-  // { id: 'integration', label: 'Интеграции', icon: LinkIcon },
+const BASE_TABS = [
+  { id: 'personal' as const, label: 'Личные данные', icon: User },
+  { id: 'security' as const, label: 'Почта и пароль', icon: Shield },
+  { id: 'exhibitions' as const, label: 'Мои выставки', icon: Briefcase },
 ]
 
 function ProfileContent() {
   const { user } = useAuth()
   const searchParams = useSearchParams()
   const tabFromUrl = searchParams.get('tab')
-  const [activeTab, setActiveTab] = useState(tabFromUrl === 'exhibitions' ? 'exhibitions' : 'personal')
+  const tabs = [
+    ...BASE_TABS.slice(0, 2),
+    ...(user?.role === 'exhibitor' ? [{ id: 'exhibitor' as const, label: 'Профиль университета', icon: Building2 }] : []),
+    ...BASE_TABS.slice(2),
+  ]
+  const [activeTab, setActiveTab] = useState(tabFromUrl === 'exhibitions' ? 'exhibitions' : tabFromUrl === 'exhibitor' ? 'exhibitor' : 'personal')
 
   useEffect(() => {
     if (tabFromUrl === 'exhibitions') setActiveTab('exhibitions')
+    if (tabFromUrl === 'exhibitor') setActiveTab('exhibitor')
   }, [tabFromUrl])
 
   if (!user) {
@@ -40,12 +45,10 @@ function ProfileContent() {
         return <PersonalInfoSection user={user} />
       case 'security':
         return <SecuritySection />
-      // case 'notifications':
-      //   return <NotificationsSection />
+      case 'exhibitor':
+        return <ExhibitorProfileSection />
       case 'exhibitions':
         return <ExhibitionsSection />
-      // case 'integration':
-      //   return <IntegrationSection />
       default:
         return <PersonalInfoSection user={user} />
     }
@@ -59,7 +62,7 @@ function ProfileContent() {
         <div className="container mx-auto px-4">
           <h1 className="text-3xl font-bold pt-8 pb-4">Профиль</h1>
           <div className="flex justify-center gap-1 overflow-x-auto pb-0">
-            {TABS.map((tab) => {
+            {tabs.map((tab) => {
               const Icon = tab.icon
               return (
                 <button

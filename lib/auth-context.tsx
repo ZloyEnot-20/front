@@ -2,20 +2,20 @@
 
 import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react'
 import { User } from './types'
-import { authApi } from './api'
+import { authApi, RegisterPayload } from './api'
 
 export interface UserContextType {
   user: User | null
   isLoading: boolean
   login: (email: string, password: string) => Promise<void>
   logout: () => void
-  signup: (email: string, name: string, password: string, role: User['role']) => Promise<void>
+  signup: (payload: RegisterPayload) => Promise<void>
   refreshUser: () => Promise<void>
 }
 
 export const UserContext = createContext<UserContextType | undefined>(undefined)
 
-function toUser(apiUser: { id: string; email: string; name: string; role: string; status?: string; avatar?: string; phone?: string; createdAt: string; updatedAt: string }): User {
+function toUser(apiUser: { id: string; email: string; name: string; role: string; status?: string; avatar?: string; phone?: string; exhibitorDescription?: string; exhibitorAddress?: string; exhibitorWebsite?: string; exhibitorPhotos?: string[]; createdAt: string; updatedAt: string }): User {
   return {
     id: apiUser.id,
     email: apiUser.email,
@@ -24,6 +24,10 @@ function toUser(apiUser: { id: string; email: string; name: string; role: string
     status: apiUser.status as User['status'],
     avatar: apiUser.avatar,
     phone: apiUser.phone,
+    exhibitorDescription: apiUser.exhibitorDescription,
+    exhibitorAddress: apiUser.exhibitorAddress,
+    exhibitorWebsite: apiUser.exhibitorWebsite,
+    exhibitorPhotos: apiUser.exhibitorPhotos,
     createdAt: new Date(apiUser.createdAt),
     updatedAt: new Date(apiUser.updatedAt),
   }
@@ -80,10 +84,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null)
   }
 
-  const signup = async (email: string, name: string, password: string, role: User['role']) => {
+  const signup = async (payload: RegisterPayload) => {
     setIsLoading(true)
     try {
-      const { user: u, token } = await authApi.register(email, name, password, role)
+      const { user: u, token } = await authApi.register(payload)
       localStorage.setItem('token', token)
       setUser(toUser(u))
     } finally {

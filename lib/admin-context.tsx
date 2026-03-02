@@ -4,15 +4,15 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { Exhibition, News, User, ExhibitionRegistration } from './types'
 import { exhibitionsApi, newsApi, usersApi, registrationsApi, ApiUser } from './api'
 
-function toExhibition(e: { id: string; title: string; description: string; startDate: string; endDate: string; location: string; cities?: string[]; image?: string; status: string; participantCount: number; registrations: number; createdBy: string; createdAt: string; updatedAt: string }): Exhibition {
+function toExhibition(e: { id: string; title: string; description: string; startDate: string; endDate: string; location?: string; cities?: { id: string; name: string }[]; participants?: { id: string; name: string; avatar?: string; exhibitorDescription?: string; exhibitorAddress?: string; exhibitorWebsite?: string; exhibitorPhotos?: string[] }[]; image?: string; status: string; participantCount: number; registrations: number; createdBy: string; createdAt: string; updatedAt: string }): Exhibition {
   return {
     id: e.id,
     title: e.title,
     description: e.description,
     startDate: new Date(e.startDate),
     endDate: new Date(e.endDate),
-    location: e.location,
-    cities: e.cities,
+    cities: e.cities ?? [],
+    participants: e.participants ?? [],
     image: e.image,
     status: e.status as Exhibition['status'],
     participantCount: e.participantCount,
@@ -130,8 +130,16 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   }, [refresh])
 
   const addExhibition = async (exhibition: Exhibition) => {
+    const cityIds = Array.isArray(exhibition.cities)
+      ? exhibition.cities.map((c) => (typeof c === 'string' ? c : c.id))
+      : []
+    const participantIds = Array.isArray(exhibition.participants)
+      ? exhibition.participants.map((p) => (typeof p === 'string' ? p : p.id))
+      : []
     const created = await exhibitionsApi.create({
       ...exhibition,
+      cities: cityIds,
+      participants: participantIds,
       startDate: exhibition.startDate instanceof Date ? exhibition.startDate.toISOString() : (exhibition.startDate as unknown as string),
       endDate: exhibition.endDate instanceof Date ? exhibition.endDate.toISOString() : (exhibition.endDate as unknown as string),
       createdAt: exhibition.createdAt instanceof Date ? exhibition.createdAt.toISOString() : (exhibition.createdAt as unknown as string),
@@ -154,6 +162,12 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     const payload: Record<string, unknown> = { ...updates }
     if (updates.startDate) payload.startDate = updates.startDate instanceof Date ? updates.startDate.toISOString() : updates.startDate
     if (updates.endDate) payload.endDate = updates.endDate instanceof Date ? updates.endDate.toISOString() : updates.endDate
+    if (Array.isArray(updates.cities)) {
+      payload.cities = updates.cities.map((c) => (typeof c === 'string' ? c : c.id))
+    }
+    if (Array.isArray(updates.participants)) {
+      payload.participants = updates.participants.map((p) => (typeof p === 'string' ? p : p.id))
+    }
     const updated = await exhibitionsApi.update(id, payload)
     setExhibitions((prev) => prev.map((e) => (e.id === id ? toExhibition(updated) : e)))
   }

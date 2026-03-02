@@ -5,7 +5,7 @@ import { ProtectedRoute } from '@/components/auth/protected-route'
 import { AdminSidebar } from '@/components/admin/admin-sidebar'
 import { useAdmin } from '@/lib/admin-context'
 import { useAuth } from '@/lib/auth-context'
-import { getImageUrl } from '@/lib/api'
+import { getImageUrl, citiesApi, ApiCity, usersApi, ApiUser } from '@/lib/api'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -26,6 +26,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Checkbox } from '@/components/ui/checkbox'
+import { ChevronDown } from 'lucide-react'
 
 function PublicationsContent() {
   const { exhibitions, news, updateExhibition, updateExhibitionFormData, deleteExhibition, deleteNews, updateNews, updateNewsFormData, addExhibition, addExhibitionFormData, addNews, addNewsFormData, isLoading } = useAdmin()
@@ -41,8 +44,10 @@ function PublicationsContent() {
   const [saving, setSaving] = useState(false)
   const [togglingStatusExhibitionId, setTogglingStatusExhibitionId] = useState<string | null>(null)
   const [togglingStatusNewsId, setTogglingStatusNewsId] = useState<string | null>(null)
-  const [cityInput, setCityInput] = useState('')
-  const [recentCities, setRecentCities] = useState<string[]>([])
+  const [citiesList, setCitiesList] = useState<ApiCity[]>([])
+  const [citiesListLoading, setCitiesListLoading] = useState(false)
+  const [exhibitorsList, setExhibitorsList] = useState<ApiUser[]>([])
+  const [exhibitorsListLoading, setExhibitorsListLoading] = useState(false)
   const MAX_FILE_MB = 10
 
   const handleToggleExhibitionStatus = async (id: string, currentStatus: string) => {
@@ -84,29 +89,23 @@ function PublicationsContent() {
     n.title.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
-  const EXHIBITION_RECENT_CITIES_KEY = 'exhibition_recent_cities'
-  const getRecentCities = (): string[] => {
-    if (typeof window === 'undefined') return []
-    try {
-      const raw = localStorage.getItem(EXHIBITION_RECENT_CITIES_KEY)
-      return raw ? JSON.parse(raw) : []
-    } catch {
-      return []
+  useEffect(() => {
+    if (modalOpen && modalType === 'exhibition') {
+      if (citiesList.length === 0) {
+        setCitiesListLoading(true)
+        citiesApi.list().then(setCitiesList).catch(() => setCitiesList([])).finally(() => setCitiesListLoading(false))
+      }
+      if (exhibitorsList.length === 0) {
+        setExhibitorsListLoading(true)
+        usersApi.list({ role: 'exhibitor' }).then(setExhibitorsList).catch(() => setExhibitorsList([])).finally(() => setExhibitorsListLoading(false))
+      }
     }
-  }
-  const saveRecentCities = (cities: string[]) => {
-    if (typeof window === 'undefined' || !cities.length) return
-    const prev = getRecentCities()
-    const merged = [...new Set([...cities, ...prev])].slice(0, 20)
-    localStorage.setItem(EXHIBITION_RECENT_CITIES_KEY, JSON.stringify(merged))
-  }
+  }, [modalOpen, modalType])
 
   const handleCreateContent = (type: 'news' | 'exhibition') => {
     setModalType(type)
     setEditingItem(null)
-    setFormData(type === 'exhibition' ? { cities: [] } : {})
-    setCityInput('')
-    setRecentCities(type === 'exhibition' ? getRecentCities() : [])
+    setFormData(type === 'exhibition' ? { cities: [], participants: [] } : {})
     setPendingImageFile(null)
     setUploadError(null)
     setModalOpen(true)
@@ -115,27 +114,32 @@ function PublicationsContent() {
   const handleEditContent = (item: any, type: 'news' | 'exhibition') => {
     setModalType(type)
     setEditingItem(item)
-    setFormData({ ...item, cities: item.cities ?? [] })
-    setCityInput('')
-    setRecentCities(type === 'exhibition' ? getRecentCities() : [])
+    const cityIds = (item.cities ?? []).map((c: { id: string; name: string } | string) => typeof c === 'string' ? c : c.id)
+    const participantIds = (item.participants ?? []).map((p: { id: string } | string) => typeof p === 'string' ? p : p.id)
+    setFormData({ ...item, cities: cityIds, participants: participantIds })
     setPendingImageFile(null)
     setUploadError(null)
     setModalOpen(true)
   }
 
-  const addCity = (city: string) => {
-    const trimmed = city.trim()
-    if (!trimmed) return
+  const toggleCity = (cityId: string) => {
     const list = formData.cities ?? []
-    if (list.includes(trimmed)) return
-    setFormData({ ...formData, cities: [...list, trimmed] })
-    setCityInput('')
+    const next = list.includes(cityId) ? list.filter((id) => id !== cityId) : [...list, cityId]
+    setFormData({ ...formData, cities: next })
   }
 
-  const removeCity = (index: number) => {
-    const list = [...(formData.cities ?? [])]
-    list.splice(index, 1)
-    setFormData({ ...formData, cities: list })
+  const removeCity = (cityId: string) => {
+    setFormData({ ...formData, cities: (formData.cities ?? []).filter((id) => id !== cityId) })
+  }
+
+  const toggleParticipant = (userId: string) => {
+    const list = formData.participants ?? []
+    const next = list.includes(userId) ? list.filter((id) => id !== userId) : [...list, userId]
+    setFormData({ ...formData, participants: next })
+  }
+
+  const removeParticipant = (userId: string) => {
+    setFormData({ ...formData, participants: (formData.participants ?? []).filter((id) => id !== userId) })
   }
 
   const handleSaveContent = async () => {
@@ -189,8 +193,8 @@ function PublicationsContent() {
         fd.append('title', formData.title)
         if (modalType === 'exhibition') {
           fd.append('description', formData.description ?? '')
-          fd.append('location', formData.location ?? '')
           fd.append('cities', JSON.stringify(formData.cities ?? []))
+          fd.append('participants', JSON.stringify(formData.participants ?? []))
           const start = formData.startDate ? (formData.startDate instanceof Date ? formData.startDate : new Date(formData.startDate)) : new Date()
           const end = formData.endDate ? (formData.endDate instanceof Date ? formData.endDate : new Date(formData.endDate)) : new Date()
           fd.append('startDate', start.toISOString())
@@ -209,20 +213,17 @@ function PublicationsContent() {
         if (editingItem) {
           if (modalType === 'exhibition') {
             await updateExhibitionFormData(editingItem.id, fd)
-            saveRecentCities(formData.cities ?? [])
           } else await updateNewsFormData(editingItem.id, fd)
         } else {
           if (modalType === 'exhibition') {
             await addExhibitionFormData(fd)
-            saveRecentCities(formData.cities ?? [])
           } else await addNewsFormData(fd)
         }
       } else {
         const dataToSave = { ...formData }
         if (editingItem) {
           if (modalType === 'exhibition') {
-            await updateExhibition(editingItem.id, dataToSave)
-            saveRecentCities(dataToSave.cities ?? [])
+            await updateExhibition(editingItem.id, { ...dataToSave, cities: dataToSave.cities ?? [], participants: dataToSave.participants ?? [] })
           } else {
             const newsPayload = {
               title: dataToSave.title,
@@ -242,8 +243,8 @@ function PublicationsContent() {
               description: dataToSave.description ?? '',
               startDate: dataToSave.startDate ?? new Date(),
               endDate: dataToSave.endDate ?? new Date(),
-              location: dataToSave.location ?? '',
               cities: dataToSave.cities ?? [],
+              participants: dataToSave.participants ?? [],
               image: dataToSave.image,
               status: (dataToSave.status as 'draft' | 'published') ?? 'draft',
               participantCount: 0,
@@ -253,7 +254,6 @@ function PublicationsContent() {
               updatedAt: new Date(),
             }
             await addExhibition(newExhibition)
-            saveRecentCities(dataToSave.cities ?? [])
           } else {
             const newNews = {
               id: `news-${Date.now()}`,
@@ -557,46 +557,84 @@ function PublicationsContent() {
                       />
                     </div>
                     <div>
-                      <label className="text-sm font-medium">Место проведения</label>
-                      <Input
-                        value={formData.location || ''}
-                        onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                        placeholder="Например: Москва, ВДНХ"
-                      />
+                      <label className="text-sm font-medium">Города</label>
+                      <p className="text-xs text-muted-foreground mt-0.5 mb-1">Выберите города из справочника (множественный выбор)</p>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button variant="outline" className="w-full justify-between font-normal" disabled={citiesListLoading}>
+                            {citiesListLoading ? 'Загрузка...' : (formData.cities ?? []).length ? `Выбрано: ${(formData.cities ?? []).length}` : 'Выберите города'}
+                            <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-full min-w-[var(--radix-popover-trigger-width)] max-h-60 overflow-y-auto p-2" align="start">
+                          {citiesList.length === 0 ? (
+                            <p className="text-sm text-muted-foreground py-2">Нет городов. Добавьте города в разделе Справочники → Города.</p>
+                          ) : (
+                            <div className="space-y-1">
+                              {citiesList.map((city) => (
+                                <label key={city.id} className="flex items-center gap-2 py-1.5 px-2 rounded-md hover:bg-accent cursor-pointer">
+                                  <Checkbox
+                                    checked={(formData.cities ?? []).includes(city.id)}
+                                    onCheckedChange={() => toggleCity(city.id)}
+                                  />
+                                  <span className="text-sm">{city.name}</span>
+                                </label>
+                              ))}
+                            </div>
+                          )}
+                        </PopoverContent>
+                      </Popover>
+                      <div className="flex flex-wrap gap-1.5 mt-2">
+                        {(formData.cities ?? []).map((id: string) => {
+                          const city = citiesList.find((c) => c.id === id)
+                          const name = city?.name ?? id
+                          return (
+                            <Badge key={id} variant="secondary" className="cursor-pointer" onClick={() => removeCity(id)}>
+                              {name} ×
+                            </Badge>
+                          )
+                        })}
+                      </div>
                     </div>
                     <div>
-                      <label className="text-sm font-medium">Города</label>
-                      <div className="mt-1 flex flex-wrap gap-2 items-center">
-                        <Input
-                          value={cityInput}
-                          onChange={(e) => setCityInput(e.target.value)}
-                          onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addCity(cityInput))}
-                          placeholder="Город"
-                          className="w-36"
-                        />
-                        <Button type="button" variant="outline" size="sm" onClick={() => addCity(cityInput)}>
-                          Добавить
-                        </Button>
-                      </div>
+                      <label className="text-sm font-medium">Участники (университеты)</label>
+                      <p className="text-xs text-muted-foreground mt-0.5 mb-1">Выберите exhibitor из списка (множественный выбор)</p>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button variant="outline" className="w-full justify-between font-normal" disabled={exhibitorsListLoading}>
+                            {exhibitorsListLoading ? 'Загрузка...' : (formData.participants ?? []).length ? `Выбрано: ${(formData.participants ?? []).length}` : 'Выберите участников'}
+                            <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-full min-w-[var(--radix-popover-trigger-width)] max-h-60 overflow-y-auto p-2" align="start">
+                          {exhibitorsList.length === 0 ? (
+                            <p className="text-sm text-muted-foreground py-2">Нет университетов с ролью exhibitor. Создайте пользователей с ролью exhibitor в разделе Пользователи.</p>
+                          ) : (
+                            <div className="space-y-1">
+                              {exhibitorsList.map((exh) => (
+                                <label key={exh.id} className="flex items-center gap-2 py-1.5 px-2 rounded-md hover:bg-accent cursor-pointer">
+                                  <Checkbox
+                                    checked={(formData.participants ?? []).includes(exh.id)}
+                                    onCheckedChange={() => toggleParticipant(exh.id)}
+                                  />
+                                  <span className="text-sm">{exh.name}</span>
+                                </label>
+                              ))}
+                            </div>
+                          )}
+                        </PopoverContent>
+                      </Popover>
                       <div className="flex flex-wrap gap-1.5 mt-2">
-                        {(formData.cities ?? []).map((c: string, i: number) => (
-                          <Badge key={`${c}-${i}`} variant="secondary" className="cursor-pointer" onClick={() => removeCity(i)}>
-                            {c} ×
-                          </Badge>
-                        ))}
+                        {(formData.participants ?? []).map((id: string) => {
+                          const exh = exhibitorsList.find((e) => e.id === id)
+                          const name = exh?.name ?? id
+                          return (
+                            <Badge key={id} variant="secondary" className="cursor-pointer" onClick={() => removeParticipant(id)}>
+                              {name} ×
+                            </Badge>
+                          )
+                        })}
                       </div>
-                      {recentCities.length > 0 && (
-                        <div className="mt-2">
-                          <span className="text-xs text-muted-foreground mr-2">Недавние:</span>
-                          <div className="flex flex-wrap gap-1.5 mt-1">
-                            {recentCities.filter((c) => !(formData.cities ?? []).includes(c)).map((c) => (
-                              <Badge key={c} variant="outline" className="cursor-pointer hover:bg-muted" onClick={() => addCity(c)}>
-                                {c}
-                              </Badge>
-                            ))}
-                          </div>
-                        </div>
-                      )}
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>

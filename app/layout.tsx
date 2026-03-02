@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { AuthProvider } from '@/lib/auth-context'
 import { AdminProvider } from '@/lib/admin-context'
+import { LocaleProvider } from '@/lib/i18n'
 import './globals.css'
 
 const geist = Geist({
@@ -51,11 +52,13 @@ export default function RootLayout({
   return (
     <html lang="ru" className={`${geist.variable} ${geistMono.variable}`}>
       <body className="font-sans antialiased">
-        <AuthProvider>
-          <AdminProvider>
-            {children}
-          </AdminProvider>
-        </AuthProvider>
+        <LocaleProvider>
+          <AuthProvider>
+            <AdminProvider>
+              {children}
+            </AdminProvider>
+          </AuthProvider>
+        </LocaleProvider>
         <Analytics />
       </body>
     </html>

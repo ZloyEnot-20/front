@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import Link from 'next/link'
 import { ArrowLeft, Calendar } from 'lucide-react'
 import { OptimizedImage } from '@/components/ui/optimized-image'
+import { NewsDetailSkeleton } from '@/components/news/news-detail-skeleton'
 
 interface NewsPageProps {
   params: Promise<{ id: string }>
@@ -16,9 +17,13 @@ interface NewsPageProps {
 
 export default function NewsDetailPage({ params }: NewsPageProps) {
   const { id } = use(params)
-  const { news: newsList } = useAdmin()
+  const { news: newsList, isLoading } = useAdmin()
   const news = newsList.find((n) => n.id === id)
   const otherNews = newsList.filter((n) => n.id !== id && n.status === 'published').slice(0, 3)
+
+  if (isLoading) {
+    return <NewsDetailSkeleton />
+  }
 
   if (!news) {
     return (

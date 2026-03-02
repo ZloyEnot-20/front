@@ -1,6 +1,17 @@
 // Роли пользователей
 export type UserRole = 'visitor' | 'exhibitor' | 'participant' | 'staff' | 'manager' | 'content_manager' | 'admin'
 
+// Информация об университете-участнике (exhibitor) для отображения на выставке
+export interface ExhibitorInfo {
+  id: string
+  name: string
+  avatar?: string
+  exhibitorDescription?: string
+  exhibitorAddress?: string
+  exhibitorWebsite?: string
+  exhibitorPhotos?: string[]
+}
+
 // Пользователь
 export interface User {
   id: string
@@ -10,12 +21,24 @@ export interface User {
   status?: 'active' | 'blocked' | 'pending'
   avatar?: string
   phone?: string
+  exhibitorDescription?: string
+  exhibitorAddress?: string
+  exhibitorWebsite?: string
+  exhibitorPhotos?: string[]
   createdAt: Date
   updatedAt: Date
 }
 
 // Статус выставки
 export type ExhibitionStatus = 'draft' | 'published' | 'archived' | 'cancelled'
+
+// Город (справочник)
+export interface City {
+  id: string
+  name: string
+  createdAt?: Date
+  updatedAt?: Date
+}
 
 // Выставка
 export interface Exhibition {
@@ -24,8 +47,12 @@ export interface Exhibition {
   description: string
   startDate: Date
   endDate: Date
-  location: string
-  cities?: string[]
+  /** @deprecated не используется, вместо него cities */
+  location?: string
+  /** Города из справочника (множественный выбор) */
+  cities?: { id: string; name: string }[]
+  /** Университеты-участники (exhibitor) */
+  participants?: ExhibitorInfo[]
   image?: string
   status: ExhibitionStatus
   participantCount: number

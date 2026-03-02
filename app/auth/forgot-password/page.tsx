@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useLocale } from '@/lib/i18n'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -11,6 +12,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'
 
 export default function ForgotPasswordPage() {
+  const { t } = useLocale()
   const [email, setEmail] = useState('')
   const [sent, setSent] = useState(false)
   const [error, setError] = useState('')
@@ -27,10 +29,10 @@ export default function ForgotPasswordPage() {
         body: JSON.stringify({ email }),
       })
       const data = await res.json().catch(() => ({}))
-      if (!res.ok) throw new Error(data.error ?? 'Ошибка запроса')
+      if (!res.ok) throw new Error(data.error ?? t('requestError'))
       setSent(true)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Ошибка восстановления доступа')
+      setError(err instanceof Error ? err.message : t('recoveryError'))
     } finally {
       setLoading(false)
     }
@@ -41,14 +43,12 @@ export default function ForgotPasswordPage() {
       <div className="min-h-screen flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader>
-            <CardTitle>Проверьте почту</CardTitle>
-            <CardDescription>
-              Если пользователь с таким email зарегистрирован, на почту будет отправлено письмо с данными для входа.
-            </CardDescription>
+            <CardTitle>{t('checkEmail')}</CardTitle>
+            <CardDescription>{t('checkEmailDesc')}</CardDescription>
           </CardHeader>
           <CardContent>
             <Button asChild className="w-full">
-              <Link href="/auth/login">Вернуться ко входу</Link>
+              <Link href="/auth/login">{t('backToLogin')}</Link>
             </Button>
           </CardContent>
         </Card>
@@ -60,8 +60,8 @@ export default function ForgotPasswordPage() {
     <div className="min-h-screen flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Восстановление доступа</CardTitle>
-          <CardDescription>Введите email — на почту будут отправлены данные для входа</CardDescription>
+          <CardTitle>{t('forgotPasswordTitle')}</CardTitle>
+          <CardDescription>{t('forgotPasswordDescription')}</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -71,7 +71,7 @@ export default function ForgotPasswordPage() {
               </Alert>
             )}
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t('email')}</Label>
               <Input
                 id="email"
                 type="email"
@@ -83,12 +83,12 @@ export default function ForgotPasswordPage() {
               />
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Отправка...' : 'Отправить данные для входа'}
+              {loading ? t('sendingReset') : t('sendResetLink')}
             </Button>
           </form>
           <div className="mt-4 text-center text-sm text-muted-foreground">
             <Link href="/auth/login" className="text-primary hover:underline">
-              Вернуться ко входу
+              {t('backToLogin')}
             </Link>
           </div>
         </CardContent>

@@ -5,6 +5,7 @@ import { Exhibition } from '@/lib/types'
 import { getImageUrl } from '@/lib/api'
 import { useAuth } from '@/lib/auth-context'
 import { useAdmin } from '@/lib/admin-context'
+import { useLocale } from '@/lib/i18n'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { RegistrationModal } from './registration-modal'
@@ -18,25 +19,27 @@ interface ExhibitionCardProps {
 }
 
 export function ExhibitionCard({ exhibition }: ExhibitionCardProps) {
+  const { t, lang } = useLocale()
   const [registrationOpen, setRegistrationOpen] = useState(false)
   const { user } = useAuth()
   const { getRegistrationsByUser } = useAdmin()
   const userRegistrations = user ? getRegistrationsByUser(user.id) : []
   const isRegistered = userRegistrations.some((r) => r.exhibitionId === exhibition.id && r.status === 'registered')
-  const startDate = new Date(exhibition.startDate).toLocaleDateString('ru-RU', {
+  const locale = lang === 'uz' ? 'uz-UZ' : lang === 'en' ? 'en-US' : 'ru-RU'
+  const startDate = new Date(exhibition.startDate).toLocaleDateString(locale, {
     month: 'short',
     day: 'numeric',
   })
-  const endDate = new Date(exhibition.endDate).toLocaleDateString('ru-RU', {
+  const endDate = new Date(exhibition.endDate).toLocaleDateString(locale, {
     month: 'short',
     day: 'numeric',
   })
 
   const statusLabel = {
-    draft: 'Черновик',
-    published: 'Опубликовано',
-    archived: 'Архив',
-    cancelled: 'Отменено',
+    draft: t('draft'),
+    published: t('published'),
+    archived: t('archived'),
+    cancelled: t('cancelled'),
   }
 
   return (
@@ -68,28 +71,28 @@ export function ExhibitionCard({ exhibition }: ExhibitionCardProps) {
           </div>
           <div className="flex items-center gap-2 text-muted-foreground">
             <MapPin className="w-4 h-4" />
-            {exhibition.location}
+            {exhibition.cities?.length ? exhibition.cities.map((c) => c.name).join(', ') : (exhibition as { location?: string }).location ?? ''}
           </div>
           <div className="flex items-center gap-2 text-muted-foreground">
             <Users className="w-4 h-4" />
-            {exhibition.registrations} зарегистрировано
+            {exhibition.registrations} {t('registeredCount')}
           </div>
         </div>
 
         <div className="flex flex-col gap-2">
           <Button asChild variant="outline" className="flex-1 bg-transparent">
-            <Link href={`/exhibitions/${exhibition.id}`}>Подробнее</Link>
+            <Link href={`/exhibitions/${exhibition.id}`}>{t('moreDetails')}</Link>
           </Button>
           {isRegistered ? (
             <div className="flex flex-col items-center justify-center gap-2 py-1 flex-1">
               <div className="flex items-center gap-2 text-sm font-medium text-green-600">
                 <CheckCircle2 className="w-4 h-4" />
-                <p className="text-sm font-medium text-green-600">Вы зарегистрированы</p>
+                <p className="text-sm font-medium text-green-600">{t('youAreRegistered')}</p>
               </div>
             </div>
           ) : (
             <Button className="flex-1" onClick={() => setRegistrationOpen(true)}>
-              Зарегистрироваться
+              {t('registerToExhibition')}
             </Button>
           )}
         </div>
@@ -99,7 +102,7 @@ export function ExhibitionCard({ exhibition }: ExhibitionCardProps) {
           onOpenChange={setRegistrationOpen}
           exhibitionId={exhibition.id}
           exhibitionTitle={exhibition.title}
-          cities={exhibition.cities}
+          cities={exhibition.cities?.map((c) => c.name) ?? []}
         />
       </CardContent>
     </Card>

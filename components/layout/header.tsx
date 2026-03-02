@@ -1,6 +1,7 @@
 'use client'
 
 import { useAuth } from '@/lib/auth-context'
+import { useLocale } from '@/lib/i18n'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -15,6 +16,7 @@ import { useRouter } from 'next/navigation'
 
 export function Header() {
   const { user, logout } = useAuth()
+  const { t, lang, setLang } = useLocale()
   const router = useRouter()
 
   const handleLogout = () => {
@@ -29,26 +31,38 @@ export function Header() {
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold">
             M
           </div>
-          <span className="hidden sm:inline font-bold text-lg">EDU Expo</span>
+          <span className="hidden sm:inline font-bold text-lg">{t('appName')}</span>
         </Link>
 
-        <nav className="hidden md:flex items-center gap-8">
+        <nav className="hidden md:flex items-center gap-6">
+          <div className="flex gap-1 text-xs text-muted-foreground">
+            {(['uz', 'ru', 'en'] as const).map((l) => (
+              <button
+                key={l}
+                type="button"
+                onClick={() => setLang(l)}
+                className={`px-1.5 py-0.5 rounded ${lang === l ? 'bg-primary/20 text-primary font-medium' : 'hover:text-foreground'}`}
+              >
+                {l.toUpperCase()}
+              </button>
+            ))}
+          </div>
           <Link href="/" className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors">
-            Выставки
+            {t('exhibitions')}
           </Link>
           <Link href="/" className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors">
-            Новости
+            {t('news')}
           </Link>
           {user && (
             <>
               {user.role === 'admin' && (
                 <Link href="/admin" className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors">
-                  Управление
+                  {t('management')}
                 </Link>
               )}
               {user.role === 'content_manager' && (
                 <Link href="/admin/publications" className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors">
-                  Мои контенты
+                  {t('myContent')}
                 </Link>
               )}
             </>
@@ -70,45 +84,45 @@ export function Header() {
                 <DropdownMenuLabel>{user.email}</DropdownMenuLabel>
                 <DropdownMenuLabel className="text-xs font-normal text-muted-foreground capitalize">
                   {user.role === 'content_manager'
-                    ? 'Менеджер контента'
+                    ? t('contentManager')
                     : user.role === 'participant'
-                      ? 'Участник'
+                      ? t('participant')
                       : user.role === 'admin'
-                        ? 'Администратор'
-                        : 'Посетитель'}
+                        ? t('admin')
+                        : t('visitor')}
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link href="/profile">Профиль</Link>
+                  <Link href="/profile">{t('profile')}</Link>
                 </DropdownMenuItem>
                 {user.role === 'admin' && (
                   <DropdownMenuItem asChild>
-                    <Link href="/admin">Админ панель</Link>
+                    <Link href="/admin">{t('adminPanel')}</Link>
                   </DropdownMenuItem>
                 )}
                 {user.role === 'content_manager' && (
                   <DropdownMenuItem asChild>
-                    <Link href="/admin/publications">Мои контенты</Link>
+                    <Link href="/admin/publications">{t('myContent')}</Link>
                   </DropdownMenuItem>
                 )}
                 {user.role === 'participant' && (
                   <DropdownMenuItem asChild>
-                    <Link href="/participant">Мой кабинет</Link>
+                    <Link href="/participant">{t('myCabinet')}</Link>
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout} className="text-destructive">
-                  Выход
+                  {t('logout')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
             <>
               <Button variant="ghost" asChild>
-                <Link href="/auth/login">Вход</Link>
+                <Link href="/auth/login">{t('login')}</Link>
               </Button>
               <Button asChild>
-                <Link href="/auth/signup">Регистрация</Link>
+                <Link href="/auth/signup">{t('signup')}</Link>
               </Button>
             </>
           )}

@@ -3,6 +3,7 @@
 import { ReactNode, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
+import { useLocale } from '@/lib/i18n'
 import { UserRole } from '@/lib/types'
 
 interface ProtectedRouteProps {
@@ -12,6 +13,7 @@ interface ProtectedRouteProps {
 
 export function ProtectedRoute({ children, requiredRoles }: ProtectedRouteProps) {
   const router = useRouter()
+  const { t } = useLocale()
   const { user, isLoading } = useAuth()
 
   useEffect(() => {
@@ -26,7 +28,7 @@ export function ProtectedRoute({ children, requiredRoles }: ProtectedRouteProps)
   }, [user, isLoading, requiredRoles, router])
 
   if (isLoading) {
-    return <div className="flex items-center justify-center min-h-screen">Загрузка...</div>
+    return <div className="flex items-center justify-center min-h-screen">{t('loading')}</div>
   }
 
   if (!user) {

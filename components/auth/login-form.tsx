@@ -5,6 +5,7 @@ import React from "react"
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
+import { useLocale } from '@/lib/i18n'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -13,6 +14,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 
 export function LoginForm() {
   const router = useRouter()
+  const { t } = useLocale()
   const { login, isLoading } = useAuth()
   const [error, setError] = useState('')
   const [formData, setFormData] = useState({
@@ -35,15 +37,15 @@ export function LoginForm() {
       await login(formData.email, formData.password)
       router.push('/')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Ошибка входа')
+      setError(err instanceof Error ? err.message : t('loginError'))
     }
   }
 
   return (
     <Card className="w-full max-w-md">
       <CardHeader className="space-y-2">
-        <CardTitle>Вход в систему</CardTitle>
-        <CardDescription>Введите свои учетные данные для входа</CardDescription>
+        <CardTitle>{t('loginTitle')}</CardTitle>
+        <CardDescription>{t('loginDescription')}</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -54,7 +56,7 @@ export function LoginForm() {
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{t('email')}</Label>
             <Input
               id="email"
               name="email"
@@ -68,7 +70,7 @@ export function LoginForm() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password">Пароль</Label>
+            <Label htmlFor="password">{t('password')}</Label>
             <Input
               id="password"
               name="password"
@@ -83,18 +85,18 @@ export function LoginForm() {
 
           <div className="flex justify-end">
             <a href="/auth/forgot-password" className="text-sm text-primary hover:underline">
-              Забыли пароль?
+              {t('forgotPassword')}
             </a>
           </div>
           <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? 'Вход...' : 'Войти'}
+            {isLoading ? t('loggingIn') : t('loginButton')}
           </Button>
         </form>
 
         <div className="mt-4 text-center text-sm text-muted-foreground">
-          Нет учетной записи?{' '}
+          {t('noAccount')}{' '}
           <a href="/auth/signup" className="text-primary hover:underline">
-            Зарегистрируйтесь
+            {t('registerLink')}
           </a>
         </div>
       </CardContent>

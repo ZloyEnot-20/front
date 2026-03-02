@@ -10,8 +10,16 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
-import { ArrowLeft, MapPin, Calendar, Users } from 'lucide-react'
+import { ArrowLeft, MapPin, Calendar, Users, ExternalLink, Building2 } from 'lucide-react'
 import { OptimizedImage } from '@/components/ui/optimized-image'
+import { ExhibitionDetailSkeleton } from '@/components/exhibitions/exhibition-detail-skeleton'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import type { ExhibitorInfo } from '@/lib/types'
 
 interface ExhibitionPageProps {
   params: Promise<{ id: string }>
@@ -20,12 +28,17 @@ interface ExhibitionPageProps {
 export default function ExhibitionPage({ params }: ExhibitionPageProps) {
   const { id } = use(params)
   const [registrationOpen, setRegistrationOpen] = useState(false)
+  const [exhibitorModal, setExhibitorModal] = useState<ExhibitorInfo | null>(null)
   const { user } = useAuth()
-  const { exhibitions, getRegistrationsByUser } = useAdmin()
+  const { exhibitions, getRegistrationsByUser, isLoading } = useAdmin()
   const exhibition = exhibitions.find((e) => e.id === id)
   const userRegistrations = user ? getRegistrationsByUser(user.id) : []
   const isRegistered = userRegistrations.some((r) => r.exhibitionId === id && r.status === 'registered')
-  const participants: { id: string; exhibitionId: string; userId: string; companyName: string; boothNumber?: string; status: string }[] = []
+  const participants = exhibition?.participants ?? []
+
+  if (isLoading) {
+    return <ExhibitionDetailSkeleton />
+  }
 
   if (!exhibition) {
     return (
@@ -126,13 +139,15 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
                     </div>
                   </div>
 
-                  <div className="flex items-start gap-4">
-                    <MapPin className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="font-medium">Место проведения</p>
-                      <p className="text-sm text-muted-foreground">{exhibition.location}</p>
+                  {exhibition.cities?.length > 0 && (
+                    <div className="flex items-start gap-4">
+                      <MapPin className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+                      <div>
+                        <p className="font-medium">Города</p>
+                        <p className="text-sm text-muted-foreground">{exhibition.cities.map((c) => c.name).join(', ')}</p>
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   <div className="flex items-start gap-4">
                     <Users className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
@@ -152,26 +167,38 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
                 </CardContent>
               </Card>
 
-              {/* Participants */}
+              {/* Participants (университеты) */}
               {participants.length > 0 && (
                 <Card>
                   <CardHeader>
-                    <CardTitle>Компании-участники</CardTitle>
+                    <CardTitle>Участники</CardTitle>
+                    <p className="text-sm text-muted-foreground">Университеты-экспоненты выставки</p>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-4">
-                      {participants.map((participant) => (
-                        <div key={participant.id} className="flex items-center justify-between p-4 border border-border/40 rounded-lg">
-                          <div>
-                            <p className="font-medium">{participant.companyName}</p>
-                            {participant.boothNumber && (
-                              <p className="text-sm text-muted-foreground">Стенд: {participant.boothNumber}</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {participants.map((p) => (
+                        <button
+                          key={p.id}
+                          type="button"
+                          onClick={() => setExhibitorModal(p)}
+                          className="flex items-center gap-4 p-4 rounded-lg border border-border/40 hover:border-primary/50 hover:bg-muted/30 transition-colors text-left"
+                        >
+                          <div className="h-12 w-12 rounded-lg bg-muted overflow-hidden flex-shrink-0">
+                            {p.avatar ? (
+                              <img src={getImageUrl(p.avatar)} alt="" className="h-full w-full object-cover" />
+                            ) : (
+                              <div className="h-full w-full flex items-center justify-center">
+                                <Building2 className="w-6 h-6 text-muted-foreground" />
+                              </div>
                             )}
                           </div>
-                          <Badge variant={participant.status === 'confirmed' ? 'default' : 'outline'}>
-                            {participant.status === 'confirmed' ? 'Подтверждено' : 'Зарегистрировано'}
-                          </Badge>
-                        </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="font-medium truncate">{p.name}</p>
+                            {p.exhibitorDescription && (
+                              <p className="text-sm text-muted-foreground line-clamp-2 mt-0.5">{p.exhibitorDescription}</p>
+                            )}
+                          </div>
+                        </button>
                       ))}
                     </div>
                   </CardContent>
@@ -231,8 +258,66 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
         onOpenChange={setRegistrationOpen}
         exhibitionId={exhibition.id}
         exhibitionTitle={exhibition.title}
-        cities={exhibition.cities}
+        cities={exhibition.cities?.map((c) => c.name) ?? []}
       />
+
+      {/* Exhibitor detail modal */}
+      <Dialog open={!!exhibitorModal} onOpenChange={(open) => !open && setExhibitorModal(null)}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          {exhibitorModal && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-3">
+                  <div className="h-12 w-12 rounded-lg bg-muted overflow-hidden flex-shrink-0">
+                    {exhibitorModal.avatar ? (
+                      <img src={getImageUrl(exhibitorModal.avatar)} alt="" className="h-full w-full object-cover" />
+                    ) : (
+                      <div className="h-full w-full flex items-center justify-center">
+                        <Building2 className="w-6 h-6 text-muted-foreground" />
+                      </div>
+                    )}
+                  </div>
+                  {exhibitorModal.name}
+                </DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 pt-2">
+                {exhibitorModal.exhibitorDescription && (
+                  <p className="text-sm text-foreground/80 leading-relaxed">{exhibitorModal.exhibitorDescription}</p>
+                )}
+                {exhibitorModal.exhibitorAddress && (
+                  <div className="flex items-start gap-2">
+                    <MapPin className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                    <p className="text-sm text-muted-foreground">{exhibitorModal.exhibitorAddress}</p>
+                  </div>
+                )}
+                {exhibitorModal.exhibitorWebsite && (
+                  <a
+                    href={exhibitorModal.exhibitorWebsite.startsWith('http') ? exhibitorModal.exhibitorWebsite : `https://${exhibitorModal.exhibitorWebsite}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-sm text-primary hover:underline"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    {exhibitorModal.exhibitorWebsite}
+                  </a>
+                )}
+                {exhibitorModal.exhibitorPhotos && exhibitorModal.exhibitorPhotos.length > 0 && (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    {exhibitorModal.exhibitorPhotos.map((url, i) => (
+                      <img
+                        key={i}
+                        src={getImageUrl(url) || url}
+                        alt=""
+                        className="rounded-lg object-cover aspect-square w-full"
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Footer */}
       <footer className="border-t border-border/40 py-12 bg-muted/40 mt-12">
