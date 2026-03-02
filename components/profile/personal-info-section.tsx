@@ -74,7 +74,7 @@ export function PersonalInfoSection({ user }: PersonalInfoSectionProps) {
             <Button
               variant="default"
               size="sm"
-              className="rounded-full gap-2"
+              className="rounded-md gap-2"
               onClick={() => setIsEditing(true)}
             >
               <Pencil className="w-4 h-4" />

@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Plus, Loader2, Trash2, LayoutGrid, Pencil, ExternalLink } from 'lucide-react'
+import { Plus, Loader2, Trash2, LayoutGrid, Pencil, ExternalLink, MoreVertical } from 'lucide-react'
 import Link from 'next/link'
 import { PublicationCardSkeleton } from '@/components/admin/publication-card-skeleton'
 import {
@@ -358,14 +358,14 @@ function PublicationsContent() {
                         )}
                       </Link>
                       <div className="absolute inset-0 bg-gradient-to-t from-black/85 from-30% via-black/20 to-transparent pointer-events-none z-10" />
-                      <div className="absolute inset-0 z-20 flex flex-col justify-end p-3">
+                      <div className="absolute inset-0 z-20 flex flex-col justify-end p-3 pointer-events-none">
                         <h3 className="font-bold text-white text-sm drop-shadow-md line-clamp-1">{exhibition.title}</h3>
                         <p className="text-white/90 text-xs mt-0.5 line-clamp-1">{exhibition.description}</p>
                         <div className="flex gap-3 mt-1 text-white/80 text-[10px]">
                           <span>{new Date(exhibition.startDate).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })}</span>
                           <span>{exhibition.registrations} чел.</span>
                         </div>
-                        <div className="flex items-center justify-between gap-2 mt-2 pt-2 border-t border-white/20">
+                        <div className="flex items-center justify-between gap-2 mt-2 pt-2 border-t border-white/20 pointer-events-auto">
                           {togglingStatusExhibitionId === exhibition.id ? (
                             <Button variant="default" size="sm" className="flex-1 h-8 text-xs rounded-md shadow-lg" disabled>
                               <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" />
@@ -377,20 +377,25 @@ function PublicationsContent() {
                                 variant="default"
                                 size="sm"
                                 className="flex-1 h-8 text-xs rounded-md max-w-[140px] mx-auto shadow-lg"
-                                onClick={(e) => { e.preventDefault(); handleToggleExhibitionStatus(exhibition.id, exhibition.status); }}
+                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleToggleExhibitionStatus(exhibition.id, exhibition.status); }}
                               >
                                 {exhibition.status === 'published' ? 'Снять с публикации' : 'Опубликовать'}
                               </Button>
+                              <Button
+                                variant="default"
+                                size="icon"
+                                className="h-8 w-8 rounded-full shrink-0 shadow-lg"
+                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleEditContent(exhibition, 'exhibition'); }}
+                              >
+                                <Pencil className="w-4 h-4" />
+                              </Button>
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                  <Button variant="default" size="icon" className="h-8 w-8 rounded-full shrink-0 shadow-lg" onClick={(e) => e.preventDefault()}>
-                                    <Pencil className="w-4 h-4" />
+                                  <Button variant="outline" size="icon" className="h-8 w-8 rounded-full shrink-0 bg-white/20 hover:bg-white/30 border-white/30 shadow-lg" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
+                                    <MoreVertical className="w-4 h-4" />
                                   </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
-                                  <DropdownMenuItem onClick={() => handleEditContent(exhibition, 'exhibition')}>
-                                    Редактировать
-                                  </DropdownMenuItem>
                                   <DropdownMenuItem asChild>
                                     <a href={`/exhibitions/${exhibition.id}`} target="_blank" rel="noopener noreferrer">
                                       Просмотр
@@ -456,13 +461,13 @@ function PublicationsContent() {
                         )}
                       </a>
                       <div className="absolute inset-0 bg-gradient-to-t from-black/85 from-30% via-black/20 to-transparent pointer-events-none z-10" />
-                      <div className="absolute inset-0 z-20 flex flex-col justify-end p-3">
+                      <div className="absolute inset-0 z-20 flex flex-col justify-end p-3 pointer-events-none">
                         <h3 className="font-bold text-white text-sm drop-shadow-md line-clamp-1">{news.title}</h3>
                         <p className="text-white/90 text-xs mt-0.5 line-clamp-2">{news.excerpt}</p>
                         <p className="text-white/80 text-[10px] mt-1">
                           {new Date(news.publishedAt).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric' })}
                         </p>
-                        <div className="flex items-center justify-between gap-2 mt-2 pt-2 border-t border-white/20">
+                        <div className="flex items-center justify-between gap-2 mt-2 pt-2 border-t border-white/20 pointer-events-auto">
                           {togglingStatusNewsId === news.id ? (
                             <Button variant="default" size="sm" className="flex-1 h-8 text-xs rounded-md shadow-lg" disabled>
                               <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" />
@@ -474,20 +479,25 @@ function PublicationsContent() {
                                 variant="default"
                                 size="sm"
                                 className="flex-1 h-8 text-xs rounded-md max-w-[140px] mx-auto shadow-lg"
-                                onClick={(e) => { e.preventDefault(); handleToggleNewsStatus(news.id, news.status); }}
+                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleToggleNewsStatus(news.id, news.status); }}
                               >
                                 {news.status === 'published' ? 'Снять с публикации' : 'Опубликовать'}
                               </Button>
+                              <Button
+                                variant="default"
+                                size="icon"
+                                className="h-8 w-8 rounded-full shrink-0 shadow-lg"
+                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleEditContent(news, 'news'); }}
+                              >
+                                <Pencil className="w-4 h-4" />
+                              </Button>
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                  <Button variant="default" size="icon" className="h-8 w-8 rounded-full shrink-0 shadow-lg" onClick={(e) => e.preventDefault()}>
-                                    <Pencil className="w-4 h-4" />
+                                  <Button variant="outline" size="icon" className="h-8 w-8 rounded-full shrink-0 bg-white/20 hover:bg-white/30 border-white/30 shadow-lg" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
+                                    <MoreVertical className="w-4 h-4" />
                                   </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
-                                  <DropdownMenuItem onClick={() => handleEditContent(news, 'news')}>
-                                    Редактировать
-                                  </DropdownMenuItem>
                                   <DropdownMenuItem asChild>
                                     <a href={`/news/${news.id}`} target="_blank" rel="noopener noreferrer">
                                       Просмотр
