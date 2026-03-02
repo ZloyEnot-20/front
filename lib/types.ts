@@ -47,8 +47,6 @@ export interface Exhibition {
   description: string
   startDate: Date
   endDate: Date
-  /** @deprecated не используется, вместо него cities */
-  location?: string
   /** Города из справочника (множественный выбор) */
   cities?: { id: string; name: string }[]
   /** Университеты-участники (exhibitor) */

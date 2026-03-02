@@ -35,18 +35,6 @@ export function Header() {
         </Link>
 
         <nav className="hidden md:flex items-center gap-6">
-          <div className="flex gap-1 text-xs text-muted-foreground">
-            {(['uz', 'ru', 'en'] as const).map((l) => (
-              <button
-                key={l}
-                type="button"
-                onClick={() => setLang(l)}
-                className={`px-1.5 py-0.5 rounded ${lang === l ? 'bg-primary/20 text-primary font-medium' : 'hover:text-foreground'}`}
-              >
-                {l.toUpperCase()}
-              </button>
-            ))}
-          </div>
           <Link href="/" className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors">
             {t('exhibitions')}
           </Link>
@@ -69,7 +57,20 @@ export function Header() {
           )}
         </nav>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3 border-l border-border/60 pl-4">
+          <div className="flex gap-1 text-xs text-muted-foreground">
+            {(['uz', 'ru', 'en'] as const).map((l) => (
+              <button
+                key={l}
+                type="button"
+                onClick={() => setLang(l)}
+                className={`px-1.5 py-0.5 rounded ${lang === l ? 'bg-primary/20 text-primary font-medium' : 'hover:text-foreground'}`}
+              >
+                {l.toUpperCase()}
+              </button>
+            ))}
+          </div>
+          <div className="flex items-center gap-2">
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -126,6 +127,7 @@ export function Header() {
               </Button>
             </>
           )}
+          </div>
         </div>
       </div>
     </header>

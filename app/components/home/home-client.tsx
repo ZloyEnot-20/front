@@ -22,54 +22,8 @@ export function HomeClient() {
 
   return (
     <>
-      {/* Featured News - reserve min-height to reduce CLS */}
-      {isLoading ? (
-        <section className="border-b border-border/40 py-16 md:py-24 min-h-[340px]" aria-busy="true">
-          <div className="container mx-auto px-4">
-            <div className="mb-8">
-              <h2 className="text-3xl font-bold">{t('latestNews')}</h2>
-              <p className="text-muted-foreground mt-2">{t('latestNewsDesc')}</p>
-            </div>
-            <NewsCardSkeleton featured />
-          </div>
-        </section>
-      ) : featuredNews ? (
-        <section className="border-b border-border/40 py-16 md:py-24 min-h-[340px]">
-          <div className="container mx-auto px-4">
-            <div className="mb-8">
-              <h2 className="text-3xl font-bold">{t('latestNews')}</h2>
-              <p className="text-muted-foreground mt-2">{t('latestNewsDesc')}</p>
-            </div>
-            <NewsCard news={featuredNews} featured priority />
-          </div>
-        </section>
-      ) : null}
-
-      {/* Other News - reserve min-height */}
-      {isLoading ? (
-        <section className="border-b border-border/40 py-16 md:py-24 min-h-[380px]">
-          <div className="container mx-auto px-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[1, 2, 3].map((i) => (
-                <NewsCardSkeleton key={i} />
-              ))}
-            </div>
-          </div>
-        </section>
-      ) : otherNews.length > 0 ? (
-        <section className="border-b border-border/40 py-16 md:py-24 min-h-[380px]">
-          <div className="container mx-auto px-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {otherNews.map((news) => (
-                <NewsCard key={news.id} news={news} />
-              ))}
-            </div>
-          </div>
-        </section>
-      ) : null}
-
-      {/* Exhibitions - reserve min-height to reduce CLS */}
-      <section className="py-16 md:py-24 min-h-[520px]" id="exhibitions">
+      {/* Exhibitions — выше, акцент на выставках */}
+      <section className="border-b border-border/40 py-16 md:py-24 min-h-[520px]" id="exhibitions">
         <div className="container mx-auto px-4">
           <div className="mb-12">
             <h2 className="text-3xl font-bold mb-2">{t('exhibitions')}</h2>
@@ -110,6 +64,51 @@ export function HomeClient() {
           )}
         </div>
       </section>
+
+      {/* Новости — ниже выставок */}
+      {isLoading ? (
+        <section className="border-b border-border/40 py-16 md:py-24 min-h-[340px]" aria-busy="true">
+          <div className="container mx-auto px-4">
+            <div className="mb-8">
+              <h2 className="text-3xl font-bold">{t('latestNews')}</h2>
+              <p className="text-muted-foreground mt-2">{t('latestNewsDesc')}</p>
+            </div>
+            <NewsCardSkeleton featured />
+          </div>
+        </section>
+      ) : featuredNews ? (
+        <section className="border-b border-border/40 py-16 md:py-24 min-h-[340px]">
+          <div className="container mx-auto px-4">
+            <div className="mb-8">
+              <h2 className="text-3xl font-bold">{t('latestNews')}</h2>
+              <p className="text-muted-foreground mt-2">{t('latestNewsDesc')}</p>
+            </div>
+            <NewsCard news={featuredNews} featured priority />
+          </div>
+        </section>
+      ) : null}
+
+      {isLoading ? (
+        <section className="border-b border-border/40 py-16 md:py-24 min-h-[380px]">
+          <div className="container mx-auto px-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3].map((i) => (
+                <NewsCardSkeleton key={i} />
+              ))}
+            </div>
+          </div>
+        </section>
+      ) : otherNews.length > 0 ? (
+        <section className="border-b border-border/40 py-16 md:py-24 min-h-[380px]">
+          <div className="container mx-auto px-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {otherNews.map((news) => (
+                <NewsCard key={news.id} news={news} />
+              ))}
+            </div>
+          </div>
+        </section>
+      ) : null}
 
       {/* CTA Section */}
       {!user && (

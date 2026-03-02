@@ -222,7 +222,6 @@ export interface ApiExhibition {
   description: string
   startDate: string
   endDate: string
-  location?: string
   cities?: { id: string; name: string }[]
   participants?: ApiExhibitorInfo[]
   image?: string

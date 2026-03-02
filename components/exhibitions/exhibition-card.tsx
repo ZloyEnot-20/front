@@ -71,7 +71,7 @@ export function ExhibitionCard({ exhibition }: ExhibitionCardProps) {
           </div>
           <div className="flex items-center gap-2 text-muted-foreground">
             <MapPin className="w-4 h-4" />
-            {exhibition.cities?.length ? exhibition.cities.map((c) => c.name).join(', ') : (exhibition as { location?: string }).location ?? ''}
+            {exhibition.cities?.length ? exhibition.cities.map((c) => c.name).join(', ') : ''}
           </div>
           <div className="flex items-center gap-2 text-muted-foreground">
             <Users className="w-4 h-4" />

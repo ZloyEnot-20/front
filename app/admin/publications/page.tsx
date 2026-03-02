@@ -28,6 +28,7 @@ import {
 } from '@/components/ui/dialog'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Checkbox } from '@/components/ui/checkbox'
+import { cn } from '@/lib/utils'
 import { ChevronDown } from 'lucide-react'
 
 function PublicationsContent() {
@@ -298,23 +299,23 @@ function PublicationsContent() {
         {/* Content */}
         <div className="p-4 sm:p-6 lg:p-8">
           <Tabs defaultValue="exhibitions" className="space-y-0">
-            <TabsList className="h-auto w-fit rounded-none bg-transparent p-0 gap-0 border-b border-border/60 shadow-none">
+            <TabsList className="h-auto w-full sm:w-fit rounded-none bg-transparent p-0 gap-6 sm:gap-8 border-b border-border/60 shadow-none min-h-0">
               <TabsTrigger
                 value="exhibitions"
-                className="rounded-t-lg border border-transparent border-b-0 bg-transparent px-5 py-2.5 text-muted-foreground data-[state=active]:bg-muted/70 data-[state=active]:text-foreground data-[state=active]:border-border data-[state=active]:border-b-0 data-[state=active]:-mb-px data-[state=active]:shadow-sm"
+                className="relative rounded-none bg-transparent px-0 py-3 text-muted-foreground data-[state=active]:text-primary data-[state=active]:bg-transparent border-0 shadow-none -mb-px focus-visible:ring-0 focus-visible:ring-offset-0 after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2 after:bottom-0 after:h-[3px] after:w-[75%] after:rounded-full data-[state=inactive]:after:bg-transparent data-[state=active]:after:bg-primary"
               >
                 Выставки
               </TabsTrigger>
               <TabsTrigger
                 value="news"
-                className="rounded-t-lg border border-transparent border-b-0 border-l border-border/50 bg-transparent px-5 py-2.5 text-muted-foreground data-[state=active]:bg-muted/70 data-[state=active]:text-foreground data-[state=active]:border-border data-[state=active]:border-b-0 data-[state=active]:-mb-px data-[state=active]:shadow-sm data-[state=active]:border-l-0"
+                className="relative rounded-none bg-transparent px-0 py-3 text-muted-foreground data-[state=active]:text-primary data-[state=active]:bg-transparent border-0 shadow-none -mb-px focus-visible:ring-0 focus-visible:ring-offset-0 after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2 after:bottom-0 after:h-[3px] after:w-[75%] after:rounded-full data-[state=inactive]:after:bg-transparent data-[state=active]:after:bg-primary"
               >
                 Новости
               </TabsTrigger>
             </TabsList>
 
             {/* Exhibitions Tab */}
-            <TabsContent value="exhibitions" className="space-y-6 rounded-b border border-t-0 border-border/60 p-0 pt-6">
+            <TabsContent value="exhibitions" className="space-y-6 p-0 pt-6">
               <div className="flex flex-col sm:flex-row gap-4">
                 <Input
                   placeholder="Поиск выставок..."
@@ -399,7 +400,7 @@ function PublicationsContent() {
             </TabsContent>
 
             {/* News Tab */}
-            <TabsContent value="news" className="space-y-6 rounded-b border border-t-0 border-border/60 p-0 pt-6">
+            <TabsContent value="news" className="space-y-6 p-0 pt-6">
               <div className="flex flex-col sm:flex-row gap-4">
                 <Input
                   placeholder="Поиск новостей..."
@@ -580,7 +581,13 @@ function PublicationsContent() {
                           ) : (
                             <div className="space-y-1">
                               {citiesList.map((city) => (
-                                <label key={city.id} className="flex items-center gap-2 py-1.5 px-2 rounded-md hover:bg-accent cursor-pointer">
+                                <label
+                                  key={city.id}
+                                  className={cn(
+                                    'flex items-center gap-2 py-1.5 px-2 rounded-md cursor-pointer',
+                                    (formData.cities ?? []).includes(city.id) ? 'bg-primary/20 text-primary' : 'hover:bg-accent'
+                                  )}
+                                >
                                   <Checkbox
                                     checked={(formData.cities ?? []).includes(city.id)}
                                     onCheckedChange={() => toggleCity(city.id)}
@@ -597,7 +604,7 @@ function PublicationsContent() {
                           const city = citiesList.find((c) => c.id === id)
                           const name = city?.name ?? id
                           return (
-                            <Badge key={id} variant="secondary" className="cursor-pointer" onClick={() => removeCity(id)}>
+                            <Badge key={id} variant="default" className="cursor-pointer hover:bg-primary/90" onClick={() => removeCity(id)}>
                               {name} ×
                             </Badge>
                           )
@@ -620,7 +627,13 @@ function PublicationsContent() {
                           ) : (
                             <div className="space-y-1">
                               {exhibitorsList.map((exh) => (
-                                <label key={exh.id} className="flex items-center gap-2 py-1.5 px-2 rounded-md hover:bg-accent cursor-pointer">
+                                <label
+                                  key={exh.id}
+                                  className={cn(
+                                    'flex items-center gap-2 py-1.5 px-2 rounded-md cursor-pointer',
+                                    (formData.participants ?? []).includes(exh.id) ? 'bg-primary/20 text-primary' : 'hover:bg-accent'
+                                  )}
+                                >
                                   <Checkbox
                                     checked={(formData.participants ?? []).includes(exh.id)}
                                     onCheckedChange={() => toggleParticipant(exh.id)}
@@ -637,7 +650,7 @@ function PublicationsContent() {
                           const exh = exhibitorsList.find((e) => e.id === id)
                           const name = exh?.name ?? id
                           return (
-                            <Badge key={id} variant="secondary" className="cursor-pointer" onClick={() => removeParticipant(id)}>
+                            <Badge key={id} variant="default" className="cursor-pointer hover:bg-primary/90" onClick={() => removeParticipant(id)}>
                               {name} ×
                             </Badge>
                           )
