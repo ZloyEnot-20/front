@@ -20,12 +20,66 @@ export function ExhibitionsSection() {
   const { exhibitions, getRegistrationsByUser, refresh } = useAdmin()
   const [changeCityReg, setChangeCityReg] = useState<ExhibitionRegistration | null>(null)
 
-  const userRegistrations = user ? getRegistrationsByUser(user.id) : []
+  const isExhibitor = user?.role === 'exhibitor'
+  const userRegistrations = !isExhibitor && user ? getRegistrationsByUser(user.id) : []
+  const exhibitorExhibitions = isExhibitor && user
+    ? exhibitions.filter((e) =>
+        (e.participants ?? []).some((p) => {
+          const id = typeof p === 'string' ? p : p.id
+          return id === user.id
+        }),
+      )
+    : []
 
   return (
     <div className="flex-1 flex justify-center items-center p-8">
       <div className="space-y-4 max-w-3xl w-full">
-        {userRegistrations.length > 0 ? (
+        {isExhibitor ? (
+          exhibitorExhibitions.length > 0 ? (
+            exhibitorExhibitions.map((exhibition) => (
+              <Card key={exhibition.id}>
+                <CardContent className="pt-6">
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <h3 className="text-lg font-semibold">{exhibition.title}</h3>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Университет-участник: {user?.name}
+                      </p>
+                    </div>
+                    <Badge variant={exhibition.status === 'published' ? 'default' : 'outline'}>
+                      {exhibition.status === 'published' ? 'Опубликована' : 'Черновик'}
+                    </Badge>
+                  </div>
+
+                  <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-4">
+                    <div className="flex items-center gap-1">
+                      <Calendar className="w-4 h-4" />
+                      {formatDate(exhibition.startDate)} — {formatDate(exhibition.endDate)}
+                    </div>
+                    {Array.isArray(exhibition.cities) && exhibition.cities.length > 0 && (
+                      <div className="flex items-center gap-1">
+                        <MapPin className="w-4 h-4" />
+                        {exhibition.cities.map((c) => c.name).join(', ')}
+                      </div>
+                    )}
+                  </div>
+
+                  <Button variant="outline" className="w-full" asChild>
+                    <Link href={`/exhibitions/${exhibition.id}`}>Подробнее о выставке</Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            ))
+          ) : (
+            <Card>
+              <CardContent className="pt-12 pb-12 text-center">
+                <p className="text-muted-foreground mb-4">
+                  Ваш университет пока не участвует ни в одной выставке
+                </p>
+              </CardContent>
+            </Card>
+          )
+        ) : userRegistrations.length > 0 ? (
           userRegistrations.map((reg) => {
             const exhibition = exhibitions.find((e) => e.id === reg.exhibitionId)
             const startDate = exhibition?.startDate ? formatDate(exhibition.startDate) : null
@@ -88,7 +142,7 @@ export function ExhibitionsSection() {
             )
           })
         ) : null}
-        {changeCityReg && (() => {
+        {!isExhibitor && changeCityReg && (() => {
           const exhibition = exhibitions.find((e) => e.id === changeCityReg.exhibitionId)
           const cities = exhibition?.cities?.map((c) => c.name) ?? []
           return (
@@ -105,7 +159,7 @@ export function ExhibitionsSection() {
             />
           )
         })()}
-        {userRegistrations.length === 0 ? (
+        {!isExhibitor && userRegistrations.length === 0 ? (
           <Card>
             <CardContent className="pt-12 pb-12 text-center">
               <p className="text-muted-foreground mb-4">Вы ещё не зарегистрированы ни на одну выставку</p>
