@@ -114,7 +114,7 @@ export function ExhibitionsSection() {
               </Button>
             </CardContent>
           </Card>
-        )}
+        ) : null}
       </div>
     </div>
   )
