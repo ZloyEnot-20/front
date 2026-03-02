@@ -40,23 +40,33 @@ export function CreateUserModal({ isOpen, onOpenChange }: CreateUserModalProps) 
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
+    universityName: '',
     email: '',
     phone: '',
     password: '',
-    role: 'visitor',
+    role: 'visitor' as 'visitor' | 'exhibitor' | 'content_manager' | 'admin',
   })
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
   const [saving, setSaving] = useState(false)
 
+  const isExhibitor = formData.role === 'exhibitor'
+
   const validateForm = () => {
-    if (!formData.firstName.trim()) {
-      setError('Введите имя')
-      return false
-    }
-    if (!formData.lastName.trim()) {
-      setError('Введите фамилию')
-      return false
+    if (isExhibitor) {
+      if (!formData.universityName.trim()) {
+        setError('Введите название университета')
+        return false
+      }
+    } else {
+      if (!formData.firstName.trim()) {
+        setError('Введите имя')
+        return false
+      }
+      if (!formData.lastName.trim()) {
+        setError('Введите фамилию')
+        return false
+      }
     }
     if (!formData.email.trim() || !formData.email.includes('@')) {
       setError('Введите корректный email')
@@ -73,6 +83,8 @@ export function CreateUserModal({ isOpen, onOpenChange }: CreateUserModalProps) 
     return true
   }
 
+  const displayName = isExhibitor ? formData.universityName : `${formData.firstName} ${formData.lastName}`.trim()
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
@@ -82,13 +94,14 @@ export function CreateUserModal({ isOpen, onOpenChange }: CreateUserModalProps) 
     setSaving(true)
     const newUser = {
       id: `user-${Date.now()}`,
-      name: `${formData.firstName} ${formData.lastName}`,
+      name: isExhibitor ? formData.universityName.trim() : `${formData.firstName} ${formData.lastName}`.trim(),
       email: formData.email,
       phone: formData.phone,
       password: formData.password,
-      role: formData.role as 'visitor' | 'exhibitor' | 'content_manager' | 'admin',
+      role: formData.role,
       status: 'active' as const,
       createdAt: new Date(),
+      updatedAt: new Date(),
     } as Parameters<typeof addUser>[0]
 
     try {
@@ -106,10 +119,11 @@ export function CreateUserModal({ isOpen, onOpenChange }: CreateUserModalProps) 
       setFormData({
         firstName: '',
         lastName: '',
+        universityName: '',
         email: '',
         phone: '',
         password: '',
-        role: 'visitor',
+        role: 'visitor' as const,
       })
       onOpenChange(false)
     }, 1500)
@@ -130,7 +144,7 @@ export function CreateUserModal({ isOpen, onOpenChange }: CreateUserModalProps) 
             <CheckCircle2 className="w-12 h-12 text-green-600 mx-auto mb-4" />
             <p className="font-semibold mb-2">Пользователь создан успешно!</p>
             <p className="text-sm text-muted-foreground">
-              {formData.firstName} {formData.lastName} был добавлен в систему
+              {displayName} был добавлен в систему
             </p>
           </div>
         ) : (
@@ -142,24 +156,35 @@ export function CreateUserModal({ isOpen, onOpenChange }: CreateUserModalProps) 
               </Alert>
             )}
 
-            <div className="grid grid-cols-2 gap-4">
+            {isExhibitor ? (
               <div>
-                <label className="text-sm font-medium">Имя</label>
+                <label className="text-sm font-medium">Название университета</label>
                 <Input
-                  value={formData.firstName}
-                  onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                  placeholder="Иван"
+                  value={formData.universityName}
+                  onChange={(e) => setFormData({ ...formData, universityName: e.target.value })}
+                  placeholder="МГУ им. М. В. Ломоносова"
                 />
               </div>
-              <div>
-                <label className="text-sm font-medium">Фамилия</label>
-                <Input
-                  value={formData.lastName}
-                  onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                  placeholder="Петров"
-                />
+            ) : (
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium">Имя</label>
+                  <Input
+                    value={formData.firstName}
+                    onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                    placeholder="Иван"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Фамилия</label>
+                  <Input
+                    value={formData.lastName}
+                    onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                    placeholder="Петров"
+                  />
+                </div>
               </div>
-            </div>
+            )}
 
             <div>
               <label className="text-sm font-medium">Email</label>
@@ -192,7 +217,7 @@ export function CreateUserModal({ isOpen, onOpenChange }: CreateUserModalProps) 
 
             <div>
               <label className="text-sm font-medium">Роль</label>
-              <Select value={formData.role} onValueChange={(value) => setFormData({ ...formData, role: value })}>
+              <Select value={formData.role} onValueChange={(value) => setFormData({ ...formData, role: value as typeof formData.role })}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
