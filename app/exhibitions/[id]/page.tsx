@@ -20,6 +20,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from '@/components/ui/carousel'
 import type { ExhibitorInfo } from '@/lib/types'
 
 interface ExhibitionPageProps {
@@ -329,15 +336,22 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
                   </a>
                 )}
                 {exhibitorModal.exhibitorPhotos && exhibitorModal.exhibitorPhotos.length > 0 && (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                    {exhibitorModal.exhibitorPhotos.map((url, i) => (
-                      <img
-                        key={i}
-                        src={getImageUrl(url) || url}
-                        alt=""
-                        className="rounded-lg object-cover aspect-square w-full"
-                      />
-                    ))}
+                  <div className="relative w-full">
+                    <Carousel opts={{ align: 'start', loop: true }} className="w-full">
+                      <CarouselContent className="-ml-0">
+                        {exhibitorModal.exhibitorPhotos.map((url, i) => (
+                          <CarouselItem key={i} className="pl-0 basis-full">
+                            <img
+                              src={getImageUrl(url) || url}
+                              alt=""
+                              className="rounded-lg object-cover aspect-video w-full"
+                            />
+                          </CarouselItem>
+                        ))}
+                      </CarouselContent>
+                      <CarouselPrevious className="left-2 border-0 bg-black/50 text-white hover:bg-black/70 disabled:opacity-30" />
+                      <CarouselNext className="right-2 border-0 bg-black/50 text-white hover:bg-black/70 disabled:opacity-30" />
+                    </Carousel>
                   </div>
                 )}
               </div>

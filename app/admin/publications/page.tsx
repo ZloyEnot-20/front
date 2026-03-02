@@ -12,7 +12,8 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Plus, Loader2, Trash2, LayoutGrid } from 'lucide-react'
+import { Plus, Loader2, Trash2, LayoutGrid, Pencil, ExternalLink } from 'lucide-react'
+import Link from 'next/link'
 import { PublicationCardSkeleton } from '@/components/admin/publication-card-skeleton'
 import {
   DropdownMenu,
@@ -344,12 +345,12 @@ function PublicationsContent() {
                   ))}
                 </div>
               ) : filteredExhibitions.length > 0 ? (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                   {filteredExhibitions.map((exhibition) => (
-                    <Card key={exhibition.id} className="group hover:shadow-lg transition-shadow">
-                      <div className="aspect-square bg-muted relative overflow-hidden">
+                    <Card key={exhibition.id} className="group overflow-hidden rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col">
+                      <Link href={`/exhibitions/${exhibition.id}`} className="relative block aspect-[4/3] bg-muted overflow-hidden">
                         {exhibition.image ? (
-                          <img src={getImageUrl(exhibition.image) || "/placeholder.svg"} alt={exhibition.title} className="w-full h-full object-cover" loading="lazy" />
+                          <img src={getImageUrl(exhibition.image) || "/placeholder.svg"} alt={exhibition.title} className="w-full h-full object-cover transition-all duration-300 group-hover:blur-[2px] group-hover:scale-105" loading="lazy" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10">
                             <span className="text-2xl font-bold text-muted-foreground/20">
@@ -357,48 +358,61 @@ function PublicationsContent() {
                             </span>
                           </div>
                         )}
-                        <Badge className="absolute top-1 right-1 text-[10px] px-1 py-0" variant={exhibition.status === 'published' ? 'default' : 'secondary'}>
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent pointer-events-none" />
+                        <div className="absolute bottom-0 left-0 right-0 p-3 pointer-events-none">
+                          <h3 className="font-bold text-white text-sm drop-shadow-md line-clamp-1">{exhibition.title}</h3>
+                          <p className="text-white/90 text-xs mt-0.5 line-clamp-1">{exhibition.description}</p>
+                          <div className="flex gap-3 mt-1 text-white/80 text-[10px]">
+                            <span>{new Date(exhibition.startDate).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })}</span>
+                            <span>{exhibition.registrations} чел.</span>
+                          </div>
+                        </div>
+                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none bg-black/20">
+                          <span className="rounded-full bg-white/90 p-3 shadow-lg">
+                            <ExternalLink className="w-5 h-5 text-foreground" />
+                          </span>
+                        </div>
+                        <Badge className="absolute top-2 right-2 text-[10px] px-1.5 py-0" variant={exhibition.status === 'published' ? 'default' : 'secondary'}>
                           {exhibition.status === 'draft' ? 'Черн.' : 'Опубл.'}
                         </Badge>
-                      </div>
-                      <CardContent className="p-2">
-                        <h3 className="font-semibold text-xs line-clamp-1 mb-1">{exhibition.title}</h3>
-                        <p className="text-[10px] text-muted-foreground line-clamp-2 mb-2">
-                          {exhibition.description}
-                        </p>
-                        <div className="space-y-0.5 text-[10px] text-muted-foreground mb-2">
-                          <div>{new Date(exhibition.startDate).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })}</div>
-                          <div>{exhibition.registrations} чел.</div>
-                        </div>
+                      </Link>
+                      <CardContent className="p-3 flex-1 flex items-center justify-between gap-2 min-h-[52px]">
                         {togglingStatusExhibitionId === exhibition.id ? (
-                          <Button variant="default" size="sm" className="w-full h-7 text-xs" disabled>
+                          <Button variant="default" size="sm" className="flex-1 h-8 text-xs rounded-full" disabled>
                             <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" />
                             Сохранение...
                           </Button>
                         ) : (
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="default" size="sm" className="w-full h-7 text-xs">
-                              Управление
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => handleEditContent(exhibition, 'exhibition')}>
-                              Редактировать
-                            </DropdownMenuItem>
-                            <DropdownMenuItem asChild>
-                              <a href={`/exhibitions/${exhibition.id}`} target="_blank" rel="noopener noreferrer">
-                                 Просмотр
-                              </a>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleToggleExhibitionStatus(exhibition.id, exhibition.status)}>
+                          <>
+                            <Button
+                              variant="default"
+                              size="sm"
+                              className="flex-1 h-8 text-xs rounded-full max-w-[180px] mx-auto"
+                              onClick={() => handleToggleExhibitionStatus(exhibition.id, exhibition.status)}
+                            >
                               {exhibition.status === 'published' ? 'Снять с публикации' : 'Опубликовать'}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="text-destructive" onClick={() => deleteExhibition(exhibition.id)}>
-                               Удалить
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                            </Button>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="outline" size="icon" className="h-8 w-8 rounded-full shrink-0">
+                                  <Pencil className="w-4 h-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => handleEditContent(exhibition, 'exhibition')}>
+                                  Редактировать
+                                </DropdownMenuItem>
+                                <DropdownMenuItem asChild>
+                                  <a href={`/exhibitions/${exhibition.id}`} target="_blank" rel="noopener noreferrer">
+                                    Просмотр
+                                  </a>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem className="text-destructive" onClick={() => deleteExhibition(exhibition.id)}>
+                                  Удалить
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </>
                         )}
                       </CardContent>
                     </Card>
@@ -431,10 +445,10 @@ function PublicationsContent() {
                   ))}
                 </div>
               ) : filteredNews.length > 0 ? (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                   {filteredNews.map((news) => (
-                    <Card key={news.id} className="group hover:shadow-lg transition-shadow">
-                      <div className="aspect-square bg-muted relative overflow-hidden">
+                    <Card key={news.id} className="group overflow-hidden rounded-2xl shadow-sm hover:shadow-lg transition-shadow flex flex-col bg-card">
+                      <div className="aspect-[4/3] bg-muted relative overflow-hidden rounded-t-2xl">
                         {news.image ? (
                           <img src={getImageUrl(news.image) || "/placeholder.svg"} alt={news.title} className="w-full h-full object-cover" loading="lazy" />
                         ) : (
@@ -444,48 +458,57 @@ function PublicationsContent() {
                             </span>
                           </div>
                         )}
-                        <Badge className="absolute top-1 right-1 text-[10px] px-1 py-0" variant={news.status === 'published' ? 'default' : 'secondary'}>
+                        <Badge className="absolute top-2 right-2 text-[10px] px-1.5 py-0" variant={news.status === 'published' ? 'default' : 'secondary'}>
                           {news.status === 'draft' ? 'Черн.' : 'Опубл.'}
                         </Badge>
                       </div>
-                      <CardContent className="p-2">
-                        <h3 className="font-semibold text-xs line-clamp-1 mb-1">{news.title}</h3>
-                        <p className="text-[10px] text-muted-foreground line-clamp-2 mb-2">
+                      <CardContent className="p-4 flex-1 flex flex-col bg-background">
+                        <h3 className="font-bold text-foreground text-base line-clamp-1 mb-1">{news.title}</h3>
+                        <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
                           {news.excerpt}
                         </p>
-                        <div className="text-[10px] text-muted-foreground mb-2">
-                          {new Date(news.publishedAt).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })}
-                        </div>
-                        {togglingStatusNewsId === news.id ? (
-                          <Button variant="default" size="sm" className="w-full h-7 text-xs" disabled>
-                            <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" />
-                            Сохранение...
-                          </Button>
-                        ) : (
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="default" size="sm" className="w-full h-7 text-xs">
-                              Управление
+                        <p className="text-xs text-muted-foreground mt-auto">
+                          {new Date(news.publishedAt).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric' })}
+                        </p>
+                        <div className="flex items-center gap-2 mt-3">
+                          {togglingStatusNewsId === news.id ? (
+                            <Button variant="default" size="sm" className="flex-1 h-8 text-xs rounded-full" disabled>
+                              <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" />
+                              Сохранение...
                             </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => handleEditContent(news, 'news')}>
-                              Редактировать
-                            </DropdownMenuItem>
-                            <DropdownMenuItem asChild>
-                              <a href={`/news/${news.id}`} target="_blank" rel="noopener noreferrer">
-                                Просмотр
-                              </a>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleToggleNewsStatus(news.id, news.status)}>
-                              {news.status === 'published' ? 'Снять с публикации' : 'Опубликовать'}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="text-destructive" onClick={() => deleteNews(news.id)}>
-                              Удалить
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                        )}
+                          ) : (
+                            <>
+                              <Button
+                                variant="default"
+                                size="sm"
+                                className="flex-1 h-8 text-xs rounded-full"
+                                onClick={() => handleToggleNewsStatus(news.id, news.status)}
+                              >
+                                {news.status === 'published' ? 'Снять с публикации' : 'Опубликовать'}
+                              </Button>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="outline" size="icon" className="h-8 w-8 rounded-full shrink-0">
+                                    <Pencil className="w-4 h-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem onClick={() => handleEditContent(news, 'news')}>
+                                    Редактировать
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem asChild>
+                                    <a href={`/news/${news.id}`} target="_blank" rel="noopener noreferrer">
+                                      Просмотр
+                                    </a>
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem className="text-destructive" onClick={() => deleteNews(news.id)}>
+                                    Удалить
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </>
+                          )}
+                        </div>
                       </CardContent>
                     </Card>
                   ))}
