@@ -27,9 +27,9 @@ export function PersonalInfoSection({ user }: PersonalInfoSectionProps) {
     firstName: user.name.split(' ')[0] || '',
     lastName: user.name.split(' ')[1] || '',
     email: user.email || '',
-    phone: (user as User & { phone?: string }).phone || '',
-    country: 'Россия',
-    city: 'Москва',
+    phone: (user as User & { phone?: string; country?: string; city?: string }).phone || '',
+    country: (user as User & { country?: string }).country || '',
+    city: (user as User & { city?: string }).city || '',
     zipCode: '',
   })
 
@@ -39,8 +39,8 @@ export function PersonalInfoSection({ user }: PersonalInfoSectionProps) {
       lastName: user.name.split(' ')[1] || '',
       email: user.email || '',
       phone: (user as User & { phone?: string }).phone || '',
-      country: 'Россия',
-      city: 'Москва',
+      country: (user as User & { country?: string }).country || '',
+      city: (user as User & { city?: string }).city || '',
       zipCode: '',
     })
   }, [user])
@@ -155,29 +155,21 @@ export function PersonalInfoSection({ user }: PersonalInfoSectionProps) {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div>
                 <label className="block text-xs text-muted-foreground mb-1.5">Страна</label>
-                <select
-                  className="w-full h-9 px-3 rounded-md border border-input bg-background text-sm"
+                <Input
                   value={formData.country}
                   onChange={(e) => handleChange('country', e.target.value)}
-                >
-                  <option>Россия</option>
-                  <option>США</option>
-                  <option>Канада</option>
-                  <option>Великобритания</option>
-                </select>
+                  placeholder="Введите страну"
+                  className="h-9"
+                />
               </div>
               <div>
                 <label className="block text-xs text-muted-foreground mb-1.5">Город</label>
-                <select
-                  className="w-full h-9 px-3 rounded-md border border-input bg-background text-sm"
+                <Input
                   value={formData.city}
                   onChange={(e) => handleChange('city', e.target.value)}
-                >
-                  <option>Москва</option>
-                  <option>Санкт-Петербург</option>
-                  <option>Новосибирск</option>
-                  <option>Екатеринбург</option>
-                </select>
+                  placeholder="Введите город"
+                  className="h-9"
+                />
               </div>
               <div className="sm:col-span-2">
                 <label className="block text-xs text-muted-foreground mb-1.5">Почтовый индекс</label>
