@@ -11,17 +11,17 @@ export default function NewsPage() {
   const otherNews = publishedNews.slice(1)
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Header />
 
-      <section className="border-b border-border/40">
+      <section className="border-b border-border/40 flex-shrink-0">
         <div className="container mx-auto px-4 py-12">
           <h1 className="text-3xl md:text-4xl font-bold mb-2">Новости</h1>
           <p className="text-muted-foreground">Будьте в курсе последних событий в мире выставок</p>
         </div>
       </section>
 
-      <section className="py-12">
+      <section className="py-12 flex-1">
         <div className="container mx-auto px-4">
           {/* Featured */}
           {featuredNews && (
@@ -51,7 +51,7 @@ export default function NewsPage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-border/40 py-12 bg-muted/40 mt-12">
+      <footer className="border-t border-border/40 py-12 bg-muted/40 mt-auto flex-shrink-0">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center gap-8">
             <div>
