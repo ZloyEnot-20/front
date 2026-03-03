@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
-import { ArrowLeft, MapPin, Calendar, Users, ExternalLink, Building2 } from 'lucide-react'
+import { ArrowLeft, MapPin, Calendar, Users, ExternalLink, Building2, X } from 'lucide-react'
 import { OptimizedImage } from '@/components/ui/optimized-image'
 import { ExhibitionDetailSkeleton } from '@/components/exhibitions/exhibition-detail-skeleton'
 import {
@@ -38,6 +38,7 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
   const [registrationOpen, setRegistrationOpen] = useState(false)
   const [changeCityOpen, setChangeCityOpen] = useState(false)
   const [exhibitorModal, setExhibitorModal] = useState<ExhibitorInfo | null>(null)
+  const [galleryImageModal, setGalleryImageModal] = useState<string | null>(null)
   const { user } = useAuth()
   const { exhibitions, getRegistrationsByUser, isLoading, refresh } = useAdmin()
   const exhibition = exhibitions.find((e) => e.id === id)
@@ -82,13 +83,6 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
     day: 'numeric',
   })
 
-  const statusLabel = {
-    draft: 'Черновик',
-    published: 'Опубликовано',
-    archived: 'Архив',
-    cancelled: 'Отменено',
-  }
-
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -114,7 +108,7 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
               </Link>
             </Button>
             <h1 className="text-4xl md:text-5xl font-bold mb-4">{exhibition.title}</h1>
-            <Badge variant="secondary">{statusLabel[exhibition.status]}</Badge>
+            <Badge className="bg-violet-600 hover:bg-violet-700 text-white border-0">Выставка</Badge>
           </div>
         </div>
       </section>
@@ -125,33 +119,6 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Main */}
             <div className="lg:col-span-2 space-y-8">
-              {/* Галерея изображений (до 10) */}
-              {(exhibition.images?.length ?? 0) > 0 && (
-                <Card>
-                  <CardContent className="p-0">
-                    <Carousel className="w-full">
-                      <CarouselContent>
-                        {(exhibition.images ?? []).map((url, idx) => (
-                          <CarouselItem key={idx}>
-                            <div className="relative aspect-video w-full overflow-hidden rounded-b-lg">
-                              <OptimizedImage
-                                src={getImageUrl(url) || '/placeholder.svg'}
-                                alt={`${exhibition.title} — ${idx + 1}`}
-                                fill
-                                sizes="(max-width: 1024px) 100vw, 66vw"
-                                className="object-contain"
-                              />
-                            </div>
-                          </CarouselItem>
-                        ))}
-                      </CarouselContent>
-                      <CarouselPrevious className="left-2" />
-                      <CarouselNext className="right-2" />
-                    </Carousel>
-                  </CardContent>
-                </Card>
-              )}
-
               {/* Description */}
               <Card>
                 <CardHeader>
@@ -161,6 +128,28 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
                   <p className="text-foreground/80 leading-relaxed">{exhibition.description}</p>
                 </CardContent>
               </Card>
+
+              {/* Галерея: 3 в ряд, по клику — модалка */}
+              {(exhibition.images?.length ?? 0) > 0 && (
+                <div className="grid grid-cols-3 gap-2">
+                  {(exhibition.images ?? []).map((url, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      className="relative aspect-square overflow-hidden rounded-lg border border-border/40 hover:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/30"
+                      onClick={() => setGalleryImageModal(getImageUrl(url) || url)}
+                    >
+                      <OptimizedImage
+                        src={getImageUrl(url) || '/placeholder.svg'}
+                        alt={`${exhibition.title} — ${idx + 1}`}
+                        fill
+                        sizes="(max-width: 1024px) 33vw, 22vw"
+                        className="object-cover"
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
 
               {/* Details */}
               <Card>
@@ -191,16 +180,8 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
                   <div className="flex items-start gap-4">
                     <Users className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="font-medium">Участники</p>
-                      <p className="text-sm text-muted-foreground">{exhibition.participantCount} участников</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-4">
-                    <Users className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                    <div>
                       <p className="font-medium">Зарегистрировано</p>
-                      <p className="text-sm text-muted-foreground">{exhibition.registrations} участников</p>
+                      <p className="text-sm text-muted-foreground">{exhibition.registrations} посетителей</p>
                     </div>
                   </div>
                 </CardContent>
@@ -320,6 +301,31 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
           onSuccess={refresh}
         />
       )}
+
+      {/* Галерея: модалка по клику на картинку */}
+      <Dialog open={!!galleryImageModal} onOpenChange={(open) => !open && setGalleryImageModal(null)}>
+        <DialogContent className="max-w-4xl max-h-[90vh] p-0 overflow-hidden bg-black/95 border-0">
+          {galleryImageModal && (
+            <>
+              <button
+                type="button"
+                className="absolute top-2 right-2 z-10 rounded-full p-1.5 text-white/80 hover:text-white hover:bg-white/10 focus:outline-none"
+                onClick={() => setGalleryImageModal(null)}
+                aria-label="Закрыть"
+              >
+                <X className="w-6 h-6" />
+              </button>
+              <div className="relative w-full min-h-[50vh] flex items-center justify-center p-4">
+                <img
+                  src={galleryImageModal}
+                  alt=""
+                  className="max-w-full max-h-[85vh] w-auto h-auto object-contain"
+                />
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Exhibitor detail modal */}
       <Dialog open={!!exhibitorModal} onOpenChange={(open) => !open && setExhibitorModal(null)}>

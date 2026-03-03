@@ -5,6 +5,7 @@ import { Header } from '@/components/layout/header'
 import { useAdmin } from '@/lib/admin-context'
 import { getImageUrl } from '@/lib/api'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import Link from 'next/link'
 import { ArrowLeft, Calendar } from 'lucide-react'
@@ -73,6 +74,7 @@ export default function NewsDetailPage({ params }: NewsPageProps) {
               </Link>
             </Button>
             <h1 className="text-4xl md:text-5xl font-bold mb-4">{news.title}</h1>
+            <Badge className="bg-violet-600 hover:bg-violet-700 text-white border-0">Новость</Badge>
           </div>
         </div>
       </section>
