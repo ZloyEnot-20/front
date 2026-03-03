@@ -5,6 +5,13 @@ import { ExhibitionCardSkeleton } from '@/components/exhibitions/exhibition-card
 import { NewsCard } from '@/components/news/news-card'
 import { NewsCardSkeleton } from '@/components/news/news-card-skeleton'
 import { Button } from '@/components/ui/button'
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from '@/components/ui/carousel'
 import { useAdmin } from '@/lib/admin-context'
 import { useAuth } from '@/lib/auth-context'
 import { useLocale } from '@/lib/i18n'
@@ -17,8 +24,6 @@ export function HomeClient() {
   const { exhibitions, news, isLoading } = useAdmin()
   const publishedExhibitions = exhibitions.filter((e) => e.status === 'published')
   const publishedNews = news.filter((n) => n.status === 'published')
-  const featuredNews = publishedNews[0]
-  const otherNews = publishedNews.slice(1)
 
   return (
     <>
@@ -38,10 +43,22 @@ export function HomeClient() {
             </div>
           ) : publishedExhibitions.length > 0 ? (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-                {publishedExhibitions.map((exhibition) => (
-                  <ExhibitionCard key={exhibition.id} exhibition={exhibition} />
-                ))}
+              <div className="relative px-2 mb-12">
+                <Carousel opts={{ align: 'start', loop: false, containScroll: 'trimSnaps' }} className="w-full">
+                  <CarouselContent className="-ml-4 md:-ml-6">
+                    {Array.from({ length: Math.ceil(publishedExhibitions.length / 3) }).map((_, rowIndex) => (
+                      <CarouselItem key={rowIndex} className="pl-4 md:pl-6 basis-full">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                          {publishedExhibitions.slice(rowIndex * 3, rowIndex * 3 + 3).map((exhibition) => (
+                            <ExhibitionCard key={exhibition.id} exhibition={exhibition} />
+                          ))}
+                        </div>
+                      </CarouselItem>
+                    ))}
+                  </CarouselContent>
+                  <CarouselPrevious className="left-0 -translate-y-1/2 hidden sm:flex" />
+                  <CarouselNext className="right-0 -translate-y-1/2 hidden sm:flex" />
+                </Carousel>
               </div>
               <div className="text-center">
                 <Button variant="outline" asChild>
@@ -65,50 +82,42 @@ export function HomeClient() {
         </div>
       </section>
 
-      {/* Новости — ниже выставок */}
-      {isLoading ? (
-        <section className="border-t border-b border-border/40 py-16 md:py-24 min-h-[340px]" aria-busy="true">
-          <div className="container mx-auto px-4">
-            <div className="mb-8">
-              <h2 className="text-3xl font-bold">{t('latestNews')}</h2>
-              <p className="text-muted-foreground mt-2">{t('latestNewsDesc')}</p>
-            </div>
-            <NewsCardSkeleton featured />
+      {/* Новости — карусель 3 в ряд */}
+      <section className="border-t border-b border-border/40 py-16 md:py-24 min-h-[380px]" id="news">
+        <div className="container mx-auto px-4">
+          <div className="mb-8">
+            <h2 className="text-3xl font-bold">{t('latestNews')}</h2>
+            <p className="text-muted-foreground mt-2">{t('latestNewsDesc')}</p>
           </div>
-        </section>
-      ) : featuredNews ? (
-        <section className="border-t border-b border-border/40 py-16 md:py-24 min-h-[340px]">
-          <div className="container mx-auto px-4">
-            <div className="mb-8">
-              <h2 className="text-3xl font-bold">{t('latestNews')}</h2>
-              <p className="text-muted-foreground mt-2">{t('latestNewsDesc')}</p>
-            </div>
-            <NewsCard news={featuredNews} featured priority />
-          </div>
-        </section>
-      ) : null}
-
-      {isLoading ? (
-        <section className="border-t border-b border-border/40 py-16 md:py-24 min-h-[380px]">
-          <div className="container mx-auto px-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {isLoading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {[1, 2, 3].map((i) => (
                 <NewsCardSkeleton key={i} />
               ))}
             </div>
-          </div>
-        </section>
-      ) : otherNews.length > 0 ? (
-        <section className="border-t border-b border-border/40 py-16 md:py-24 min-h-[380px]">
-          <div className="container mx-auto px-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {otherNews.map((news) => (
-                <NewsCard key={news.id} news={news} />
-              ))}
+          ) : publishedNews.length > 0 ? (
+            <div className="relative px-2">
+              <Carousel opts={{ align: 'start', loop: false, containScroll: 'trimSnaps' }} className="w-full">
+                <CarouselContent className="-ml-4 md:-ml-6">
+                  {Array.from({ length: Math.ceil(publishedNews.length / 3) }).map((_, rowIndex) => (
+                    <CarouselItem key={rowIndex} className="pl-4 md:pl-6 basis-full">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {publishedNews.slice(rowIndex * 3, rowIndex * 3 + 3).map((item) => (
+                          <NewsCard key={item.id} news={item} />
+                        ))}
+                      </div>
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                <CarouselPrevious className="left-0 -translate-y-1/2 hidden sm:flex" />
+                <CarouselNext className="right-0 -translate-y-1/2 hidden sm:flex" />
+              </Carousel>
             </div>
-          </div>
-        </section>
-      ) : null}
+          ) : (
+            <p className="text-muted-foreground text-center py-8">{t('noNews')}</p>
+          )}
+        </div>
+      </section>
 
       {/* CTA Section */}
       {!user && (
