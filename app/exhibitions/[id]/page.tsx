@@ -129,9 +129,9 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
                 </CardContent>
               </Card>
 
-              {/* Галерея: 3 в ряд, по клику — модалка */}
+              {/* Галерея: 3 в ряд, небольшие превью, по клику — модалка */}
               {(exhibition.images?.length ?? 0) > 0 && (
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-3 gap-2 max-w-sm">
                   {(exhibition.images ?? []).map((url, idx) => (
                     <button
                       key={idx}
@@ -143,7 +143,7 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
                         src={getImageUrl(url) || '/placeholder.svg'}
                         alt={`${exhibition.title} — ${idx + 1}`}
                         fill
-                        sizes="(max-width: 1024px) 33vw, 22vw"
+                        sizes="160px"
                         className="object-cover"
                       />
                     </button>
@@ -304,12 +304,12 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
 
       {/* Галерея: модалка по клику на картинку */}
       <Dialog open={!!galleryImageModal} onOpenChange={(open) => !open && setGalleryImageModal(null)}>
-        <DialogContent className="max-w-4xl max-h-[90vh] p-0 overflow-hidden bg-black/95 border-0">
+        <DialogContent className="max-w-4xl max-h-[90vh] p-0 overflow-hidden bg-white">
           {galleryImageModal && (
             <>
               <button
                 type="button"
-                className="absolute top-2 right-2 z-10 rounded-full p-1.5 text-white/80 hover:text-white hover:bg-white/10 focus:outline-none"
+                className="absolute top-2 right-2 z-10 rounded-full p-1.5 text-foreground/80 hover:text-foreground hover:bg-muted focus:outline-none"
                 onClick={() => setGalleryImageModal(null)}
                 aria-label="Закрыть"
               >
