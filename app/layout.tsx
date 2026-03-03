@@ -27,8 +27,8 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'EDU Expo - Управление выставками',
-  description: 'Платформа для управления выставками, билетами и участниками',
+  title: 'EDU Expo - Организация выставок',
+  description: 'Платформа для организации выставок, билетами и участниками',
   generator: 'v0.app',
   icons: {
     icon: [

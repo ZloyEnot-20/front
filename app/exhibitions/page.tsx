@@ -107,7 +107,7 @@ export default function ExhibitionsPage() {
           <div className="flex flex-col md:flex-row justify-between items-center gap-8">
             <div>
               <div className="font-bold text-lg mb-2">EDU Expo</div>
-              <p className="text-sm text-muted-foreground">Платформа для управления выставками</p>
+              <p className="text-sm text-muted-foreground">Платформа для организации выставок</p>
             </div>
             <div className="flex gap-8 text-sm text-muted-foreground">
               <a href="#" className="hover:text-foreground transition-colors">
