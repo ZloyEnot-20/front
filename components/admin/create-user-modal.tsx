@@ -31,6 +31,7 @@ interface CreateUserModalProps {
 const ROLES = [
   { value: 'visitor', label: 'Посетитель' },
   { value: 'exhibitor', label: 'Экспонент (Exhibitor)' },
+  { value: 'staff', label: 'Сотрудник (Staff)' },
   { value: 'content_manager', label: 'Менеджер контента (Content Manager)' },
   { value: 'admin', label: 'Администратор' },
 ]
@@ -44,7 +45,7 @@ export function CreateUserModal({ isOpen, onOpenChange }: CreateUserModalProps) 
     email: '',
     phone: '',
     password: '',
-    role: 'visitor' as 'visitor' | 'exhibitor' | 'content_manager' | 'admin',
+    role: 'exhibitor' as 'visitor' | 'exhibitor' | 'staff' | 'content_manager' | 'admin',
   })
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
@@ -123,7 +124,7 @@ export function CreateUserModal({ isOpen, onOpenChange }: CreateUserModalProps) 
         email: '',
         phone: '',
         password: '',
-        role: 'visitor' as const,
+        role: 'exhibitor' as const,
       })
       onOpenChange(false)
     }, 1500)

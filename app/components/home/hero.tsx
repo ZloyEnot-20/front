@@ -7,7 +7,7 @@ import { useAuth } from '@/lib/auth-context'
 export function Hero() {
   const { t } = useLocale()
   const { user } = useAuth()
-  const showRegister = !user || (user.role !== 'exhibitor')
+  const showRegister = !user
   return (
     <section className="border-b border-border/40" style={{ minHeight: '320px' }}>
       <div className="container mx-auto px-4 py-20 md:py-32">

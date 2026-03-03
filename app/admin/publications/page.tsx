@@ -354,26 +354,26 @@ function PublicationsContent() {
                           <span>{new Date(exhibition.startDate).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })}</span>
                           <span>{exhibition.registrations} чел.</span>
                         </div>
-                        <div className="flex items-center justify-between gap-2 mt-2 pt-2 border-t border-white/20 pointer-events-auto">
+                        <div className="flex items-center gap-1.5 mt-2 pt-2 border-t border-white/20 pointer-events-auto min-w-0 flex-wrap">
                           {togglingStatusExhibitionId === exhibition.id ? (
-                            <Button variant="default" size="sm" className="flex-1 h-8 text-xs rounded-md shadow-lg" disabled>
-                              <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" />
-                              Сохранение...
+                            <Button variant="default" size="sm" className="flex-1 min-w-0 h-8 text-xs rounded-md shadow-lg shrink-0" disabled>
+                              <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" />
+                              <span className="truncate">Сохранение...</span>
                             </Button>
                           ) : (
                             <>
                               <Button
                                 variant="default"
                                 size="sm"
-                                className="flex-1 h-8 text-xs rounded-md max-w-[140px] mx-auto shadow-lg"
+                                className="flex-1 min-w-0 h-8 text-xs rounded-md shadow-lg shrink-0 px-2"
                                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleToggleExhibitionStatus(exhibition.id, exhibition.status); }}
                               >
-                                {exhibition.status === 'published' ? 'Снять с публикации' : 'Опубликовать'}
+                                <span className="truncate">{exhibition.status === 'published' ? 'Снять' : 'Опубликовать'}</span>
                               </Button>
                               <Button
                                 variant="default"
                                 size="icon"
-                                className="h-8 w-8 rounded-full shrink-0 shadow-lg"
+                                className="h-8 w-8 rounded-full shrink-0 shadow-lg flex-shrink-0"
                                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleEditContent(exhibition, 'exhibition'); }}
                               >
                                 <Pencil className="w-4 h-4" />
@@ -439,26 +439,26 @@ function PublicationsContent() {
                         <p className="text-white/80 text-[10px] mt-1">
                           {new Date(news.publishedAt).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric' })}
                         </p>
-                        <div className="flex items-center justify-between gap-2 mt-2 pt-2 border-t border-white/20 pointer-events-auto">
+                        <div className="flex items-center gap-1.5 mt-2 pt-2 border-t border-white/20 pointer-events-auto min-w-0 flex-wrap">
                           {togglingStatusNewsId === news.id ? (
-                            <Button variant="default" size="sm" className="flex-1 h-8 text-xs rounded-md shadow-lg" disabled>
-                              <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" />
-                              Сохранение...
+                            <Button variant="default" size="sm" className="flex-1 min-w-0 h-8 text-xs rounded-md shadow-lg shrink-0" disabled>
+                              <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" />
+                              <span className="truncate">Сохранение...</span>
                             </Button>
                           ) : (
                             <>
                               <Button
                                 variant="default"
                                 size="sm"
-                                className="flex-1 h-8 text-xs rounded-md max-w-[140px] mx-auto shadow-lg"
+                                className="flex-1 min-w-0 h-8 text-xs rounded-md shadow-lg shrink-0 px-2"
                                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleToggleNewsStatus(news.id, news.status); }}
                               >
-                                {news.status === 'published' ? 'Снять с публикации' : 'Опубликовать'}
+                                <span className="truncate">{news.status === 'published' ? 'Снять' : 'Опубликовать'}</span>
                               </Button>
                               <Button
                                 variant="default"
                                 size="icon"
-                                className="h-8 w-8 rounded-full shrink-0 shadow-lg"
+                                className="h-8 w-8 rounded-full shrink-0 shadow-lg flex-shrink-0"
                                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleEditContent(news, 'news'); }}
                               >
                                 <Pencil className="w-4 h-4" />

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { ProtectedRoute } from '@/components/auth/protected-route'
 import { AdminSidebar } from '@/components/admin/admin-sidebar'
-import { citiesApi, ApiCity } from '@/lib/api'
+import { citiesApi, ApiCity, countriesApi, ApiCountry } from '@/lib/api'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -14,7 +14,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Plus, Loader2, Trash2, MapPin } from 'lucide-react'
+import { Plus, Loader2, Trash2, MapPin, Globe } from 'lucide-react'
 
 function ReferenceContent() {
   const [cities, setCities] = useState<ApiCity[]>([])
@@ -24,6 +24,14 @@ function ReferenceContent() {
   const [saving, setSaving] = useState(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+
+  const [countries, setCountries] = useState<ApiCountry[]>([])
+  const [countriesLoading, setCountriesLoading] = useState(true)
+  const [countriesModalOpen, setCountriesModalOpen] = useState(false)
+  const [newCountryName, setNewCountryName] = useState('')
+  const [countriesSaving, setCountriesSaving] = useState(false)
+  const [countriesDeletingId, setCountriesDeletingId] = useState<string | null>(null)
+  const [countriesError, setCountriesError] = useState<string | null>(null)
 
   const loadCities = async () => {
     setCitiesLoading(true)
@@ -71,6 +79,52 @@ function ReferenceContent() {
     }
   }
 
+  const loadCountries = async () => {
+    setCountriesLoading(true)
+    try {
+      const list = await countriesApi.list()
+      setCountries(list)
+    } catch (e) {
+      setCountriesError(e instanceof Error ? e.message : 'Ошибка загрузки стран')
+    } finally {
+      setCountriesLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    loadCountries()
+  }, [])
+
+  const handleCreateCountry = async () => {
+    const name = newCountryName.trim()
+    if (!name) return
+    setCountriesSaving(true)
+    setCountriesError(null)
+    try {
+      await countriesApi.create({ name })
+      setNewCountryName('')
+      setCountriesModalOpen(false)
+      await loadCountries()
+    } catch (e) {
+      setCountriesError(e instanceof Error ? e.message : 'Ошибка создания')
+    } finally {
+      setCountriesSaving(false)
+    }
+  }
+
+  const handleDeleteCountry = async (id: string) => {
+    setCountriesDeletingId(id)
+    setCountriesError(null)
+    try {
+      await countriesApi.delete(id)
+      await loadCountries()
+    } catch (e) {
+      setCountriesError(e instanceof Error ? e.message : 'Ошибка удаления')
+    } finally {
+      setCountriesDeletingId(null)
+    }
+  }
+
   return (
     <div className="flex min-h-screen bg-background">
       <AdminSidebar />
@@ -83,8 +137,9 @@ function ReferenceContent() {
         </div>
         <div className="p-4 sm:p-6 lg:p-8">
           <Tabs defaultValue="cities" className="space-y-6">
-            <TabsList className="grid w-fit grid-cols-1">
+            <TabsList className="grid w-fit grid-cols-2">
               <TabsTrigger value="cities">Города</TabsTrigger>
+              <TabsTrigger value="countries">Страны</TabsTrigger>
             </TabsList>
             <TabsContent value="cities" className="space-y-6">
               <div className="flex flex-col sm:flex-row gap-4 justify-between items-start pb-4 border-b border-border/60">
@@ -144,6 +199,64 @@ function ReferenceContent() {
                 </Card>
               )}
             </TabsContent>
+            <TabsContent value="countries" className="space-y-6">
+              <div className="flex flex-col sm:flex-row gap-4 justify-between items-start pb-4 border-b border-border/60">
+                <p className="text-sm text-muted-foreground">
+                  Справочник стран для использования в профилях и других формах.
+                </p>
+                <Button onClick={() => { setCountriesModalOpen(true); setCountriesError(null); setNewCountryName(''); }}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Добавить страну
+                </Button>
+              </div>
+              {countriesError && (
+                <p className="text-sm text-destructive">{countriesError}</p>
+              )}
+              {countriesLoading ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <Card key={i} className="overflow-hidden py-0">
+                      <CardContent className="p-4 flex items-center gap-3">
+                        <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                        <span className="text-sm text-muted-foreground">Загрузка...</span>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : countries.length > 0 ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                  {countries.map((country) => (
+                    <Card key={country.id} className="overflow-hidden py-0 group hover:shadow-md transition-shadow">
+                      <CardContent className="p-4 flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <Globe className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                          <span className="font-medium text-sm truncate">{country.name}</span>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="flex-shrink-0 h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                          onClick={() => handleDeleteCountry(country.id)}
+                          disabled={countriesDeletingId === country.id}
+                        >
+                          {countriesDeletingId === country.id ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <Trash2 className="w-4 h-4" />
+                          )}
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <Card>
+                  <CardContent className="py-12 text-center text-muted-foreground">
+                    Нет стран. Добавьте первую страну в справочник.
+                  </CardContent>
+                </Card>
+              )}
+            </TabsContent>
           </Tabs>
         </div>
       </main>
@@ -166,6 +279,30 @@ function ReferenceContent() {
             </div>
             <Button className="w-full" onClick={handleCreateCity} disabled={saving || !newCityName.trim()}>
               {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+              Создать
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={countriesModalOpen} onOpenChange={setCountriesModalOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Новая страна</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-2">
+            <div>
+              <label className="text-sm font-medium">Название</label>
+              <Input
+                value={newCountryName}
+                onChange={(e) => setNewCountryName(e.target.value)}
+                placeholder="Например: Россия"
+                className="mt-1"
+                onKeyDown={(e) => e.key === 'Enter' && handleCreateCountry()}
+              />
+            </div>
+            <Button className="w-full" onClick={handleCreateCountry} disabled={countriesSaving || !newCountryName.trim()}>
+              {countriesSaving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
               Создать
             </Button>
           </div>

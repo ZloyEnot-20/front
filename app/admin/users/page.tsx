@@ -5,6 +5,7 @@ import { ProtectedRoute } from '@/components/auth/protected-route'
 import { AdminSidebar } from '@/components/admin/admin-sidebar'
 import { CreateUserModal } from '@/components/admin/create-user-modal'
 import { useAdmin } from '@/lib/admin-context'
+import { useAuth } from '@/lib/auth-context'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -43,6 +44,7 @@ const ROLE_LABELS: Record<string, string> = {
 }
 
 function UsersModeration() {
+  const { user: currentUser } = useAuth()
   const { users, updateUser, isLoading, refresh } = useAdmin()
   const [searchQuery, setSearchQuery] = useState('')
 
@@ -235,12 +237,14 @@ function UsersModeration() {
                             <DropdownMenuItem>
                               Отправить письмо
                             </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => updateUser(user.id, { status: user.status === 'active' ? 'blocked' : 'active' })}
-                              className={user.status === 'blocked' ? 'text-green-600' : 'text-destructive'}
-                            >
-                              {user.status === 'blocked' ? 'Разблокировать' : 'Заблокировать'}
-                            </DropdownMenuItem>
+                            {currentUser?.id !== user.id && (
+                              <DropdownMenuItem
+                                onClick={() => updateUser(user.id, { status: user.status === 'active' ? 'blocked' : 'active' })}
+                                className={user.status === 'blocked' ? 'text-green-600' : 'text-destructive'}
+                              >
+                                {user.status === 'blocked' ? 'Разблокировать' : 'Заблокировать'}
+                              </DropdownMenuItem>
+                            )}
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </td>

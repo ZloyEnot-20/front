@@ -260,6 +260,23 @@ export interface ApiCity {
   updatedAt?: string
 }
 
+// Справочник стран
+export const countriesApi = {
+  list: () => api<ApiCountry[]>('/api/countries'),
+  create: (data: { name: string }) =>
+    api<ApiCountry>('/api/countries', { method: 'POST', body: JSON.stringify(data) }),
+  update: (id: string, data: { name: string }) =>
+    api<ApiCountry>(`/api/countries/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  delete: (id: string) => api<void>(`/api/countries/${id}`, { method: 'DELETE' }),
+}
+
+export interface ApiCountry {
+  id: string
+  name: string
+  createdAt?: string
+  updatedAt?: string
+}
+
 export interface ApiRegistration {
   id: string
   exhibitionId: string
