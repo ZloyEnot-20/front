@@ -52,11 +52,11 @@ export default function NewsDetailPage({ params }: NewsPageProps) {
     <div className="min-h-screen bg-background">
       <Header />
 
-      {/* Hero */}
+      {/* Hero — баннер */}
       <section className="relative w-full h-96 bg-muted">
-        {news.image && (
+        {(news.banner ?? news.image) && (
           <OptimizedImage
-            src={getImageUrl(news.image) || "/placeholder.svg"}
+            src={getImageUrl(news.banner ?? news.image) || "/placeholder.svg"}
             alt={news.title}
             fill
             sizes="100vw"
@@ -88,11 +88,29 @@ export default function NewsDetailPage({ params }: NewsPageProps) {
                 {publishedDate}
               </div>
 
+              {(news.images?.length ?? 0) > 0 && (
+                <div className="mb-8 rounded-lg overflow-hidden border border-border/40">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 p-2 bg-muted/30">
+                    {(news.images ?? []).map((url, idx) => (
+                      <div key={idx} className="relative aspect-video overflow-hidden rounded-md">
+                        <OptimizedImage
+                          src={getImageUrl(url) || '/placeholder.svg'}
+                          alt={`${news.title} — ${idx + 1}`}
+                          fill
+                          sizes="(max-width: 640px) 100vw, 50vw"
+                          className="object-cover"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="prose prose-sm max-w-none text-foreground/80 leading-relaxed">
                 <p>{news.content}</p>
               </div>
 
-              {/* Share */}
+              {/* Share — закомментировано
               <div className="mt-12 pt-8 border-t border-border/40">
                 <p className="text-sm font-medium mb-4">Поделиться:</p>
                 <div className="flex gap-4">
@@ -107,6 +125,7 @@ export default function NewsDetailPage({ params }: NewsPageProps) {
                   </Button>
                 </div>
               </div>
+              */}
             </article>
 
             {/* Sidebar */}

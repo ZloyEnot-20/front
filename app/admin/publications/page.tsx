@@ -34,9 +34,11 @@ function PublicationsContent() {
   const [modalType, setModalType] = useState<'news' | 'exhibition'>('news')
   const [editingItem, setEditingItem] = useState<any>(null)
   const [formData, setFormData] = useState<any>({})
-  const [pendingImageFile, setPendingImageFile] = useState<File | null>(null)
-  const [pendingPreviewUrl, setPendingPreviewUrl] = useState<string | null>(null)
+  const [pendingBannerFile, setPendingBannerFile] = useState<File | null>(null)
+  const [pendingBannerPreviewUrl, setPendingBannerPreviewUrl] = useState<string | null>(null)
+  const [pendingImagesFiles, setPendingImagesFiles] = useState<File[]>([])
   const [uploadError, setUploadError] = useState<string | null>(null)
+  const MAX_IMAGES = 10
   const [saving, setSaving] = useState(false)
   const [togglingStatusExhibitionId, setTogglingStatusExhibitionId] = useState<string | null>(null)
   const [togglingStatusNewsId, setTogglingStatusNewsId] = useState<string | null>(null)
@@ -65,17 +67,17 @@ function PublicationsContent() {
   }
 
   useEffect(() => {
-    if (!pendingImageFile) {
-      setPendingPreviewUrl((prev) => {
+    if (!pendingBannerFile) {
+      setPendingBannerPreviewUrl((prev) => {
         if (prev) URL.revokeObjectURL(prev)
         return null
       })
       return
     }
-    const url = URL.createObjectURL(pendingImageFile)
-    setPendingPreviewUrl(url)
+    const url = URL.createObjectURL(pendingBannerFile)
+    setPendingBannerPreviewUrl(url)
     return () => URL.revokeObjectURL(url)
-  }, [pendingImageFile])
+  }, [pendingBannerFile])
 
   const filteredExhibitions = exhibitions.filter((e) =>
     e.title.toLowerCase().includes(searchQuery.toLowerCase())
@@ -101,8 +103,9 @@ function PublicationsContent() {
   const handleCreateContent = (type: 'news' | 'exhibition') => {
     setModalType(type)
     setEditingItem(null)
-    setFormData(type === 'exhibition' ? { cities: [], participants: [] } : {})
-    setPendingImageFile(null)
+    setFormData(type === 'exhibition' ? { cities: [], participants: [], images: [] } : { images: [] })
+    setPendingBannerFile(null)
+    setPendingImagesFiles([])
     setUploadError(null)
     setModalOpen(true)
   }
@@ -112,8 +115,15 @@ function PublicationsContent() {
     setEditingItem(item)
     const cityIds = (item.cities ?? []).map((c: { id: string; name: string } | string) => typeof c === 'string' ? c : c.id)
     const participantIds = (item.participants ?? []).map((p: { id: string } | string) => typeof p === 'string' ? p : p.id)
-    setFormData({ ...item, cities: cityIds, participants: participantIds })
-    setPendingImageFile(null)
+    setFormData({
+      ...item,
+      cities: cityIds,
+      participants: participantIds,
+      banner: item.banner ?? item.image,
+      images: item.images ?? [],
+    })
+    setPendingBannerFile(null)
+    setPendingImagesFiles([])
     setUploadError(null)
     setModalOpen(true)
   }
@@ -177,7 +187,7 @@ function PublicationsContent() {
 
     setSaving(true)
     try {
-      const useFormData = !!pendingImageFile
+      const useFormData = !!pendingBannerFile || pendingImagesFiles.length > 0
 
       if (useFormData) {
         const fd = new FormData()
@@ -199,7 +209,18 @@ function PublicationsContent() {
           fd.append('status', formData.status ?? 'draft')
         }
         fd.append('createdBy', user?.id || '')
-        fd.append('image', pendingImageFile)
+        if (pendingBannerFile) {
+          fd.append('banner', pendingBannerFile)
+        } else if (formData.banner) {
+          fd.append('banner', formData.banner)
+        }
+        const existingImages = formData.images ?? []
+        if (pendingImagesFiles.length > 0) {
+          fd.append('imagesExisting', JSON.stringify(existingImages))
+          pendingImagesFiles.slice(0, MAX_IMAGES).forEach((file) => fd.append('images', file))
+        } else if (existingImages.length > 0) {
+          fd.append('images', JSON.stringify(existingImages))
+        }
 
         if (editingItem) {
           if (modalType === 'exhibition') {
@@ -212,15 +233,18 @@ function PublicationsContent() {
         }
       } else {
         const dataToSave = { ...formData }
+        const banner = dataToSave.banner ?? dataToSave.image
         if (editingItem) {
           if (modalType === 'exhibition') {
-            await updateExhibition(editingItem.id, { ...dataToSave, cities: dataToSave.cities ?? [], participants: dataToSave.participants ?? [] })
+            await updateExhibition(editingItem.id, { ...dataToSave, cities: dataToSave.cities ?? [], participants: dataToSave.participants ?? [], banner, images: dataToSave.images ?? [] })
           } else {
             const newsPayload = {
               title: dataToSave.title,
               content: dataToSave.content ?? '',
               excerpt: (dataToSave.content ?? '').replace(/<[^>]*>/g, '').trim().slice(0, 300),
-              image: dataToSave.image,
+              image: banner,
+              banner,
+              images: dataToSave.images ?? [],
               publishedAt: dataToSave.publishedAt ?? new Date(),
               status: (dataToSave.status as 'draft' | 'published') ?? 'draft',
             }
@@ -236,7 +260,9 @@ function PublicationsContent() {
               endDate: dataToSave.endDate ?? new Date(),
               cities: dataToSave.cities ?? [],
               participants: dataToSave.participants ?? [],
-              image: dataToSave.image,
+              image: banner,
+              banner,
+              images: dataToSave.images ?? [],
               status: (dataToSave.status as 'draft' | 'published') ?? 'draft',
               participantCount: 0,
               registrations: 0,
@@ -251,7 +277,9 @@ function PublicationsContent() {
               title: dataToSave.title,
               content: dataToSave.content ?? '',
               excerpt: (dataToSave.content ?? '').replace(/<[^>]*>/g, '').trim().slice(0, 300),
-              image: dataToSave.image,
+              image: banner,
+              banner,
+              images: dataToSave.images ?? [],
               publishedAt: dataToSave.publishedAt ?? new Date(),
               status: (dataToSave.status as 'draft' | 'published') ?? 'draft',
               createdBy: user?.id || '3',
@@ -262,7 +290,8 @@ function PublicationsContent() {
           }
         }
       }
-      setPendingImageFile(null)
+      setPendingBannerFile(null)
+      setPendingImagesFiles([])
       setModalOpen(false)
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Ошибка сохранения'
@@ -507,12 +536,13 @@ function PublicationsContent() {
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium">Изображение</label>
+                  <label className="text-sm font-medium">Баннер</label>
+                  <p className="text-xs text-muted-foreground mt-0.5 mb-1">Карточка и шапка страницы публикации</p>
                   <div className="mt-1 flex flex-wrap items-start gap-3">
-                    {(pendingPreviewUrl || formData.image) ? (
+                    {(pendingBannerPreviewUrl || formData.banner || formData.image) ? (
                       <div className="flex flex-col gap-2 w-36">
                         <img
-                          src={pendingPreviewUrl ?? getImageUrl(formData.image)}
+                          src={pendingBannerPreviewUrl ?? getImageUrl(formData.banner ?? formData.image)}
                           alt=""
                           className="h-36 w-36 rounded-lg object-cover border"
                           loading="lazy"
@@ -523,8 +553,8 @@ function PublicationsContent() {
                           size="sm"
                           className="w-full min-w-0"
                           onClick={() => {
-                            setFormData({ ...formData, image: '' })
-                            setPendingImageFile(null)
+                            setFormData({ ...formData, banner: '', image: '' })
+                            setPendingBannerFile(null)
                           }}
                         >
                           <Trash2 className="w-4 h-4 mr-1.5" />
@@ -547,7 +577,7 @@ function PublicationsContent() {
                             e.target.value = ''
                             return
                           }
-                          setPendingImageFile(file)
+                          setPendingBannerFile(file)
                           e.target.value = ''
                         }}
                       />
@@ -555,6 +585,66 @@ function PublicationsContent() {
                       <span className="text-xs text-muted-foreground ml-1">(макс. {MAX_FILE_MB} МБ)</span>
                     </label>
                     {uploadError ? <p className="text-sm text-destructive mt-1">{uploadError}</p> : null}
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Изображения (до {MAX_IMAGES})</label>
+                  <p className="text-xs text-muted-foreground mt-0.5 mb-1">Отображаются на странице публикации</p>
+                  <div className="mt-1 flex flex-wrap gap-2">
+                    {(formData.images ?? []).map((url: string, idx: number) => (
+                      <div key={idx} className="relative group">
+                        <img src={getImageUrl(url)} alt="" className="h-20 w-20 rounded-lg object-cover border" loading="lazy" />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="icon"
+                          className="absolute -top-1 -right-1 h-6 w-6 rounded-full opacity-90 group-hover:opacity-100"
+                          onClick={() => setFormData({ ...formData, images: (formData.images ?? []).filter((_: string, i: number) => i !== idx) })}
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    ))}
+                    {pendingImagesFiles.map((file, idx) => (
+                      <div key={`pending-${idx}`} className="relative group">
+                        <img src={URL.createObjectURL(file)} alt="" className="h-20 w-20 rounded-lg object-cover border" />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="icon"
+                          className="absolute -top-1 -right-1 h-6 w-6 rounded-full opacity-90"
+                          onClick={() => setPendingImagesFiles((prev) => prev.filter((_, i) => i !== idx))}
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    ))}
+                    {(formData.images ?? []).length + pendingImagesFiles.length < MAX_IMAGES && (
+                      <label className="h-20 w-20 flex items-center justify-center rounded-lg border border-dashed border-muted-foreground/40 hover:border-primary/50 cursor-pointer text-muted-foreground text-xs">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          multiple
+                          disabled={saving}
+                          onChange={(e) => {
+                            const files = Array.from(e.target.files ?? [])
+                            e.target.value = ''
+                            setUploadError(null)
+                            const added: File[] = []
+                            for (const file of files) {
+                              if (file.size > MAX_FILE_MB * 1024 * 1024) {
+                                setUploadError(`Файл ${file.name} слишком большой. Максимум ${MAX_FILE_MB} МБ.`)
+                                continue
+                              }
+                              added.push(file)
+                            }
+                            setPendingImagesFiles((prev) => prev.concat(added).slice(0, MAX_IMAGES))
+                          }}
+                        />
+                        + Добавить
+                      </label>
+                    )}
                   </div>
                 </div>
                 {modalType === 'exhibition' ? (

@@ -225,6 +225,8 @@ export interface ApiExhibition {
   cities?: { id: string; name: string }[]
   participants?: ApiExhibitorInfo[]
   image?: string
+  banner?: string
+  images?: string[]
   status: string
   participantCount: number
   registrations: number
@@ -300,6 +302,8 @@ export interface ApiNews {
   content: string
   excerpt: string
   image?: string
+  banner?: string
+  images?: string[]
   publishedAt: string
   createdBy: string
   status: string

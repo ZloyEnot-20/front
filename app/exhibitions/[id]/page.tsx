@@ -93,11 +93,11 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
     <div className="min-h-screen bg-background">
       <Header />
 
-      {/* Hero */}
+      {/* Hero — баннер */}
       <section className="relative w-full h-96 bg-muted">
-        {exhibition.image && (
+        {(exhibition.banner ?? exhibition.image) && (
           <OptimizedImage
-            src={getImageUrl(exhibition.image) || "/placeholder.svg"}
+            src={getImageUrl(exhibition.banner ?? exhibition.image) || "/placeholder.svg"}
             alt={exhibition.title}
             fill
             sizes="100vw"
@@ -125,6 +125,33 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Main */}
             <div className="lg:col-span-2 space-y-8">
+              {/* Галерея изображений (до 10) */}
+              {(exhibition.images?.length ?? 0) > 0 && (
+                <Card>
+                  <CardContent className="p-0">
+                    <Carousel className="w-full">
+                      <CarouselContent>
+                        {(exhibition.images ?? []).map((url, idx) => (
+                          <CarouselItem key={idx}>
+                            <div className="relative aspect-video w-full overflow-hidden rounded-b-lg">
+                              <OptimizedImage
+                                src={getImageUrl(url) || '/placeholder.svg'}
+                                alt={`${exhibition.title} — ${idx + 1}`}
+                                fill
+                                sizes="(max-width: 1024px) 100vw, 66vw"
+                                className="object-contain"
+                              />
+                            </div>
+                          </CarouselItem>
+                        ))}
+                      </CarouselContent>
+                      <CarouselPrevious className="left-2" />
+                      <CarouselNext className="right-2" />
+                    </Carousel>
+                  </CardContent>
+                </Card>
+              )}
+
               {/* Description */}
               <Card>
                 <CardHeader>

@@ -5,7 +5,7 @@ import { Exhibition, News, User, ExhibitionRegistration } from './types'
 import { exhibitionsApi, newsApi, usersApi, registrationsApi, ApiUser } from './api'
 import { useAuth } from './auth-context'
 
-function toExhibition(e: { id: string; title: string; description: string; startDate: string; endDate: string; cities?: { id: string; name: string }[]; participants?: { id: string; name: string; avatar?: string; exhibitorDescription?: string; exhibitorAddress?: string; exhibitorWebsite?: string; exhibitorPhotos?: string[] }[]; image?: string; status: string; participantCount: number; registrations: number; createdBy: string; createdAt: string; updatedAt: string }): Exhibition {
+function toExhibition(e: { id: string; title: string; description: string; startDate: string; endDate: string; cities?: { id: string; name: string }[]; participants?: { id: string; name: string; avatar?: string; exhibitorDescription?: string; exhibitorAddress?: string; exhibitorWebsite?: string; exhibitorPhotos?: string[] }[]; image?: string; banner?: string; images?: string[]; status: string; participantCount: number; registrations: number; createdBy: string; createdAt: string; updatedAt: string }): Exhibition {
   return {
     id: e.id,
     title: e.title,
@@ -14,7 +14,9 @@ function toExhibition(e: { id: string; title: string; description: string; start
     endDate: new Date(e.endDate),
     cities: e.cities ?? [],
     participants: e.participants ?? [],
-    image: e.image,
+    image: e.banner ?? e.image,
+    banner: e.banner,
+    images: e.images ?? [],
     status: e.status as Exhibition['status'],
     participantCount: e.participantCount,
     registrations: e.registrations,
@@ -24,13 +26,15 @@ function toExhibition(e: { id: string; title: string; description: string; start
   }
 }
 
-function toNews(n: { id: string; title: string; content: string; excerpt: string; image?: string; publishedAt: string; createdBy: string; status: string; createdAt: string; updatedAt: string }): News {
+function toNews(n: { id: string; title: string; content: string; excerpt: string; image?: string; banner?: string; images?: string[]; publishedAt: string; createdBy: string; status: string; createdAt: string; updatedAt: string }): News {
   return {
     id: n.id,
     title: n.title,
     content: n.content,
     excerpt: n.excerpt,
-    image: n.image,
+    image: n.banner ?? n.image,
+    banner: n.banner,
+    images: n.images ?? [],
     publishedAt: new Date(n.publishedAt),
     createdBy: n.createdBy,
     status: n.status as News['status'],

@@ -52,6 +52,10 @@ export interface Exhibition {
   /** Университеты-участники (exhibitor) */
   participants?: ExhibitorInfo[]
   image?: string
+  /** Баннер: карточка и шапка страницы */
+  banner?: string
+  /** До 10 изображений на странице публикации */
+  images?: string[]
   status: ExhibitionStatus
   participantCount: number
   registrations: number
@@ -67,6 +71,10 @@ export interface News {
   content: string
   excerpt: string
   image?: string
+  /** Баннер: карточка и шапка страницы */
+  banner?: string
+  /** До 10 изображений на странице публикации */
+  images?: string[]
   publishedAt: Date
   createdBy: string
   status: 'draft' | 'published'
