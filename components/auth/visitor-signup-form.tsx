@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp'
+import { Loader2 } from 'lucide-react'
 
 const LANG = ['uz', 'ru', 'en'] as const
 type Lang = (typeof LANG)[number]
@@ -33,7 +34,9 @@ const t: Record<Lang, Record<string, string>> = {
     phone: 'Telefon',
     email: 'Email',
     sendCode: "Kod yuborish",
+    sendingCode: 'Yuborilmoqda',
     codeSent: "Kod yuborildi",
+    codeSentWait: 'Yuborildi',
     codePlaceholder: 'Kod',
     city: 'Shahar',
     status: 'Status',
@@ -74,7 +77,9 @@ const t: Record<Lang, Record<string, string>> = {
     phone: 'Телефон',
     email: 'Email',
     sendCode: 'Отправить код',
+    sendingCode: 'Отправка',
     codeSent: 'Код отправлен',
+    codeSentWait: 'Отправлено',
     codePlaceholder: 'Код из письма',
     city: 'Город',
     status: 'Статус',
@@ -115,7 +120,9 @@ const t: Record<Lang, Record<string, string>> = {
     phone: 'Phone',
     email: 'Email',
     sendCode: 'Send code',
+    sendingCode: 'Sending',
     codeSent: 'Code sent',
+    codeSentWait: 'Sent',
     codePlaceholder: 'Code from email',
     city: 'City',
     status: 'Status',
@@ -165,6 +172,14 @@ export function VisitorSignupForm() {
   const [error, setError] = useState('')
   const [emailCodeSent, setEmailCodeSent] = useState(false)
   const [sendingCode, setSendingCode] = useState(false)
+  const [countdown, setCountdown] = useState(0)
+
+  const COOLDOWN_SEC = 60
+  useEffect(() => {
+    if (countdown <= 0) return
+    const t = setInterval(() => setCountdown((c) => (c <= 1 ? 0 : c - 1)), 1000)
+    return () => clearInterval(t)
+  }, [countdown])
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -200,6 +215,7 @@ export function VisitorSignupForm() {
     try {
       await authApi.sendEmailCode(email)
       setEmailCodeSent(true)
+      setCountdown(COOLDOWN_SEC)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Ошибка отправки кода')
     } finally {
@@ -344,9 +360,18 @@ export function VisitorSignupForm() {
                 type="button"
                 variant="outline"
                 onClick={handleSendCode}
-                disabled={sendingCode || isLoading}
+                disabled={sendingCode || isLoading || countdown > 0}
               >
-                {sendingCode ? '...' : T.sendCode}
+                {sendingCode ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                    {T.sendingCode}
+                  </>
+                ) : countdown > 0 ? (
+                  `${T.codeSentWait} (0:${String(countdown).padStart(2, '0')})`
+                ) : (
+                  T.sendCode
+                )}
               </Button>
             </div>
             {emailCodeSent && (

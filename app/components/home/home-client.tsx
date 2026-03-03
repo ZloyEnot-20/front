@@ -5,18 +5,14 @@ import { ExhibitionCardSkeleton } from '@/components/exhibitions/exhibition-card
 import { NewsCard } from '@/components/news/news-card'
 import { NewsCardSkeleton } from '@/components/news/news-card-skeleton'
 import { Button } from '@/components/ui/button'
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from '@/components/ui/carousel'
 import { useAdmin } from '@/lib/admin-context'
 import { useAuth } from '@/lib/auth-context'
 import { useLocale } from '@/lib/i18n'
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
+
+const HOME_EXHIBITIONS_LIMIT = 6
+const HOME_NEWS_LIMIT = 6
 
 export function HomeClient() {
   const { t } = useLocale()
@@ -43,22 +39,10 @@ export function HomeClient() {
             </div>
           ) : publishedExhibitions.length > 0 ? (
             <>
-              <div className="relative px-2 mb-12">
-                <Carousel opts={{ align: 'start', loop: false, containScroll: 'trimSnaps' }} className="w-full">
-                  <CarouselContent className="-ml-4 md:-ml-6">
-                    {Array.from({ length: Math.ceil(publishedExhibitions.length / 3) }).map((_, rowIndex) => (
-                      <CarouselItem key={rowIndex} className="pl-4 md:pl-6 basis-full">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                          {publishedExhibitions.slice(rowIndex * 3, rowIndex * 3 + 3).map((exhibition) => (
-                            <ExhibitionCard key={exhibition.id} exhibition={exhibition} />
-                          ))}
-                        </div>
-                      </CarouselItem>
-                    ))}
-                  </CarouselContent>
-                  <CarouselPrevious className="left-0 -translate-y-1/2 hidden sm:flex" />
-                  <CarouselNext className="right-0 -translate-y-1/2 hidden sm:flex" />
-                </Carousel>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+                {publishedExhibitions.slice(0, HOME_EXHIBITIONS_LIMIT).map((exhibition) => (
+                  <ExhibitionCard key={exhibition.id} exhibition={exhibition} />
+                ))}
               </div>
               <div className="text-center">
                 <Button variant="outline" asChild>
@@ -82,7 +66,7 @@ export function HomeClient() {
         </div>
       </section>
 
-      {/* Новости — карусель 3 в ряд */}
+      {/* Новости — 2 ряда по 3 */}
       <section className="border-t border-b border-border/40 py-16 md:py-24 min-h-[380px]" id="news">
         <div className="container mx-auto px-4">
           <div className="mb-8">
@@ -96,23 +80,21 @@ export function HomeClient() {
               ))}
             </div>
           ) : publishedNews.length > 0 ? (
-            <div className="relative px-2">
-              <Carousel opts={{ align: 'start', loop: false, containScroll: 'trimSnaps' }} className="w-full">
-                <CarouselContent className="-ml-4 md:-ml-6">
-                  {Array.from({ length: Math.ceil(publishedNews.length / 3) }).map((_, rowIndex) => (
-                    <CarouselItem key={rowIndex} className="pl-4 md:pl-6 basis-full">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {publishedNews.slice(rowIndex * 3, rowIndex * 3 + 3).map((item) => (
-                          <NewsCard key={item.id} news={item} />
-                        ))}
-                      </div>
-                    </CarouselItem>
-                  ))}
-                </CarouselContent>
-                <CarouselPrevious className="left-0 -translate-y-1/2 hidden sm:flex" />
-                <CarouselNext className="right-0 -translate-y-1/2 hidden sm:flex" />
-              </Carousel>
-            </div>
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                {publishedNews.slice(0, HOME_NEWS_LIMIT).map((item) => (
+                  <NewsCard key={item.id} news={item} />
+                ))}
+              </div>
+              <div className="text-center">
+                <Button variant="outline" asChild>
+                  <Link href="/news">
+                    Все новости
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Link>
+                </Button>
+              </div>
+            </>
           ) : (
             <p className="text-muted-foreground text-center py-8">{t('noNews')}</p>
           )}

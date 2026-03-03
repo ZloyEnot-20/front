@@ -3,34 +3,57 @@
 import { Header } from '@/components/layout/header'
 import { ExhibitionCard } from '@/components/exhibitions/exhibition-card'
 import { useAdmin } from '@/lib/admin-context'
-import { useState } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationPrevious,
+  PaginationNext,
+} from '@/components/ui/pagination'
 import { Search, X } from 'lucide-react'
+
+const PER_PAGE = 10
 
 export default function ExhibitionsPage() {
   const { exhibitions } = useAdmin()
   const publishedExhibitions = exhibitions.filter((e) => e.status === 'published')
   const [searchQuery, setSearchQuery] = useState('')
   const [sortBy, setSortBy] = useState('upcoming')
+  const [page, setPage] = useState(1)
 
-  const filteredExhibitions = publishedExhibitions
-    .filter((e) => {
-      const q = searchQuery.toLowerCase()
-      const matchTitle = e.title.toLowerCase().includes(q)
-      const matchCities = e.cities?.some((c) => c.name.toLowerCase().includes(q))
-      return matchTitle || matchCities
-    })
-    .sort((a, b) => {
-      if (sortBy === 'upcoming') {
-        return new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
-      }
-      if (sortBy === 'popular') {
-        return b.registrations - a.registrations
-      }
-      return 0
-    })
+  const filteredExhibitions = useMemo(
+    () =>
+      publishedExhibitions
+        .filter((e) => {
+          const q = searchQuery.toLowerCase()
+          const matchTitle = e.title.toLowerCase().includes(q)
+          const matchCities = e.cities?.some((c) => c.name.toLowerCase().includes(q))
+          return matchTitle || matchCities
+        })
+        .sort((a, b) => {
+          if (sortBy === 'upcoming') {
+            return new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
+          }
+          if (sortBy === 'popular') {
+            return b.registrations - a.registrations
+          }
+          return 0
+        }),
+    [publishedExhibitions, searchQuery, sortBy]
+  )
+
+  const totalPages = Math.max(1, Math.ceil(filteredExhibitions.length / PER_PAGE))
+  const start = (page - 1) * PER_PAGE
+  const paginatedExhibitions = filteredExhibitions.slice(start, start + PER_PAGE)
+
+  useEffect(() => {
+    setPage(1)
+  }, [searchQuery, sortBy])
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -78,11 +101,53 @@ export default function ExhibitionsPage() {
 
           {/* Results */}
           {filteredExhibitions.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredExhibitions.map((exhibition) => (
-                <ExhibitionCard key={exhibition.id} exhibition={exhibition} />
-              ))}
-            </div>
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {paginatedExhibitions.map((exhibition) => (
+                  <ExhibitionCard key={exhibition.id} exhibition={exhibition} />
+                ))}
+              </div>
+              {totalPages > 1 && (
+                <Pagination className="mt-8">
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault()
+                          setPage((p) => Math.max(1, p - 1))
+                        }}
+                        className={page <= 1 ? 'pointer-events-none opacity-50' : ''}
+                      />
+                    </PaginationItem>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                      <PaginationItem key={p}>
+                        <PaginationLink
+                          href="#"
+                          onClick={(e) => {
+                            e.preventDefault()
+                            setPage(p)
+                          }}
+                          isActive={page === p}
+                        >
+                          {p}
+                        </PaginationLink>
+                      </PaginationItem>
+                    ))}
+                    <PaginationItem>
+                      <PaginationNext
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault()
+                          setPage((p) => Math.min(totalPages, p + 1))
+                        }}
+                        className={page >= totalPages ? 'pointer-events-none opacity-50' : ''}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              )}
+            </>
           ) : (
             <div className="text-center py-12">
               <p className="text-muted-foreground mb-4">Выставки не найдены</p>

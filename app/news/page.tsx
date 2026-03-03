@@ -1,14 +1,28 @@
 'use client'
 
+import { useState } from 'react'
 import { Header } from '@/components/layout/header'
 import { NewsCard } from '@/components/news/news-card'
 import { useAdmin } from '@/lib/admin-context'
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationPrevious,
+  PaginationNext,
+} from '@/components/ui/pagination'
+
+const PER_PAGE = 10
 
 export default function NewsPage() {
   const { news } = useAdmin()
   const publishedNews = news.filter((n) => n.status === 'published')
-  const featuredNews = publishedNews[0]
-  const otherNews = publishedNews.slice(1)
+  const [page, setPage] = useState(1)
+
+  const totalPages = Math.max(1, Math.ceil(publishedNews.length / PER_PAGE))
+  const start = (page - 1) * PER_PAGE
+  const paginatedNews = publishedNews.slice(start, start + PER_PAGE)
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -23,26 +37,55 @@ export default function NewsPage() {
 
       <section className="py-12 flex-1">
         <div className="container mx-auto px-4">
-          {/* Featured */}
-          {featuredNews && (
-            <div className="mb-16">
-              <NewsCard news={featuredNews} featured />
-            </div>
-          )}
-
-          {/* Grid */}
-          {otherNews.length > 0 && (
-            <div>
-              <h2 className="text-2xl font-bold mb-8">Другие новости</h2>
+          {publishedNews.length > 0 ? (
+            <>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {otherNews.map((news) => (
-                  <NewsCard key={news.id} news={news} />
+                {paginatedNews.map((item) => (
+                  <NewsCard key={item.id} news={item} />
                 ))}
               </div>
-            </div>
-          )}
-
-          {publishedNews.length === 0 && (
+              {totalPages > 1 && (
+                <Pagination className="mt-8">
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault()
+                          setPage((p) => Math.max(1, p - 1))
+                        }}
+                        className={page <= 1 ? 'pointer-events-none opacity-50' : ''}
+                      />
+                    </PaginationItem>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                      <PaginationItem key={p}>
+                        <PaginationLink
+                          href="#"
+                          onClick={(e) => {
+                            e.preventDefault()
+                            setPage(p)
+                          }}
+                          isActive={page === p}
+                        >
+                          {p}
+                        </PaginationLink>
+                      </PaginationItem>
+                    ))}
+                    <PaginationItem>
+                      <PaginationNext
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault()
+                          setPage((p) => Math.min(totalPages, p + 1))
+                        }}
+                        className={page >= totalPages ? 'pointer-events-none opacity-50' : ''}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              )}
+            </>
+          ) : (
             <div className="text-center py-12">
               <p className="text-muted-foreground">Новостей пока нет</p>
             </div>
