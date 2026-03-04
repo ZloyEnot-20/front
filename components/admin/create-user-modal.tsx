@@ -21,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { CheckCircle2, AlertCircle, Loader2 } from 'lucide-react'
+import { CheckCircle2, AlertCircle, Loader2, Eye, EyeOff, KeyRound } from 'lucide-react'
 
 interface CreateUserModalProps {
   isOpen: boolean
@@ -50,8 +50,21 @@ export function CreateUserModal({ isOpen, onOpenChange }: CreateUserModalProps) 
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   const isExhibitor = formData.role === 'exhibitor'
+
+  function generateStrongPassword(): string {
+    const upper = 'ABCDEFGHJKLMNPQRSTUVWXYZ'
+    const lower = 'abcdefghjkmnpqrstuvwxyz'
+    const numbers = '23456789'
+    const symbols = '!@#$%&*'
+    const pick = (s: string) => s[Math.floor(Math.random() * s.length)]
+    let p = pick(upper) + pick(lower) + pick(numbers) + pick(symbols)
+    const all = upper + lower + numbers + symbols
+    for (let i = p.length; i < 12; i++) p += pick(all)
+    return p.split('').sort(() => Math.random() - 0.5).join('')
+  }
 
   const validateForm = () => {
     if (isExhibitor) {
@@ -77,8 +90,8 @@ export function CreateUserModal({ isOpen, onOpenChange }: CreateUserModalProps) 
       setError('Введите номер телефона')
       return false
     }
-    if (!formData.password || formData.password.length < 6) {
-      setError('Задайте пароль (не менее 6 символов)')
+    if (!formData.password || formData.password.length < 8) {
+      setError('Задайте пароль (не менее 8 символов, цифры, заглавная буква, символ)')
       return false
     }
     return true
@@ -207,13 +220,36 @@ export function CreateUserModal({ isOpen, onOpenChange }: CreateUserModalProps) 
             </div>
 
             <div>
-              <label className="text-sm font-medium">Пароль (задаётся администратором)</label>
-              <Input
-                type="password"
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                placeholder="••••••••"
-              />
+              <div className="flex items-center justify-between gap-2 mb-2">
+                <label className="text-sm font-medium">Пароль (задаётся администратором)</label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="shrink-0 gap-1.5 h-8 text-xs"
+                  onClick={() => setFormData({ ...formData, password: generateStrongPassword() })}
+                >
+                  <KeyRound className="w-3.5 h-3.5" />
+                  Сгенерировать надёжный пароль
+                </Button>
+              </div>
+              <div className="relative">
+                <Input
+                  type={showPassword ? 'text' : 'password'}
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  placeholder="Минимум 8 символов, цифры, буквы, символы"
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted"
+                  aria-label={showPassword ? 'Скрыть пароль' : 'Показать пароль'}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
             </div>
 
             <div>
