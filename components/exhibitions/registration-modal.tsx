@@ -5,7 +5,7 @@ import { useAdmin } from '@/lib/admin-context'
 import { useAuth } from '@/lib/auth-context'
 import { useLocale } from '@/lib/i18n'
 import { registrationsApi } from '@/lib/api'
-import { sendRegistrationEmail, sendBitrixIntegration } from '@/lib/email-service'
+import { sendRegistrationEmail } from '@/lib/email-service'
 import {
   Dialog,
   DialogContent,
@@ -88,14 +88,7 @@ export function RegistrationModal({
       setRegistration(newRegistration)
       setStep('success')
 
-      sendBitrixIntegration({
-        firstName: created.firstName,
-        lastName: created.lastName,
-        email: created.email,
-        phone: created.phone,
-        exhibitionId,
-        city,
-      }).catch(console.error)
+      
       sendRegistrationEmail({
         to: created.email,
         subject: `Подтверждение регистрации на выставку "${exhibitionTitle}"`,

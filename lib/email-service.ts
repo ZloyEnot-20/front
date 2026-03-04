@@ -31,10 +31,7 @@ export async function sendRegistrationEmail(data: EmailData): Promise<boolean> {
       Команда EDU Expo
     `
 
-    console.log('[v0] Email отправлен:')
-    console.log(`To: ${data.to}`)
-    console.log(`Subject: ${data.subject}`)
-    console.log(`Body: ${emailBody}`)
+     
 
     // Имитируем задержку отправки
     await new Promise((resolve) => setTimeout(resolve, 500))
@@ -46,30 +43,4 @@ export async function sendRegistrationEmail(data: EmailData): Promise<boolean> {
   }
 }
 
-export async function sendBitrixIntegration(data: {
-  firstName: string
-  lastName: string
-  email: string
-  phone: string
-  exhibitionId: string
-  city: string
-}): Promise<boolean> {
-  try {
-    // В реальном приложении здесь был бы запрос к Bitrix24 API
-    // Сейчас имитируем успешную интеграцию
-    
-    console.log('[v0] Отправка данных в Bitrix24:')
-    console.log(JSON.stringify({
-      ...data,
-      timestamp: new Date().toISOString(),
-    }, null, 2))
-
-    // Имитируем задержку интеграции
-    await new Promise((resolve) => setTimeout(resolve, 800))
-
-    return true
-  } catch (error) {
-    console.error('[v0] Ошибка при интеграции с Bitrix24:', error)
-    return false
-  }
-}
+ 

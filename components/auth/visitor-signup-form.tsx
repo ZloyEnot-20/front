@@ -61,6 +61,11 @@ const t: Record<Lang, Record<string, string>> = {
     password: 'Parol',
     confirmPassword: 'Parolni tasdiqlang',
     submit: "Ro'yxatdan o'tish",
+    nextStep: "Keyingi",
+    confirmTitle: "Emailni tasdiqlang",
+    confirmDesc: "Pochtangizga yuborilgan kodni kiriting",
+    confirmSubmit: "Ro'yxatdan o'tish",
+    back: 'Orqaga',
     haveAccount: 'Hisobingiz bormi?',
     login: 'Kirish',
     errRequired: "To'ldiring",
@@ -104,6 +109,11 @@ const t: Record<Lang, Record<string, string>> = {
     password: 'Пароль',
     confirmPassword: 'Подтверждение пароля',
     submit: 'Зарегистрироваться',
+    nextStep: 'Далее',
+    confirmTitle: 'Подтверждение email',
+    confirmDesc: 'Введите код из письма, отправленного на указанный email',
+    confirmSubmit: 'Зарегистрироваться',
+    back: 'Назад',
     haveAccount: 'Уже есть учётная запись?',
     login: 'Войти',
     errRequired: 'Обязательное поле',
@@ -147,6 +157,11 @@ const t: Record<Lang, Record<string, string>> = {
     password: 'Password',
     confirmPassword: 'Confirm password',
     submit: 'Register',
+    nextStep: 'Next',
+    confirmTitle: 'Confirm email',
+    confirmDesc: 'Enter the code from the email we sent you',
+    confirmSubmit: 'Register',
+    back: 'Back',
     haveAccount: 'Already have an account?',
     login: 'Log in',
     errRequired: 'Required',
@@ -163,7 +178,7 @@ export function VisitorSignupForm() {
   const router = useRouter()
   const { signup, isLoading } = useAuth()
   const globalLocale = useLocale()
-  const [step, setStep] = useState<'language' | 'form'>('language')
+  const [step, setStep] = useState<'language' | 'form' | 'confirm'>('language')
   const [lang, setLangState] = useState<Lang>(() => globalLocale.lang)
   const setLang = (l: Lang) => {
     setLangState(l)
@@ -174,7 +189,7 @@ export function VisitorSignupForm() {
   const [sendingCode, setSendingCode] = useState(false)
   const [countdown, setCountdown] = useState(0)
 
-  const COOLDOWN_SEC = 60
+  const COOLDOWN_SEC = 120
   useEffect(() => {
     if (countdown <= 0) return
     const t = setInterval(() => setCountdown((c) => (c <= 1 ? 0 : c - 1)), 1000)
@@ -223,10 +238,9 @@ export function VisitorSignupForm() {
     }
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleFormNext = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
-
     if (formData.password !== formData.confirmPassword) {
       setError(T.errPasswordMatch)
       return
@@ -235,11 +249,26 @@ export function VisitorSignupForm() {
       setError(T.errConsent)
       return
     }
+    setSendingCode(true)
+    try {
+      await authApi.sendEmailCode(formData.email.trim())
+      setEmailCodeSent(true)
+      setCountdown(COOLDOWN_SEC)
+      setStep('confirm')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Ошибка отправки кода')
+    } finally {
+      setSendingCode(false)
+    }
+  }
+
+  const handleConfirmSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
     if (!formData.emailCode.trim()) {
       setError(T.errEmailCode)
       return
     }
-
     try {
       await signup({
         email: formData.email.trim(),
@@ -291,6 +320,66 @@ export function VisitorSignupForm() {
     )
   }
 
+  if (step === 'confirm') {
+    return (
+      <Card className="w-full max-w-lg">
+        <CardHeader>
+          <CardTitle>{T.confirmTitle}</CardTitle>
+          <CardDescription>{T.confirmDesc}</CardDescription>
+          <p className="text-sm text-muted-foreground">{formData.email}</p>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleConfirmSubmit} className="space-y-4">
+            {error && (
+              <Alert variant="destructive">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+            <div className="space-y-2">
+              <Label>{T.codePlaceholder}</Label>
+              <InputOTP
+                maxLength={6}
+                value={formData.emailCode}
+                onChange={(v) => setFormData((prev) => ({ ...prev, emailCode: v }))}
+              >
+                <InputOTPGroup className="gap-1">
+                  {[0, 1, 2, 3, 4, 5].map((i) => (
+                    <InputOTPSlot key={i} index={i} />
+                  ))}
+                </InputOTPGroup>
+              </InputOTP>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleSendCode}
+                disabled={sendingCode || isLoading || countdown > 0}
+              >
+                {sendingCode ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                    {T.sendingCode}
+                  </>
+                ) : countdown > 0 ? (
+                  `${T.codeSentWait} (${Math.floor(countdown / 60)}:${String(countdown % 60).padStart(2, '0')})`
+                ) : (
+                  T.sendCode
+                )}
+              </Button>
+              <Button type="submit" className="flex-1" disabled={isLoading}>
+                {isLoading ? '...' : T.confirmSubmit}
+              </Button>
+            </div>
+            <Button type="button" variant="ghost" className="w-full" onClick={() => setStep('form')}>
+              {T.back}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+    )
+  }
+
   return (
     <Card className="w-full max-w-lg">
       <CardHeader>
@@ -298,7 +387,7 @@ export function VisitorSignupForm() {
         <CardDescription>{T.subtitle}</CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleFormNext} className="space-y-4">
           {error && (
             <Alert variant="destructive">
               <AlertDescription>{error}</AlertDescription>
@@ -345,51 +434,15 @@ export function VisitorSignupForm() {
 
           <div className="space-y-2">
             <Label htmlFor="email">{T.email} *</Label>
-            <div className="flex gap-2">
-              <Input
-                id="email"
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                placeholder="example@mail.com"
-                required
-                disabled={isLoading}
-                className="flex-1"
-              />
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleSendCode}
-                disabled={sendingCode || isLoading || countdown > 0}
-              >
-                {sendingCode ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                    {T.sendingCode}
-                  </>
-                ) : countdown > 0 ? (
-                  `${T.codeSentWait} (0:${String(countdown).padStart(2, '0')})`
-                ) : (
-                  T.sendCode
-                )}
-              </Button>
-            </div>
-            {emailCodeSent && (
-              <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">{T.codeSent}</p>
-                <InputOTP
-                  maxLength={6}
-                  value={formData.emailCode}
-                  onChange={(v) => setFormData({ ...formData, emailCode: v })}
-                >
-                  <InputOTPGroup className="gap-1">
-                    {[0, 1, 2, 3, 4, 5].map((i) => (
-                      <InputOTPSlot key={i} index={i} />
-                    ))}
-                  </InputOTPGroup>
-                </InputOTP>
-              </div>
-            )}
+            <Input
+              id="email"
+              type="email"
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              placeholder="example@mail.com"
+              required
+              disabled={isLoading}
+            />
           </div>
 
           <div className="space-y-2">
@@ -523,8 +576,15 @@ export function VisitorSignupForm() {
             </label>
           </div>
 
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? '...' : T.submit}
+          <Button type="submit" className="w-full" disabled={isLoading || sendingCode}>
+            {sendingCode ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                {T.sendingCode}
+              </>
+            ) : (
+              T.nextStep
+            )}
           </Button>
         </form>
 
