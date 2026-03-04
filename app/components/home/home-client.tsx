@@ -131,7 +131,7 @@ export function HomeClient() {
               <Link href="/" className="hover:text-foreground transition-colors">
                 {t('contacts')}
               </Link>
-              <Link href="/" className="hover:text-foreground transition-colors">
+              <Link href="/privacy" className="hover:text-foreground transition-colors">
                 {t('privacyPolicy')}
               </Link>
             </div>

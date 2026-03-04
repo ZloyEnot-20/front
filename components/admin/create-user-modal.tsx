@@ -86,8 +86,14 @@ export function CreateUserModal({ isOpen, onOpenChange }: CreateUserModalProps) 
       setError('Введите корректный email')
       return false
     }
+    const phoneDigits = formData.phone.replace(/\D/g, '')
+    const validPhone = (phoneDigits.length === 12 && phoneDigits.startsWith('998')) || (phoneDigits.length === 9 && !phoneDigits.startsWith('0'))
     if (!formData.phone.trim()) {
       setError('Введите номер телефона')
+      return false
+    }
+    if (!validPhone) {
+      setError('Введите корректный узбекский номер: +998 XX XXX XX XX')
       return false
     }
     if (!formData.password || formData.password.length < 8) {
@@ -213,9 +219,10 @@ export function CreateUserModal({ isOpen, onOpenChange }: CreateUserModalProps) 
             <div>
               <label className="text-sm font-medium">Номер телефона</label>
               <Input
+                type="tel"
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                placeholder="+7 (900) 123-45-67"
+                placeholder="+998 90 123 45 67"
               />
             </div>
 

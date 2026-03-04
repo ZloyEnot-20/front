@@ -73,6 +73,7 @@ const t: Record<Lang, Record<string, string>> = {
     errEmailCode: 'Emailni tasdiqlang: kodni kiriting',
     errConsent: 'Rozilikni belgilang',
     errPasswordMatch: 'Parollar mos kelmadi',
+    errPhoneInvalid: "O'zbekiston raqami: +998 XX XXX XX XX",
   },
   ru: {
     title: 'Регистрация',
@@ -122,6 +123,7 @@ const t: Record<Lang, Record<string, string>> = {
     errEmailCode: 'Подтвердите email: введите код из письма',
     errConsent: 'Необходимо согласие на обработку данных',
     errPasswordMatch: 'Пароли не совпадают',
+    errPhoneInvalid: 'Введите корректный узбекский номер: +998 XX XXX XX XX',
   },
   en: {
     title: 'Registration',
@@ -171,6 +173,7 @@ const t: Record<Lang, Record<string, string>> = {
     errEmailCode: 'Verify email: enter the code from the email',
     errConsent: 'You must agree to data processing',
     errPasswordMatch: 'Passwords do not match',
+    errPhoneInvalid: 'Enter a valid Uzbek number: +998 XX XXX XX XX',
   },
 }
 
@@ -244,6 +247,12 @@ export function VisitorSignupForm() {
   const handleFormNext = (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+    const phoneDigits = formData.phone.replace(/\D/g, '')
+    const validPhone = (phoneDigits.length === 12 && phoneDigits.startsWith('998')) || (phoneDigits.length === 9 && !phoneDigits.startsWith('0'))
+    if (!validPhone) {
+      setError(T.errPhoneInvalid)
+      return
+    }
     if (formData.password !== formData.confirmPassword) {
       setError(T.errPasswordMatch)
       return
