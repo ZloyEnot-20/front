@@ -34,6 +34,7 @@ const t: Record<Lang, Record<string, string>> = {
     phone: 'Telefon',
     email: 'Email',
     sendCode: "Kod yuborish",
+    resendCode: 'Qayta yuborish',
     sendingCode: 'Yuborilmoqda',
     codeSent: "Kod yuborildi",
     codeSentWait: 'Yuborildi',
@@ -82,6 +83,7 @@ const t: Record<Lang, Record<string, string>> = {
     phone: 'Телефон',
     email: 'Email',
     sendCode: 'Отправить код',
+    resendCode: 'Отправить повторно',
     sendingCode: 'Отправка',
     codeSent: 'Код отправлен',
     codeSentWait: 'Отправлено',
@@ -130,6 +132,7 @@ const t: Record<Lang, Record<string, string>> = {
     phone: 'Phone',
     email: 'Email',
     sendCode: 'Send code',
+    resendCode: 'Send again',
     sendingCode: 'Sending',
     codeSent: 'Code sent',
     codeSentWait: 'Sent',
@@ -238,7 +241,7 @@ export function VisitorSignupForm() {
     }
   }
 
-  const handleFormNext = async (e: React.FormEvent) => {
+  const handleFormNext = (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     if (formData.password !== formData.confirmPassword) {
@@ -249,17 +252,7 @@ export function VisitorSignupForm() {
       setError(T.errConsent)
       return
     }
-    setSendingCode(true)
-    try {
-      await authApi.sendEmailCode(formData.email.trim())
-      setEmailCodeSent(true)
-      setCountdown(COOLDOWN_SEC)
-      setStep('confirm')
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Ошибка отправки кода')
-    } finally {
-      setSendingCode(false)
-    }
+    setStep('confirm')
   }
 
   const handleConfirmSubmit = async (e: React.FormEvent) => {
@@ -321,20 +314,51 @@ export function VisitorSignupForm() {
   }
 
   if (step === 'confirm') {
+    const codeFilled = formData.emailCode.length === 6
     return (
       <Card className="w-full max-w-lg">
         <CardHeader>
           <CardTitle>{T.confirmTitle}</CardTitle>
           <CardDescription>{T.confirmDesc}</CardDescription>
-          <p className="text-sm text-muted-foreground">{formData.email}</p>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleConfirmSubmit} className="space-y-4">
+          <form onSubmit={handleConfirmSubmit} className="space-y-6">
             {error && (
               <Alert variant="destructive">
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
+            <div className="space-y-2">
+              <Label htmlFor="confirm-email">{T.email}</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="confirm-email"
+                  type="email"
+                  value={formData.email}
+                  readOnly
+                  className="flex-1 bg-muted"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleSendCode}
+                  disabled={sendingCode || isLoading || countdown > 0}
+                >
+                  {sendingCode ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                      {T.sendingCode}
+                    </>
+                  ) : countdown > 0 ? (
+                    `${T.codeSentWait} (${Math.floor(countdown / 60)}:${String(countdown % 60).padStart(2, '0')})`
+                  ) : emailCodeSent ? (
+                    T.resendCode
+                  ) : (
+                    T.sendCode
+                  )}
+                </Button>
+              </div>
+            </div>
             <div className="space-y-2">
               <Label>{T.codePlaceholder}</Label>
               <InputOTP
@@ -349,31 +373,21 @@ export function VisitorSignupForm() {
                 </InputOTPGroup>
               </InputOTP>
             </div>
-            <div className="flex gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleSendCode}
-                disabled={sendingCode || isLoading || countdown > 0}
-              >
-                {sendingCode ? (
+            <div className="flex flex-col items-center gap-2">
+              <Button type="submit" disabled={isLoading || !codeFilled}>
+                {isLoading ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                    {T.sendingCode}
+                    ...
                   </>
-                ) : countdown > 0 ? (
-                  `${T.codeSentWait} (${Math.floor(countdown / 60)}:${String(countdown % 60).padStart(2, '0')})`
                 ) : (
-                  T.sendCode
+                  T.confirmSubmit
                 )}
               </Button>
-              <Button type="submit" className="flex-1" disabled={isLoading}>
-                {isLoading ? '...' : T.confirmSubmit}
+              <Button type="button" variant="ghost" onClick={() => setStep('form')}>
+                {T.back}
               </Button>
             </div>
-            <Button type="button" variant="ghost" className="w-full" onClick={() => setStep('form')}>
-              {T.back}
-            </Button>
           </form>
         </CardContent>
       </Card>
@@ -576,15 +590,8 @@ export function VisitorSignupForm() {
             </label>
           </div>
 
-          <Button type="submit" className="w-full" disabled={isLoading || sendingCode}>
-            {sendingCode ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                {T.sendingCode}
-              </>
-            ) : (
-              T.nextStep
-            )}
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {T.nextStep}
           </Button>
         </form>
 
