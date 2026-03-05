@@ -57,12 +57,20 @@ function UsersModeration() {
   const [editForm, setEditForm] = useState({ name: '', email: '', role: '', status: '', phone: '' })
   const [editSaving, setEditSaving] = useState(false)
   const [editError, setEditError] = useState('')
+  const [filterRole, setFilterRole] = useState<string>('all')
 
-  const filteredUsers = users.filter(
-    (u) =>
+  const filteredUsers = users.filter((u) => {
+    const matchesSearch =
       u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       u.email.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+    const matchesRole = filterRole === 'all' || u.role === filterRole
+    return matchesSearch && matchesRole
+  })
+
+  const roleFilters = [
+    { value: 'all', label: 'Все' },
+    ...Object.entries(ROLE_LABELS).map(([value, label]) => ({ value, label })),
+  ]
 
   const stats = {
     totalUsers: users.length,
@@ -130,7 +138,7 @@ function UsersModeration() {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Активных сессий</p>
-                    <p className="text-2xl font-bold">{stats.activeSessions}</p>
+                    <p className="text-2xl font-bold">Скоро</p>
                     <p className="text-xs text-green-600 mt-1">+5% vs прошлый месяц</p>
                   </div>
                 </div>
@@ -166,17 +174,34 @@ function UsersModeration() {
             </Card>
           </div>
 
-          {/* Search */}
-          <div className="mb-6 flex flex-col sm:flex-row gap-4">
-            <Input
-              placeholder="Поиск по имени или email..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            <Button onClick={() => setCreateUserOpen(true)} className="gap-2 w-full sm:w-auto shrink-0">
-              <Plus className="w-4 h-4" />
-              Создать пользователя
-            </Button>
+          {/* Search and filters */}
+          <div className="mb-6 space-y-4">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Input
+                placeholder="Поиск по имени или email..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <Button onClick={() => setCreateUserOpen(true)} className="gap-2 w-full sm:w-auto shrink-0">
+                <Plus className="w-4 h-4" />
+                Создать пользователя
+              </Button>
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">Роль</label>
+              <div className="flex flex-wrap gap-2">
+                {roleFilters.map((r) => (
+                  <Button
+                    key={r.value}
+                    variant={filterRole === r.value ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setFilterRole(r.value)}
+                  >
+                    {r.label}
+                  </Button>
+                ))}
+              </div>
+            </div>
           </div>
 
           {/* Users Table */}
@@ -189,6 +214,7 @@ function UsersModeration() {
                     <th className="text-left p-4 font-medium text-sm text-muted-foreground">Email</th>
                     <th className="text-left p-4 font-medium text-sm text-muted-foreground">Роль</th>
                     <th className="text-left p-4 font-medium text-sm text-muted-foreground">Статус</th>
+                    <th className="text-left p-4 font-medium text-sm text-muted-foreground">Дата регистрации</th>
                     <th className="text-center p-4 font-medium text-sm text-muted-foreground">Действия</th>
                   </tr>
                 </thead>
@@ -200,6 +226,7 @@ function UsersModeration() {
                         <td className="p-4"><Skeleton className="h-5 w-36" /></td>
                         <td className="p-4"><Skeleton className="h-5 w-20" /></td>
                         <td className="p-4"><Skeleton className="h-6 w-16" /></td>
+                        <td className="p-4"><Skeleton className="h-5 w-24" /></td>
                         <td className="p-4 text-center"><Skeleton className="h-8 w-8 mx-auto rounded" /></td>
                       </tr>
                     ))
@@ -210,6 +237,9 @@ function UsersModeration() {
                       <td className="p-4 text-sm text-muted-foreground">{user.email}</td>
                       <td className="p-4 text-sm capitalize">{getRoleLabel(user.role ?? '')}</td>
                       <td className="p-4">{getStatusBadge(user.status ?? 'active')}</td>
+                      <td className="p-4 text-sm text-muted-foreground">
+                        {user.createdAt instanceof Date ? user.createdAt.toLocaleDateString('ru-RU') : new Date(user.createdAt).toLocaleDateString('ru-RU')}
+                      </td>
                       <td className="p-4 text-center">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>

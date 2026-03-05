@@ -172,6 +172,15 @@ function PublicationsContent() {
         setUploadError('Дата окончания должна быть не раньше даты начала')
         return
       }
+      const cityIds = formData.cities ?? []
+      if (cityIds.length === 0) {
+        setUploadError('Выберите хотя бы один город')
+        return
+      }
+      if (!formData.banner && !pendingBannerFile) {
+        setUploadError('Загрузите изображение (карточка/баннер)')
+        return
+      }
     } else {
       const title = (formData.title ?? '').trim()
       const content = (formData.content ?? '').trim()
@@ -181,6 +190,10 @@ function PublicationsContent() {
       }
       if (!content) {
         setUploadError('Введите полный текст новости')
+        return
+      }
+      if (!formData.banner && !pendingBannerFile) {
+        setUploadError('Загрузите изображение новости')
         return
       }
     }

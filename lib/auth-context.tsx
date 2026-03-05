@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react'
 import { User } from './types'
-import { authApi, RegisterPayload } from './api'
+import { authApi, RegisterPayload, type ApiUser } from './api'
 
 export interface UserContextType {
   user: User | null
@@ -15,7 +15,7 @@ export interface UserContextType {
 
 export const UserContext = createContext<UserContextType | undefined>(undefined)
 
-function toUser(apiUser: { id: string; email: string; name: string; role: string; status?: string; avatar?: string; phone?: string; exhibitorDescription?: string; exhibitorAddress?: string; exhibitorWebsite?: string; exhibitorPhotos?: string[]; createdAt: string; updatedAt: string }): User {
+function toUser(apiUser: ApiUser): User {
   return {
     id: apiUser.id,
     email: apiUser.email,
@@ -24,6 +24,14 @@ function toUser(apiUser: { id: string; email: string; name: string; role: string
     status: apiUser.status as User['status'],
     avatar: apiUser.avatar,
     phone: apiUser.phone,
+    firstName: apiUser.firstName,
+    lastName: apiUser.lastName,
+    city: apiUser.city,
+    visitorStatus: apiUser.visitorStatus,
+    languageKnowledge: apiUser.languageKnowledge,
+    interest: apiUser.interest,
+    countryOfInterest: apiUser.countryOfInterest,
+    admissionPlan: apiUser.admissionPlan,
     exhibitorDescription: apiUser.exhibitorDescription,
     exhibitorAddress: apiUser.exhibitorAddress,
     exhibitorWebsite: apiUser.exhibitorWebsite,

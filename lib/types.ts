@@ -21,6 +21,14 @@ export interface User {
   status?: 'active' | 'blocked' | 'pending'
   avatar?: string
   phone?: string
+  firstName?: string
+  lastName?: string
+  city?: string
+  visitorStatus?: string
+  languageKnowledge?: string
+  interest?: string
+  countryOfInterest?: string
+  admissionPlan?: string
   exhibitorDescription?: string
   exhibitorAddress?: string
   exhibitorWebsite?: string

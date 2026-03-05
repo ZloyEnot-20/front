@@ -24,24 +24,34 @@ export function PersonalInfoSection({ user }: PersonalInfoSectionProps) {
   const [isSaving, setIsSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [formData, setFormData] = useState({
-    firstName: user.name.split(' ')[0] || '',
-    lastName: user.name.split(' ')[1] || '',
+    firstName: user.firstName ?? user.name.split(' ')[0] ?? '',
+    lastName: user.lastName ?? user.name.split(' ').slice(1).join(' ') ?? '',
     email: user.email || '',
-    phone: (user as User & { phone?: string; country?: string; city?: string }).phone || '',
+    phone: user.phone || '',
     country: (user as User & { country?: string }).country || '',
-    city: (user as User & { city?: string }).city || '',
+    city: user.city || '',
     zipCode: '',
+    visitorStatus: user.visitorStatus || '',
+    languageKnowledge: user.languageKnowledge || '',
+    interest: user.interest || '',
+    countryOfInterest: user.countryOfInterest || '',
+    admissionPlan: user.admissionPlan || '',
   })
 
   useEffect(() => {
     setFormData({
-      firstName: user.name.split(' ')[0] || '',
-      lastName: user.name.split(' ')[1] || '',
+      firstName: user.firstName ?? user.name.split(' ')[0] ?? '',
+      lastName: user.lastName ?? user.name.split(' ').slice(1).join(' ') ?? '',
       email: user.email || '',
-      phone: (user as User & { phone?: string }).phone || '',
+      phone: user.phone || '',
       country: (user as User & { country?: string }).country || '',
-      city: (user as User & { city?: string }).city || '',
+      city: user.city || '',
       zipCode: '',
+      visitorStatus: user.visitorStatus || '',
+      languageKnowledge: user.languageKnowledge || '',
+      interest: user.interest || '',
+      countryOfInterest: user.countryOfInterest || '',
+      admissionPlan: user.admissionPlan || '',
     })
   }, [user])
 
@@ -103,6 +113,11 @@ export function PersonalInfoSection({ user }: PersonalInfoSectionProps) {
             <>
               <FieldRow label="Страна" value={formData.country} />
               <FieldRow label="Город" value={formData.city} />
+              <FieldRow label="Статус" value={formData.visitorStatus} />
+              <FieldRow label="Знание языков" value={formData.languageKnowledge} />
+              <FieldRow label="Интерес" value={formData.interest} />
+              <FieldRow label="Страна интереса" value={formData.countryOfInterest} />
+              <FieldRow label="План поступления" value={formData.admissionPlan} />
               <div className="sm:col-span-2">
                 <FieldRow label="Почтовый индекс" value={formData.zipCode} />
               </div>
