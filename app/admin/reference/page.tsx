@@ -188,7 +188,7 @@ function ReferenceContent() {
               <Button variant="outline" className="flex-1" onClick={() => setCityToDelete(null)}>
                 Отмена
               </Button>
-              <Button className="flex-1 text-destructive hover:bg-destructive hover:text-destructive-foreground" onClick={handleDeleteCityConfirm} disabled={deletingId !== null}>
+              <Button className="flex-1 bg-red-600 text-white hover:bg-red-700" onClick={handleDeleteCityConfirm} disabled={deletingId !== null}>
                 {deletingId ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Удалить'}
               </Button>
             </div>

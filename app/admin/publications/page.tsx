@@ -177,6 +177,11 @@ function PublicationsContent() {
         setUploadError('Выберите хотя бы один город')
         return
       }
+      const participantIds = formData.participants ?? []
+      if (participantIds.length === 0) {
+        setUploadError('Выберите хотя бы одного участника выставки')
+        return
+      }
       if (!formData.banner && !pendingBannerFile) {
         setUploadError('Загрузите изображение (карточка/баннер)')
         return
@@ -719,7 +724,7 @@ function PublicationsContent() {
                     </div>
                     <div>
                       <label className="text-sm font-medium">Участники (университеты)</label>
-                      <p className="text-xs text-muted-foreground mt-0.5 mb-1">Выберите exhibitor из списка (множественный выбор)</p>
+                      <p className="text-xs text-muted-foreground mt-0.5 mb-1">Выберите университеты из списка (множественный выбор)</p>
                       <Popover>
                         <PopoverTrigger asChild>
                           <Button variant="outline" className="w-full justify-between font-normal" disabled={exhibitorsListLoading}>
@@ -729,7 +734,7 @@ function PublicationsContent() {
                         </PopoverTrigger>
                         <PopoverContent className="w-full min-w-[var(--radix-popover-trigger-width)] max-h-60 overflow-y-auto p-2" align="start">
                           {exhibitorsList.length === 0 ? (
-                            <p className="text-sm text-muted-foreground py-2">Нет университетов с ролью exhibitor. Создайте пользователей с ролью exhibitor в разделе Пользователи.</p>
+                            <p className="text-sm text-muted-foreground py-2">Нет университетов в списке. Создайте пользователей с ролью «Университет» в разделе Пользователи.</p>
                           ) : (
                             <div className="space-y-1">
                               {exhibitorsList.map((exh) => (

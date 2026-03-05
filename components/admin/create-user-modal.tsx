@@ -30,7 +30,7 @@ interface CreateUserModalProps {
 
 const ROLES = [
   { value: 'visitor', label: 'Посетитель' },
-  { value: 'exhibitor', label: 'Экспонент (Exhibitor)' },
+  { value: 'exhibitor', label: 'Университет' },
   { value: 'staff', label: 'Сотрудник (Staff)' },
   { value: 'content_manager', label: 'Менеджер контента (Content Manager)' },
   { value: 'admin', label: 'Администратор' },

@@ -192,7 +192,7 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
                 <Card>
                   <CardHeader>
                     <CardTitle>Участники</CardTitle>
-                    <p className="text-sm text-muted-foreground">Университеты-экспоненты выставки</p>
+                    <p className="text-sm text-muted-foreground">Университеты выставки</p>
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

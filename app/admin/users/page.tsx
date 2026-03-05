@@ -35,7 +35,7 @@ import type { User } from '@/lib/types'
 
 const ROLE_LABELS: Record<string, string> = {
   visitor: 'Посетитель',
-  exhibitor: 'Экспонент',
+  exhibitor: 'Университет',
   participant: 'Участник',
   staff: 'Сотрудник',
   manager: 'Менеджер',
@@ -70,7 +70,7 @@ function UsersModeration() {
   const roleFilters = [
     { value: 'all', label: 'Все' },
     ...Object.entries(ROLE_LABELS).map(([value, label]) => ({ value, label })),
-  ]
+  ].filter((f) => f.value !== 'participant')
 
   const stats = {
     totalUsers: users.length,
@@ -82,7 +82,7 @@ function UsersModeration() {
   const getRoleLabel = (role: string) => {
     const labels: Record<string, string> = {
       visitor: 'Visitor',
-      exhibitor: 'Exhibitor',
+      exhibitor: 'Университет',
       staff: 'Staff',
       manager: 'Content Manager',
       admin: 'Admin',

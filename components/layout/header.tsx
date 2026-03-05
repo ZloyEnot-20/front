@@ -45,7 +45,7 @@ export function Header({ profileTabs }: HeaderProps) {
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold">
-            M
+            E
           </div>
           <span className="hidden sm:inline font-bold text-lg">{t('appName')}</span>
         </Link>
