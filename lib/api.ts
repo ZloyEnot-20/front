@@ -124,6 +124,48 @@ export const registrationsApi = {
     api<ApiRegistration>(`/api/registrations/${id}`, { method: 'PATCH', body: JSON.stringify({ city }) }),
 }
 
+// Leads (exhibitor: registrations on exhibitions where current user is participant)
+export interface ApiLeadRow {
+  id: string
+  registrationId: string
+  exhibitionId: string
+  exhibitionTitle: string
+  status: 'registered' | 'visited'
+  firstName: string
+  lastName: string
+  name: string
+  email: string
+  phone: string
+  city: string
+  visitorStatus?: string
+  interest?: string
+  countryOfInterest?: string
+  admissionPlan?: string
+  registeredAt: string
+  scannedAt: string | null
+}
+
+export interface ApiLeadsResponse {
+  items: ApiLeadRow[]
+  total: number
+  page: number
+  rowsPerPage: number
+  totalPages: number
+}
+
+export const leadsApi = {
+  list: (params: { page?: number; rowsPerPage?: number; exhibitionIds?: string[]; status?: string; search?: string }) =>
+    api<ApiLeadsResponse>('/api/leads', {
+      params: {
+        ...(params.page != null && { page: String(params.page) }),
+        ...(params.rowsPerPage != null && { rowsPerPage: String(params.rowsPerPage) }),
+        ...(params.exhibitionIds?.length && { exhibitionIds: params.exhibitionIds.join(',') }),
+        ...(params.status && { status: params.status }),
+        ...(params.search && { search: params.search }),
+      },
+    }),
+}
+
 export interface ApiScanLogItem {
   id: string
   scannedAt: string
