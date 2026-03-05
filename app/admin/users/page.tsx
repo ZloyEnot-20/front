@@ -49,20 +49,6 @@ function UsersModeration() {
   const { user: currentUser } = useAuth()
   const { users, updateUser, isLoading, refresh } = useAdmin()
   const [searchQuery, setSearchQuery] = useState('')
-
-  useEffect(() => {
-    refresh()
-  }, [refresh])
-
-  useEffect(() => {
-    setPage(1)
-  }, [searchQuery, filterRole])
-
-  useEffect(() => {
-    const total = Math.max(1, Math.ceil(filteredUsers.length / PAGE_SIZE))
-    setPage((p) => Math.min(p, total))
-  }, [filteredUsers.length])
-
   const [createUserOpen, setCreateUserOpen] = useState(false)
   const [viewUser, setViewUser] = useState<User | null>(null)
   const [editUser, setEditUser] = useState<User | null>(null)
@@ -71,6 +57,10 @@ function UsersModeration() {
   const [editError, setEditError] = useState('')
   const [filterRole, setFilterRole] = useState<string>('all')
   const [page, setPage] = useState(1)
+
+  useEffect(() => {
+    refresh()
+  }, [refresh])
 
   const filteredUsers = users.filter((u) => {
     const matchesSearch =
@@ -83,6 +73,15 @@ function UsersModeration() {
   const totalPages = Math.max(1, Math.ceil(filteredUsers.length / PAGE_SIZE))
   const safePage = Math.min(page, totalPages)
   const paginatedUsers = filteredUsers.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE)
+
+  useEffect(() => {
+    setPage(1)
+  }, [searchQuery, filterRole])
+
+  useEffect(() => {
+    const total = Math.max(1, Math.ceil(filteredUsers.length / PAGE_SIZE))
+    setPage((p) => Math.min(p, total))
+  }, [filteredUsers.length])
 
   const roleFilters = [
     { value: 'all', label: 'Все' },

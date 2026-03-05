@@ -65,15 +65,6 @@ function LogsContent() {
       .finally(() => setLoading(false))
   }, [])
 
-  useEffect(() => {
-    setPage(1)
-  }, [searchQuery, filterType])
-
-  useEffect(() => {
-    const total = Math.max(1, Math.ceil(filteredLogs.length / PAGE_SIZE))
-    setPage((p) => Math.min(p, total))
-  }, [filteredLogs.length])
-
   const unified: UnifiedLog[] = [
     ...scanLogs.map((l) => ({
       id: l.id,
@@ -105,6 +96,15 @@ function LogsContent() {
   const totalPages = Math.max(1, Math.ceil(filteredLogs.length / PAGE_SIZE))
   const safePage = Math.min(page, totalPages)
   const paginatedLogs = filteredLogs.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE)
+
+  useEffect(() => {
+    setPage(1)
+  }, [searchQuery, filterType])
+
+  useEffect(() => {
+    const total = Math.max(1, Math.ceil(filteredLogs.length / PAGE_SIZE))
+    setPage((p) => Math.min(p, total))
+  }, [filteredLogs.length])
 
   const getStatusBadge = (status: UnifiedLog['status']) => {
     if (status === 'success') return <Badge className="bg-green-600">Успех</Badge>
