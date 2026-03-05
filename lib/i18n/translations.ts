@@ -16,8 +16,10 @@ function buildMap(ru: Record<string, string>, en: Record<string, string>, uz: Re
 const ru = {
   // Common / layout
   appName: 'EDU Expo',
+  home: 'Главная',
   exhibitions: 'Выставки',
   news: 'Новости',
+  emailAndPassword: 'Почта и пароль',
   login: 'Вход',
   signup: 'Регистрация',
   logout: 'Выход',
@@ -184,8 +186,10 @@ const ru = {
 
 const en: Record<string, string> = {
   appName: 'EDU Expo',
+  home: 'Home',
   exhibitions: 'Exhibitions',
   news: 'News',
+  emailAndPassword: 'Email and password',
   login: 'Log in',
   signup: 'Sign up',
   logout: 'Log out',
@@ -344,8 +348,10 @@ const en: Record<string, string> = {
 
 const uz: Record<string, string> = {
   appName: 'EDU Expo',
+  home: 'Bosh sahifa',
   exhibitions: 'Ko\'rgazmalar',
   news: 'Yangiliklar',
+  emailAndPassword: 'Email va parol',
   login: 'Kirish',
   signup: "Ro'yxatdan o'tish",
   logout: 'Chiqish',

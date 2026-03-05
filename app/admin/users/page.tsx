@@ -33,6 +33,8 @@ import {
 } from '@/components/ui/select'
 import type { User } from '@/lib/types'
 
+const PAGE_SIZE = 50
+
 const ROLE_LABELS: Record<string, string> = {
   visitor: 'Посетитель',
   exhibitor: 'Университет',
@@ -51,6 +53,16 @@ function UsersModeration() {
   useEffect(() => {
     refresh()
   }, [refresh])
+
+  useEffect(() => {
+    setPage(1)
+  }, [searchQuery, filterRole])
+
+  useEffect(() => {
+    const total = Math.max(1, Math.ceil(filteredUsers.length / PAGE_SIZE))
+    setPage((p) => Math.min(p, total))
+  }, [filteredUsers.length])
+
   const [createUserOpen, setCreateUserOpen] = useState(false)
   const [viewUser, setViewUser] = useState<User | null>(null)
   const [editUser, setEditUser] = useState<User | null>(null)
@@ -58,6 +70,7 @@ function UsersModeration() {
   const [editSaving, setEditSaving] = useState(false)
   const [editError, setEditError] = useState('')
   const [filterRole, setFilterRole] = useState<string>('all')
+  const [page, setPage] = useState(1)
 
   const filteredUsers = users.filter((u) => {
     const matchesSearch =
@@ -66,6 +79,10 @@ function UsersModeration() {
     const matchesRole = filterRole === 'all' || u.role === filterRole
     return matchesSearch && matchesRole
   })
+
+  const totalPages = Math.max(1, Math.ceil(filteredUsers.length / PAGE_SIZE))
+  const safePage = Math.min(page, totalPages)
+  const paginatedUsers = filteredUsers.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE)
 
   const roleFilters = [
     { value: 'all', label: 'Все' },
@@ -231,7 +248,7 @@ function UsersModeration() {
                       </tr>
                     ))
                   ) : (
-                    filteredUsers.map((user) => (
+                    paginatedUsers.map((user) => (
                     <tr key={user.id} className="border-b border-border/40 hover:bg-muted/30">
                       <td className="p-4 font-medium">{user.name}</td>
                       <td className="p-4 text-sm text-muted-foreground">{user.email}</td>
@@ -284,6 +301,36 @@ function UsersModeration() {
                 </tbody>
               </table>
             </div>
+            {!isLoading && filteredUsers.length > 0 && (
+              <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 px-4 py-3 border-t border-border/40">
+                <p className="text-xs lg:text-sm text-muted-foreground">
+                  Показано {(safePage - 1) * PAGE_SIZE + 1}–{Math.min(safePage * PAGE_SIZE, filteredUsers.length)} из {filteredUsers.length}
+                </p>
+                {totalPages > 1 && (
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setPage((p) => Math.max(1, p - 1))}
+                      disabled={safePage <= 1}
+                    >
+                      Назад
+                    </Button>
+                    <span className="text-sm text-muted-foreground px-2">
+                      {safePage} / {totalPages}
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                      disabled={safePage >= totalPages}
+                    >
+                      Вперёд
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
           </Card>
         </div>
 

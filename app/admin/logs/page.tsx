@@ -29,6 +29,8 @@ interface UnifiedLog {
   status: 'success' | 'error' | 'warning'
 }
 
+const PAGE_SIZE = 50
+
 const LOG_TYPE_LABELS: Record<LogTypeFilter, string> = {
   all: 'Все',
   LOGIN: 'Вход',
@@ -47,6 +49,7 @@ function LogsContent() {
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [filterType, setFilterType] = useState<LogTypeFilter>('all')
+  const [page, setPage] = useState(1)
 
   useEffect(() => {
     setLoading(true)
@@ -61,6 +64,15 @@ function LogsContent() {
       })
       .finally(() => setLoading(false))
   }, [])
+
+  useEffect(() => {
+    setPage(1)
+  }, [searchQuery, filterType])
+
+  useEffect(() => {
+    const total = Math.max(1, Math.ceil(filteredLogs.length / PAGE_SIZE))
+    setPage((p) => Math.min(p, total))
+  }, [filteredLogs.length])
 
   const unified: UnifiedLog[] = [
     ...scanLogs.map((l) => ({
@@ -89,6 +101,10 @@ function LogsContent() {
     const matchesType = filterType === 'all' || log.type === filterType
     return matchesSearch && matchesType
   })
+
+  const totalPages = Math.max(1, Math.ceil(filteredLogs.length / PAGE_SIZE))
+  const safePage = Math.min(page, totalPages)
+  const paginatedLogs = filteredLogs.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE)
 
   const getStatusBadge = (status: UnifiedLog['status']) => {
     if (status === 'success') return <Badge className="bg-green-600">Успех</Badge>
@@ -166,8 +182,8 @@ function LogsContent() {
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredLogs.length > 0 ? (
-                      filteredLogs.map((log) => (
+                    {paginatedLogs.length > 0 ? (
+                      paginatedLogs.map((log) => (
                         <tr key={log.id} className="border-b border-border/40 hover:bg-muted/30">
                           <td className="p-3 lg:p-4 text-xs lg:text-sm text-muted-foreground whitespace-nowrap">
                             {new Date(log.timestamp).toLocaleString('ru-RU')}
@@ -191,10 +207,34 @@ function LogsContent() {
             </div>
           </Card>
 
-          <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2 mt-4">
+          <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 mt-4">
             <p className="text-xs lg:text-sm text-muted-foreground">
-              Показано {filteredLogs.length} из {unified.length}
+              Показано {(safePage - 1) * PAGE_SIZE + 1}–{Math.min(safePage * PAGE_SIZE, filteredLogs.length)} из {filteredLogs.length}
+              {filteredLogs.length !== unified.length && ` (всего ${unified.length})`}
             </p>
+            {totalPages > 1 && (
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={safePage <= 1}
+                >
+                  Назад
+                </Button>
+                <span className="text-sm text-muted-foreground px-2">
+                  {safePage} / {totalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={safePage >= totalPages}
+                >
+                  Вперёд
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </main>

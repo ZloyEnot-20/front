@@ -99,14 +99,15 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
           />
         )}
         <div className="absolute inset-0 bg-black/40" />
+        <div className="absolute top-0 left-0 z-10 p-4 md:p-6">
+          <Button variant="ghost" size="icon" asChild className="text-white hover:bg-white/20 rounded-full">
+            <Link href="/exhibitions" aria-label="Назад">
+              <ArrowLeft className="w-5 h-5" />
+            </Link>
+          </Button>
+        </div>
         <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
           <div className="container mx-auto px-4">
-            <Button variant="ghost" asChild className="mb-4 text-white hover:bg-white/20">
-              <Link href="/exhibitions">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Назад
-              </Link>
-            </Button>
             <h1 className="text-4xl md:text-5xl font-bold mb-4">{exhibition.title}</h1>
             <Badge className="bg-violet-600 hover:bg-violet-700 text-white border-0">Выставка</Badge>
           </div>

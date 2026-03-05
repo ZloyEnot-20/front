@@ -1,6 +1,8 @@
 'use client'
 
+import { useState } from 'react'
 import type { LucideIcon } from 'lucide-react'
+import { Menu } from 'lucide-react'
 import { useAuth } from '@/lib/auth-context'
 import { useLocale } from '@/lib/i18n'
 import { Button } from '@/components/ui/button'
@@ -12,6 +14,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet'
+import { Separator } from '@/components/ui/separator'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
@@ -34,21 +44,60 @@ export function Header({ profileTabs }: HeaderProps) {
   const { user, logout } = useAuth()
   const { t, lang, setLang } = useLocale()
   const router = useRouter()
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const handleLogout = () => {
     logout()
     router.push('/')
   }
 
+  const closeMobileMenu = () => setMobileMenuOpen(false)
+
   return (
     <header className="sticky top-0 z-50 w-full border-b-2 border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold">
-            E
-          </div>
-          <span className="hidden sm:inline font-bold text-lg">{t('appName')}</span>
-        </Link>
+        {/* Слева: на мобильной — иконка меню (вместо логотипа), на десктопе — логотип */}
+        <div className="flex items-center gap-2">
+          <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+            <SheetTrigger asChild className="md:hidden">
+              <Button variant="ghost" size="icon" aria-label="Меню">
+                <Menu className="h-6 w-6" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-[280px] sm:max-w-[280px]">
+              <SheetHeader>
+                <SheetTitle className="sr-only">{t('appName')}</SheetTitle>
+              </SheetHeader>
+              <nav className="flex flex-col gap-1 pt-6">
+                <Button variant="ghost" className="justify-start font-medium" asChild>
+                  <Link href="/" onClick={closeMobileMenu}>{t('home')}</Link>
+                </Button>
+                <Button variant="ghost" className="justify-start font-medium" asChild>
+                  <Link href="/exhibitions" onClick={closeMobileMenu}>{t('exhibitions')}</Link>
+                </Button>
+                <Button variant="ghost" className="justify-start font-medium" asChild>
+                  <Link href="/news" onClick={closeMobileMenu}>{t('news')}</Link>
+                </Button>
+                <Separator className="my-3" />
+                <Button variant="ghost" className="justify-start font-medium" asChild>
+                  <Link href="/profile?tab=personal" onClick={closeMobileMenu}>{t('personalInfo')}</Link>
+                </Button>
+                <Button variant="ghost" className="justify-start font-medium" asChild>
+                  <Link href="/profile?tab=security" onClick={closeMobileMenu}>{t('emailAndPassword')}</Link>
+                </Button>
+                <Button variant="ghost" className="justify-start font-medium" asChild>
+                  <Link href="/profile?tab=exhibitions" onClick={closeMobileMenu}>{t('myExhibitions')}</Link>
+                </Button>
+              </nav>
+            </SheetContent>
+          </Sheet>
+          <Link href="/" className="hidden md:flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold shrink-0">
+              E
+            </div>
+            <span className="font-bold text-lg">{t('appName')}</span>
+          </Link>
+        </div>
 
         <nav className="hidden md:flex items-center gap-6">
           {profileTabs ? (
