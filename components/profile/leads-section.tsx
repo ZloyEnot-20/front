@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useMemo } from 'react'
 import { useAuth } from '@/lib/auth-context'
 import { useAdmin } from '@/lib/admin-context'
 import { useLocale } from '@/lib/i18n'
@@ -15,18 +15,35 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Checkbox } from '@/components/ui/checkbox'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
-import { Filter, Download, ChevronLeft, ChevronRight, User } from 'lucide-react'
+import { Filter, Download, ArrowUpDown, User, Building2, X, ChevronLeft, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const ROWS_PER_PAGE_OPTIONS = [10, 19, 25, 50, 100]
+
+const AVATAR_COLORS = [
+  'bg-blue-500',
+  'bg-purple-500',
+  'bg-pink-500',
+  'bg-red-500',
+  'bg-amber-500',
+  'bg-green-500',
+  'bg-teal-500',
+  'bg-indigo-500',
+]
+
+function getInitials(name: string) {
+  return name
+    .trim()
+    .split(/\s+/)
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2)
+}
+
+function getAvatarColor(name: string) {
+  return AVATAR_COLORS[(name.charCodeAt(0) || 0) % AVATAR_COLORS.length]
+}
 
 function escapeCsvCell(s: string): string {
   const str = String(s ?? '')
@@ -45,6 +62,136 @@ function downloadCsv(rows: ApiLeadRow[], columns: { key: keyof ApiLeadRow; label
   URL.revokeObjectURL(a.href)
 }
 
+type SortKey = 'name' | 'email' | 'phone' | 'city' | 'status' | 'exhibitionTitle'
+
+function DataTable({
+  data,
+  selectedIds,
+  onSelectAll,
+  onSelectRow,
+  onSort,
+  sortConfig,
+  statusLabel,
+}: {
+  data: ApiLeadRow[]
+  selectedIds: Set<string>
+  onSelectAll: (checked: boolean) => void
+  onSelectRow: (id: string) => void
+  onSort: (key: SortKey) => void
+  sortConfig: { key: SortKey; direction: 'asc' | 'desc' } | null
+  statusLabel: (s: 'registered' | 'visited') => string
+}) {
+  const { t } = useLocale()
+  const allSelected = data.length > 0 && selectedIds.size === data.length
+
+  const SortHeader = ({ column, label }: { column: SortKey; label: string }) => (
+    <button
+      type="button"
+      onClick={() => onSort(column)}
+      className="flex items-center gap-1 hover:text-primary transition font-medium text-sm text-left"
+    >
+      {label}
+      <ArrowUpDown
+        size={14}
+        className={cn(
+          'transition shrink-0',
+          sortConfig?.key === column ? 'text-primary opacity-100' : 'text-muted-foreground opacity-50',
+        )}
+      />
+    </button>
+  )
+
+  const sortedData = useMemo(() => {
+    if (!sortConfig) return data
+    return [...data].sort((a, b) => {
+      const aVal = a[sortConfig.key] ?? ''
+      const bVal = b[sortConfig.key] ?? ''
+      const cmp = String(aVal).localeCompare(String(bVal), undefined, { sensitivity: 'base' })
+      return sortConfig.direction === 'asc' ? cmp : -cmp
+    })
+  }, [data, sortConfig])
+
+  return (
+    <div className="w-full">
+      <table className="w-full border-collapse">
+        <thead>
+          <tr className="border-b border-border bg-muted/50">
+            <th className="px-4 py-3 text-left w-10">
+              <Checkbox
+                checked={allSelected}
+                onCheckedChange={(v) => onSelectAll(v === true)}
+                aria-label="Выбрать все"
+                className="rounded"
+              />
+            </th>
+            <th className="px-4 py-3 text-left">
+              <SortHeader column="name" label={t('nameColumn')} />
+            </th>
+            <th className="px-4 py-3 text-left">
+              <SortHeader column="email" label={t('email')} />
+            </th>
+            <th className="px-4 py-3 text-left">
+              <SortHeader column="phone" label={t('phoneColumn')} />
+            </th>
+            <th className="px-4 py-3 text-left">
+              <SortHeader column="city" label={t('city')} />
+            </th>
+            <th className="px-4 py-3 text-left">
+              <SortHeader column="status" label={t('filterByStatus')} />
+            </th>
+            <th className="px-4 py-3 text-left">
+              <SortHeader column="exhibitionTitle" label={t('exhibitionColumn')} />
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {sortedData.map((row) => (
+            <tr key={row.id} className="border-b border-border hover:bg-muted/30 transition">
+              <td className="px-4 py-3">
+                <Checkbox
+                  checked={selectedIds.has(row.id)}
+                  onCheckedChange={() => onSelectRow(row.id)}
+                  aria-label={row.name}
+                  className="rounded"
+                />
+              </td>
+              <td className="px-4 py-3">
+                <div className="flex items-center gap-3">
+                  <div
+                    className={cn(
+                      'w-10 h-10 rounded-full flex items-center justify-center text-white font-medium text-sm flex-shrink-0',
+                      getAvatarColor(row.name),
+                    )}
+                  >
+                    {getInitials(row.name) || '?'}
+                  </div>
+                  <span className="font-medium text-foreground">{row.name}</span>
+                </div>
+              </td>
+              <td className="px-4 py-3 text-foreground">{row.email}</td>
+              <td className="px-4 py-3 text-foreground">{row.phone || '—'}</td>
+              <td className="px-4 py-3 text-foreground">{row.city || '—'}</td>
+              <td className="px-4 py-3">
+                <span
+                  className={cn(
+                    'inline-flex rounded-md px-2 py-0.5 text-xs font-medium',
+                    row.status === 'visited'
+                      ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                      : 'bg-muted text-muted-foreground',
+                  )}
+                >
+                  {statusLabel(row.status)}
+                </span>
+              </td>
+              <td className="px-4 py-3 text-foreground">{row.exhibitionTitle || '—'}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
 export function LeadsSection() {
   const { user } = useAuth()
   const { exhibitions: allExhibitions } = useAdmin()
@@ -53,6 +200,7 @@ export function LeadsSection() {
   const exhibitorExhibitionIds = allExhibitions
     .filter((e) => (e.participants ?? []).some((p) => (typeof p === 'object' ? p.id : p) === user?.id))
     .map((e) => e.id)
+  const exhibitorExhibitions = allExhibitions.filter((e) => exhibitorExhibitionIds.includes(e.id))
 
   const [data, setData] = useState<ApiLeadsResponse | null>(null)
   const [loading, setLoading] = useState(true)
@@ -65,6 +213,7 @@ export function LeadsSection() {
   const [appliedExhibitionIds, setAppliedExhibitionIds] = useState<string[]>([])
   const [appliedStatus, setAppliedStatus] = useState('__all__')
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: 'asc' | 'desc' } | null>(null)
 
   const fetchLeads = useCallback(async () => {
     if (!isExhibitor || exhibitorExhibitionIds.length === 0) {
@@ -109,7 +258,10 @@ export function LeadsSection() {
     setAppliedStatus('__all__')
     setPage(1)
   }
-  const activeFilterCount = [!!appliedSearch, appliedExhibitionIds.length > 0, appliedStatus !== '__all__'].filter(Boolean).length
+
+  const activeFilterCount = [!!appliedSearch, appliedExhibitionIds.length > 0, appliedStatus !== '__all__'].filter(
+    Boolean,
+  ).length
 
   const handleExport = async () => {
     try {
@@ -120,6 +272,10 @@ export function LeadsSection() {
         exhibitionIds: appliedExhibitionIds.length ? appliedExhibitionIds : undefined,
         status: appliedStatus === '__all__' ? undefined : appliedStatus || undefined,
       })
+      const statusLabels: Record<string, string> = {
+        registered: t('statusRegistered'),
+        visited: t('statusVisited'),
+      }
       const columns: { key: keyof ApiLeadRow; label: string }[] = [
         { key: 'name', label: t('nameColumn') },
         { key: 'email', label: t('email') },
@@ -128,10 +284,6 @@ export function LeadsSection() {
         { key: 'exhibitionTitle', label: t('exhibitionColumn') },
         { key: 'status', label: t('filterByStatus') },
       ]
-      const statusLabels: Record<string, string> = {
-        registered: t('statusRegistered'),
-        visited: t('statusVisited'),
-      }
       const rows = res.items.map((r) => ({
         ...r,
         status: statusLabels[r.status] ?? r.status,
@@ -142,22 +294,28 @@ export function LeadsSection() {
     }
   }
 
-  const toggleSelectAll = () => {
-    if (!data?.items.length) return
-    if (selectedIds.size === data.items.length) {
-      setSelectedIds(new Set())
-    } else {
-      setSelectedIds(new Set(data.items.map((r) => r.id)))
-    }
+  const handleSort = (key: SortKey) => {
+    setSortConfig((prev) =>
+      prev?.key === key && prev.direction === 'asc' ? { key, direction: 'desc' } : { key, direction: 'asc' },
+    )
   }
 
-  const toggleSelect = (id: string) => {
+  const handleSelectAll = (checked: boolean) => {
+    if (!data?.items.length) return
+    setSelectedIds(checked ? new Set(data.items.map((r) => r.id)) : new Set())
+  }
+
+  const handleSelectRow = (id: string) => {
     setSelectedIds((prev) => {
       const next = new Set(prev)
       if (next.has(id)) next.delete(id)
       else next.add(id)
       return next
     })
+  }
+
+  const removeExhibitionFilter = (id: string) => {
+    setExhibitionIds((prev) => prev.filter((x) => x !== id))
   }
 
   const statusLabel = (status: 'registered' | 'visited') =>
@@ -183,53 +341,85 @@ export function LeadsSection() {
   const safePage = Math.min(page, totalPages)
 
   return (
-    <div className="flex flex-col h-full min-h-0">
-      <div className="flex flex-1 min-h-0 gap-4">
-        {/* Left filters panel */}
-        <aside className="w-64 shrink-0 border-r border-border bg-muted/20 flex flex-col">
-          <div className="p-4 border-b border-border flex items-center justify-between">
-            <span className="font-semibold flex items-center gap-2">
-              <Filter className="w-4 h-4" />
-              {t('filters')}
-            </span>
-          </div>
-          <div className="p-4 space-y-4 overflow-y-auto">
+    <div className="flex flex-col h-full min-h-0 bg-background">
+      <div className="flex flex-1 min-h-0 gap-4 overflow-hidden">
+        {/* Sidebar — как в референсе */}
+        <aside className="w-72 bg-card overflow-y-auto flex flex-col shrink-0 rounded-lg border border-border">
+          <div className="p-6 space-y-6 flex-1">
             <div>
-              <label className="text-sm font-medium mb-1 block">{t('searchPlaceholder').split('...')[0]}</label>
+              <h2 className="font-semibold text-foreground mb-4 flex items-center gap-2">
+                <Filter className="w-4 h-4" />
+                {t('filters')}
+              </h2>
+            </div>
+
+            {/* Name / Search */}
+            <div>
+              <label className="flex items-center gap-2 text-sm font-medium mb-3 cursor-pointer">
+                <User className="w-4 h-4 text-muted-foreground" />
+                {t('nameColumn')}
+              </label>
               <Input
+                type="text"
                 placeholder={t('searchPlaceholder')}
+                className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="h-9"
               />
             </div>
+
+            {/* Выставки */}
             <div>
-              <label className="text-sm font-medium mb-1 block">{t('filterByExhibitions')}</label>
-              <div className="max-h-40 overflow-y-auto space-y-2 border rounded-md p-2">
-                {allExhibitions
-                  .filter((e) => exhibitorExhibitionIds.includes(e.id))
-                  .map((e) => (
-                    <label key={e.id} className="flex items-center gap-2 cursor-pointer text-sm">
-                      <Checkbox
-                        checked={exhibitionIds.includes(e.id)}
-                        onCheckedChange={(checked) => {
-                          setExhibitionIds((prev) =>
-                            checked ? [...prev, e.id] : prev.filter((id) => id !== e.id),
-                          )
-                        }}
-                      />
-                      <span className="truncate">{e.title}</span>
-                    </label>
-                  ))}
+              <label className="flex items-center gap-2 text-sm font-medium mb-3 cursor-pointer">
+                <Building2 className="w-4 h-4 text-muted-foreground" />
+                {t('filterByExhibitions')}
+              </label>
+              <div className="space-y-2 max-h-40 overflow-y-auto border border-border rounded-lg p-2">
+                {exhibitorExhibitions.map((e) => (
+                  <label key={e.id} className="flex items-center gap-2 cursor-pointer text-sm">
+                    <Checkbox
+                      checked={exhibitionIds.includes(e.id)}
+                      onCheckedChange={(checked) =>
+                        setExhibitionIds((prev) =>
+                          checked ? [...prev, e.id] : prev.filter((id) => id !== e.id),
+                        )
+                      }
+                      className="rounded"
+                    />
+                    <span className="truncate">{e.title}</span>
+                  </label>
+                ))}
               </div>
               {exhibitionIds.length > 0 && (
-                <p className="text-xs text-muted-foreground mt-1">Выбрано: {exhibitionIds.length}</p>
+                <div className="mt-3 p-2 bg-muted rounded flex flex-wrap gap-2">
+                  {exhibitionIds.map((id) => {
+                    const ex = exhibitorExhibitions.find((x) => x.id === id)
+                    return (
+                      <span
+                        key={id}
+                        className="inline-flex items-center gap-1 bg-background px-2 py-1 rounded text-xs border border-border"
+                      >
+                        {ex?.title ?? id}
+                        <button
+                          type="button"
+                          onClick={() => removeExhibitionFilter(id)}
+                          className="hover:text-destructive"
+                          aria-label="Удалить"
+                        >
+                          <X size={12} />
+                        </button>
+                      </span>
+                    )
+                  })}
+                </div>
               )}
             </div>
+
+            {/* Статус */}
             <div>
-              <label className="text-sm font-medium mb-1 block">{t('filterByStatus')}</label>
+              <label className="text-sm font-medium mb-2 block">{t('filterByStatus')}</label>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="h-9">
+                <SelectTrigger className="w-full px-3 py-2 text-sm border border-border rounded-lg h-auto">
                   <SelectValue placeholder={t('allStatuses')} />
                 </SelectTrigger>
                 <SelectContent>
@@ -239,95 +429,65 @@ export function LeadsSection() {
                 </SelectContent>
               </Select>
             </div>
-          </div>
-          <div className="p-4 border-t border-border space-y-2 mt-auto">
-            <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={clearFilters}>
-              {t('clearFilters')} {activeFilterCount ? `(${activeFilterCount})` : ''}
-            </Button>
-            <Button className="w-full" size="sm" onClick={applyFilters}>
-              {t('applyFilter')}
-            </Button>
+
+            {/* Action Buttons */}
+            <div className="flex gap-2 pt-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="flex-1 text-destructive hover:text-destructive hover:bg-destructive/10"
+                onClick={clearFilters}
+              >
+                {t('clearFilters')} {activeFilterCount ? `(${activeFilterCount})` : ''}
+              </Button>
+              <Button size="sm" className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground" onClick={applyFilters}>
+                {t('applyFilter')}
+              </Button>
+            </div>
           </div>
         </aside>
 
-        {/* Main table area */}
-        <div className="flex-1 flex flex-col min-w-0">
-          <div className="flex items-center justify-end gap-2 py-2">
-            <Button variant="outline" size="sm" onClick={handleExport}>
-              <Download className="w-4 h-4 mr-2" />
-              {t('exportToExcel')}
-            </Button>
+        {/* Main content — вкладка и таблица как в референсе */}
+        <div className="flex-1 flex flex-col bg-card rounded-lg border border-border overflow-hidden min-w-0">
+          <div className="border-b border-border px-6 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-6">
+                <span className="pb-3 px-1 font-medium text-sm border-b-2 border-primary text-primary">
+                  {t('leadsTab')}
+                </span>
+              </div>
+              <div className="flex items-center gap-3">
+                <Button variant="outline" size="sm" onClick={handleExport} className="gap-2">
+                  <Download size={16} />
+                  {t('exportToExcel')}
+                </Button>
+              </div>
+            </div>
           </div>
-          <div className="flex-1 border rounded-lg overflow-auto bg-card">
+
+          <div className="flex-1 overflow-auto px-6 py-4">
             {loading ? (
               <div className="p-8 text-center text-muted-foreground">{t('loading')}</div>
             ) : !data?.items.length ? (
               <div className="p-8 text-center text-muted-foreground">Нет лидов по заданным фильтрам.</div>
             ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-10">
-                      <Checkbox
-                        checked={data.items.length > 0 && selectedIds.size === data.items.length}
-                        onCheckedChange={toggleSelectAll}
-                        aria-label="Выбрать все"
-                      />
-                    </TableHead>
-                    <TableHead>{t('nameColumn')}</TableHead>
-                    <TableHead>{t('email')}</TableHead>
-                    <TableHead>{t('phoneColumn')}</TableHead>
-                    <TableHead>{t('city')}</TableHead>
-                    <TableHead>{t('filterByStatus')}</TableHead>
-                    <TableHead>{t('exhibitionColumn')}</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {data.items.map((row) => (
-                    <TableRow key={row.id}>
-                      <TableCell>
-                        <Checkbox
-                          checked={selectedIds.has(row.id)}
-                          onCheckedChange={() => toggleSelect(row.id)}
-                          aria-label={`Выбрать ${row.name}`}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center shrink-0">
-                            <User className="w-4 h-4 text-muted-foreground" />
-                          </div>
-                          <span className="font-medium">{row.name}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>{row.email}</TableCell>
-                      <TableCell>{row.phone || '—'}</TableCell>
-                      <TableCell>{row.city || '—'}</TableCell>
-                      <TableCell>
-                        <span
-                          className={cn(
-                            'inline-flex rounded-md px-2 py-0.5 text-xs font-medium',
-                            row.status === 'visited'
-                              ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-                              : 'bg-muted text-muted-foreground',
-                          )}
-                        >
-                          {statusLabel(row.status)}
-                        </span>
-                      </TableCell>
-                      <TableCell>{row.exhibitionTitle || '—'}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+              <DataTable
+                data={data.items}
+                selectedIds={selectedIds}
+                onSelectAll={handleSelectAll}
+                onSelectRow={handleSelectRow}
+                onSort={handleSort}
+                sortConfig={sortConfig}
+                statusLabel={statusLabel}
+              />
             )}
           </div>
 
-          {/* Pagination */}
+          {/* Pagination — как на картинке */}
           {data && data.total > 0 && (
-            <div className="flex items-center justify-between py-3 px-1">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <span>{t('rowsPerPage')}</span>
+            <div className="border-t border-border px-6 py-4 flex items-center justify-between text-sm text-muted-foreground">
+              <div className="flex items-center gap-2">
+                {t('rowsPerPage')}{' '}
                 <Select
                   value={String(rowsPerPage)}
                   onValueChange={(v) => {
@@ -335,7 +495,7 @@ export function LeadsSection() {
                     setPage(1)
                   }}
                 >
-                  <SelectTrigger className="w-16 h-8">
+                  <SelectTrigger className="w-16 h-8 inline-flex">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -347,7 +507,7 @@ export function LeadsSection() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="flex items-center gap-2 text-sm">
+              <div className="flex items-center gap-2">
                 <span>
                   {t('pagesOf').replace('{page}', String(safePage)).replace('{total}', String(totalPages))}
                 </span>
