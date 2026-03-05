@@ -46,9 +46,6 @@ export function ExhibitionsSection() {
                         Университет-участник: {user?.name}
                       </p>
                     </div>
-                    <Badge variant={exhibition.status === 'published' ? 'default' : 'outline'}>
-                      {exhibition.status === 'published' ? 'Опубликована' : 'Черновик'}
-                    </Badge>
                   </div>
 
                   <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-4">

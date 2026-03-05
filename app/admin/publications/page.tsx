@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { ProtectedRoute } from '@/components/auth/protected-route'
 import { AdminSidebar } from '@/components/admin/admin-sidebar'
+import { useLocale } from '@/lib/i18n'
 import { useAdmin } from '@/lib/admin-context'
 import { useAuth } from '@/lib/auth-context'
 import { getImageUrl, citiesApi, ApiCity, usersApi, ApiUser } from '@/lib/api'
@@ -27,6 +28,7 @@ import { cn } from '@/lib/utils'
 import { ChevronDown } from 'lucide-react'
 
 function PublicationsContent() {
+  const { t } = useLocale()
   const { exhibitions, news, updateExhibition, updateExhibitionFormData, deleteExhibition, deleteNews, updateNews, updateNewsFormData, addExhibition, addExhibitionFormData, addNews, addNewsFormData, isLoading } = useAdmin()
   const { user } = useAuth()
   const [searchQuery, setSearchQuery] = useState('')
@@ -157,48 +159,48 @@ function PublicationsContent() {
       const start = formData.startDate ? (formData.startDate instanceof Date ? formData.startDate : new Date(formData.startDate)) : null
       const end = formData.endDate ? (formData.endDate instanceof Date ? formData.endDate : new Date(formData.endDate)) : null
       if (!title) {
-        setUploadError('Введите название выставки')
+        setUploadError(t('enterExhibitionTitle'))
         return
       }
       if (!description) {
-        setUploadError('Введите описание выставки')
+        setUploadError(t('enterExhibitionDescription'))
         return
       }
       if (!start || !end) {
-        setUploadError('Укажите дату начала и дату окончания')
+        setUploadError(t('enterDates'))
         return
       }
       if (start > end) {
-        setUploadError('Дата окончания должна быть не раньше даты начала')
+        setUploadError(t('endDateAfterStart'))
         return
       }
       const cityIds = formData.cities ?? []
       if (cityIds.length === 0) {
-        setUploadError('Выберите хотя бы один город')
+        setUploadError(t('selectAtLeastOneCity'))
         return
       }
       const participantIds = formData.participants ?? []
       if (participantIds.length === 0) {
-        setUploadError('Выберите хотя бы одного участника выставки')
+        setUploadError(t('selectAtLeastOneParticipant'))
         return
       }
       if (!formData.banner && !pendingBannerFile) {
-        setUploadError('Загрузите изображение (карточка/баннер)')
+        setUploadError(t('uploadImageExhibition'))
         return
       }
     } else {
       const title = (formData.title ?? '').trim()
       const content = (formData.content ?? '').trim()
       if (!title) {
-        setUploadError('Введите название новости')
+        setUploadError(t('enterNewsTitle'))
         return
       }
       if (!content) {
-        setUploadError('Введите полный текст новости')
+        setUploadError(t('enterNewsContent'))
         return
       }
       if (!formData.banner && !pendingBannerFile) {
-        setUploadError('Загрузите изображение новости')
+        setUploadError(t('uploadImageNews'))
         return
       }
     }
@@ -312,7 +314,7 @@ function PublicationsContent() {
       setPendingImagesFiles([])
       setModalOpen(false)
     } catch (e) {
-      const msg = e instanceof Error ? e.message : 'Ошибка сохранения'
+      const msg = e instanceof Error ? e.message : t('saveError')
       setUploadError(msg)
       console.error(e)
     } finally {
@@ -328,8 +330,8 @@ function PublicationsContent() {
         {/* Header */}
         <div className="border-b border-border/40 bg-white/50 backdrop-blur">
           <div className="px-4 sm:px-6 lg:px-8 py-4 lg:py-6">
-            <h1 className="text-2xl lg:text-3xl font-bold">Публикации</h1>
-            <p className="text-muted-foreground mt-1">Организация выставок и новостей</p>
+            <h1 className="text-2xl lg:text-3xl font-bold">{t('publications')}</h1>
+            <p className="text-muted-foreground mt-1">{t('publicationManagement')}</p>
           </div>
         </div>
 
@@ -343,7 +345,7 @@ function PublicationsContent() {
                   className="group relative rounded-none bg-transparent px-0 pt-3 pb-0 text-muted-foreground data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 flex flex-col items-center"
                 >
                   <span className="inline-block">
-                    Выставки
+                    {t('exhibitions')}
                     <span className="block w-full h-[3px] rounded-full bg-primary opacity-0 group-data-[state=active]:opacity-100 mt-0 shrink-0" aria-hidden />
                   </span>
                 </TabsTrigger>
@@ -352,7 +354,7 @@ function PublicationsContent() {
                   className="group relative rounded-none bg-transparent px-0 pt-3 pb-0 text-muted-foreground data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 flex flex-col items-center"
                 >
                   <span className="inline-block">
-                    Новости
+                    {t('news')}
                     <span className="block w-full h-[3px] rounded-full bg-primary opacity-0 group-data-[state=active]:opacity-100 mt-0 shrink-0" aria-hidden />
                   </span>
                 </TabsTrigger>
@@ -366,12 +368,12 @@ function PublicationsContent() {
             <TabsContent value="exhibitions" className="space-y-6 p-0 pt-6">
               <div className="flex flex-col sm:flex-row gap-4 pb-4 border-b border-border/60">
                 <Input
-                  placeholder="Поиск выставок..."
+                  placeholder={t('searchExhibitions')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="max-w-sm"
                 />
-                <Button onClick={() => handleCreateContent('exhibition')}>+ Новая выставка</Button>
+                <Button onClick={() => handleCreateContent('exhibition')}>+ {t('newExhibition')}</Button>
               </div>
 
               {isLoading ? (
@@ -405,7 +407,7 @@ function PublicationsContent() {
                           {togglingStatusExhibitionId === exhibition.id ? (
                             <Button variant="default" size="sm" className="flex-1 min-w-0 h-8 text-xs rounded-md shadow-lg shrink-0" disabled>
                               <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" />
-                              <span className="truncate">Сохранение...</span>
+                              <span className="truncate">{t('saving')}</span>
                             </Button>
                           ) : (
                             <>
@@ -415,7 +417,7 @@ function PublicationsContent() {
                                 className="flex-1 min-w-0 h-8 text-xs rounded-md shadow-lg shrink-0 px-2"
                                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleToggleExhibitionStatus(exhibition.id, exhibition.status); }}
                               >
-                                <span className="truncate">{exhibition.status === 'published' ? 'Снять' : 'Опубликовать'}</span>
+                                <span className="truncate">{exhibition.status === 'published' ? t('unpublish') : t('publish')}</span>
                               </Button>
                               <Button
                                 variant="default"
@@ -435,7 +437,7 @@ function PublicationsContent() {
                         </span>
                       </div>
                       <Badge className="absolute top-2 right-2 z-30 text-[10px] px-1.5 py-0" variant={exhibition.status === 'published' ? 'default' : 'secondary'}>
-                        {exhibition.status === 'draft' ? 'Черн.' : 'Опубл.'}
+                        {exhibition.status === 'draft' ? t('draftShort') : t('publishedShort')}
                       </Badge>
                     </Card>
                   ))}
@@ -443,7 +445,7 @@ function PublicationsContent() {
               ) : (
                 <div className="w-full flex flex-col items-center justify-center py-24 min-h-[50vh]">
                   <LayoutGrid className="w-16 h-16 text-muted-foreground/50 mb-4" strokeWidth={1.25} />
-                  <p className="text-lg font-medium text-muted-foreground">Не найдено</p>
+                  <p className="text-lg font-medium text-muted-foreground">{t('notFound')}</p>
                 </div>
               )}
             </TabsContent>
@@ -452,12 +454,12 @@ function PublicationsContent() {
             <TabsContent value="news" className="space-y-6 p-0 pt-6">
               <div className="flex flex-col sm:flex-row gap-4 pb-4 border-b border-border/60">
                 <Input
-                  placeholder="Поиск новостей..."
+                  placeholder={t('searchNews')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="max-w-sm"
                 />
-                <Button onClick={() => handleCreateContent('news')}>+ Новая новость</Button>
+                <Button onClick={() => handleCreateContent('news')}>+ {t('newNews')}</Button>
               </div>
 
               {isLoading ? (
@@ -490,7 +492,7 @@ function PublicationsContent() {
                           {togglingStatusNewsId === news.id ? (
                             <Button variant="default" size="sm" className="flex-1 min-w-0 h-8 text-xs rounded-md shadow-lg shrink-0" disabled>
                               <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" />
-                              <span className="truncate">Сохранение...</span>
+                              <span className="truncate">{t('saving')}</span>
                             </Button>
                           ) : (
                             <>
@@ -500,7 +502,7 @@ function PublicationsContent() {
                                 className="flex-1 min-w-0 h-8 text-xs rounded-md shadow-lg shrink-0 px-2"
                                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleToggleNewsStatus(news.id, news.status); }}
                               >
-                                <span className="truncate">{news.status === 'published' ? 'Снять' : 'Опубликовать'}</span>
+                                <span className="truncate">{news.status === 'published' ? t('unpublish') : t('publish')}</span>
                               </Button>
                               <Button
                                 variant="default"
@@ -520,7 +522,7 @@ function PublicationsContent() {
                         </span>
                       </div>
                       <Badge className="absolute top-2 right-2 z-30 text-[10px] px-1.5 py-0" variant={news.status === 'published' ? 'default' : 'secondary'}>
-                        {news.status === 'draft' ? 'Черн.' : 'Опубл.'}
+                        {news.status === 'draft' ? t('draftShort') : t('publishedShort')}
                       </Badge>
                     </Card>
                   ))}
@@ -528,7 +530,7 @@ function PublicationsContent() {
               ) : (
                 <div className="w-full flex flex-col items-center justify-center py-24 min-h-[50vh]">
                   <LayoutGrid className="w-16 h-16 text-muted-foreground/50 mb-4" strokeWidth={1.25} />
-                  <p className="text-lg font-medium text-muted-foreground">Не найдено</p>
+                  <p className="text-lg font-medium text-muted-foreground">{t('notFound')}</p>
                 </div>
               )}
             </TabsContent>
@@ -540,22 +542,22 @@ function PublicationsContent() {
               <DialogHeader>
                 <DialogTitle>
                   {editingItem
-                    ? `Редактировать ${modalType === 'exhibition' ? 'выставку' : 'новость'}`
-                    : `Создать новую ${modalType === 'exhibition' ? 'выставку' : 'новость'}`}
+                    ? (modalType === 'exhibition' ? t('editExhibition') : t('editNews'))
+                    : (modalType === 'exhibition' ? t('createExhibition') : t('createNews'))}
                 </DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium">Название</label>
+                  <label className="text-sm font-medium">{t('title')}</label>
                   <Input
                     value={formData.title || ''}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    placeholder="Введите название"
+                    placeholder={t('enterTitle')}
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium">Баннер</label>
-                  <p className="text-xs text-muted-foreground mt-0.5 mb-1">Карточка и шапка страницы публикации</p>
+                  <label className="text-sm font-medium">{t('image')}</label>
+                  <p className="text-xs text-muted-foreground mt-0.5 mb-1">{t('bannerCardHint')}</p>
                   <div className="mt-1 flex flex-wrap items-start gap-3">
                     {(pendingBannerPreviewUrl || formData.banner || formData.image) ? (
                       <div className="flex flex-col gap-2 w-36">
@@ -576,7 +578,7 @@ function PublicationsContent() {
                           }}
                         >
                           <Trash2 className="w-4 h-4 mr-1.5" />
-                          Удалить
+                          {t('deleteImage')}
                         </Button>
                       </div>
                     ) : null}
@@ -599,15 +601,15 @@ function PublicationsContent() {
                           e.target.value = ''
                         }}
                       />
-                      <span className="text-sm text-primary hover:underline">Выбрать файл</span>
+                      <span className="text-sm text-primary hover:underline">{t('chooseFile')}</span>
                       <span className="text-xs text-muted-foreground ml-1">(макс. {MAX_FILE_MB} МБ)</span>
                     </label>
                     {uploadError ? <p className="text-sm text-destructive mt-1">{uploadError}</p> : null}
                   </div>
                 </div>
                 <div>
-                  <label className="text-sm font-medium">Изображения (до {MAX_IMAGES})</label>
-                  <p className="text-xs text-muted-foreground mt-0.5 mb-1">Отображаются на странице публикации</p>
+                  <label className="text-sm font-medium">{t('image')} (до {MAX_IMAGES})</label>
+                  <p className="text-xs text-muted-foreground mt-0.5 mb-1">{t('imagesOnPageHint')}</p>
                   <div className="mt-1 flex flex-wrap gap-2">
                     {(formData.images ?? []).map((url: string, idx: number) => (
                       <div key={idx} className="relative group">
@@ -660,7 +662,7 @@ function PublicationsContent() {
                             setPendingImagesFiles((prev) => prev.concat(added).slice(0, MAX_IMAGES))
                           }}
                         />
-                        + Добавить
+                        + {t('addImage')}
                       </label>
                     )}
                   </div>
@@ -668,27 +670,27 @@ function PublicationsContent() {
                 {modalType === 'exhibition' ? (
                   <>
                     <div>
-                      <label className="text-sm font-medium">Описание</label>
+                      <label className="text-sm font-medium">{t('description')}</label>
                       <Textarea
                         value={formData.description || ''}
                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                        placeholder="Введите описание"
+                        placeholder={t('enterExhibitionDescription')}
                         rows={4}
                       />
                     </div>
                     <div>
-                      <label className="text-sm font-medium">Города</label>
-                      <p className="text-xs text-muted-foreground mt-0.5 mb-1">Выберите города из справочника (множественный выбор)</p>
+                      <label className="text-sm font-medium">{t('cities')}</label>
+                      <p className="text-xs text-muted-foreground mt-0.5 mb-1">{t('citiesMultiHint')}</p>
                       <Popover>
                         <PopoverTrigger asChild>
                           <Button variant="outline" className="w-full justify-between font-normal" disabled={citiesListLoading}>
-                            {citiesListLoading ? 'Загрузка...' : (formData.cities ?? []).length ? `Выбрано: ${(formData.cities ?? []).length}` : 'Выберите города'}
+                            {citiesListLoading ? t('loading') : (formData.cities ?? []).length ? `${t('selectedCount')}: ${(formData.cities ?? []).length}` : t('selectCities')}
                             <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
                           </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-full min-w-[var(--radix-popover-trigger-width)] max-h-60 overflow-y-auto p-2" align="start">
                           {citiesList.length === 0 ? (
-                            <p className="text-sm text-muted-foreground py-2">Нет городов. Добавьте города в разделе Справочники → Города.</p>
+                            <p className="text-sm text-muted-foreground py-2">{t('noCitiesHint')}</p>
                           ) : (
                             <div className="space-y-1">
                               {citiesList.map((city) => (
@@ -723,18 +725,18 @@ function PublicationsContent() {
                       </div>
                     </div>
                     <div>
-                      <label className="text-sm font-medium">Участники (университеты)</label>
-                      <p className="text-xs text-muted-foreground mt-0.5 mb-1">Выберите университеты из списка (множественный выбор)</p>
+                      <label className="text-sm font-medium">{t('selectParticipants')}</label>
+                      <p className="text-xs text-muted-foreground mt-0.5 mb-1">{t('participantsMultiHint')}</p>
                       <Popover>
                         <PopoverTrigger asChild>
                           <Button variant="outline" className="w-full justify-between font-normal" disabled={exhibitorsListLoading}>
-                            {exhibitorsListLoading ? 'Загрузка...' : (formData.participants ?? []).length ? `Выбрано: ${(formData.participants ?? []).length}` : 'Выберите участников'}
+                            {exhibitorsListLoading ? t('loading') : (formData.participants ?? []).length ? `${t('selectedCount')}: ${(formData.participants ?? []).length}` : t('selectParticipants')}
                             <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
                           </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-full min-w-[var(--radix-popover-trigger-width)] max-h-60 overflow-y-auto p-2" align="start">
                           {exhibitorsList.length === 0 ? (
-                            <p className="text-sm text-muted-foreground py-2">Нет университетов в списке. Создайте пользователей с ролью «Университет» в разделе Пользователи.</p>
+                            <p className="text-sm text-muted-foreground py-2">{t('noExhibitorsHint')}</p>
                           ) : (
                             <div className="space-y-1">
                               {exhibitorsList.map((exh) => (
@@ -770,7 +772,7 @@ function PublicationsContent() {
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="text-sm font-medium">Дата начала</label>
+                        <label className="text-sm font-medium">{t('startDate')}</label>
                         <Input
                           type="date"
                           value={formData.startDate ? new Date(formData.startDate).toISOString().split('T')[0] : ''}
@@ -778,7 +780,7 @@ function PublicationsContent() {
                         />
                       </div>
                       <div>
-                        <label className="text-sm font-medium">Дата окончания</label>
+                        <label className="text-sm font-medium">{t('endDate')}</label>
                         <Input
                           type="date"
                           value={formData.endDate ? new Date(formData.endDate).toISOString().split('T')[0] : ''}
@@ -790,16 +792,16 @@ function PublicationsContent() {
                 ) : (
                   <>
                     <div>
-                      <label className="text-sm font-medium">Полный текст</label>
+                      <label className="text-sm font-medium">{t('fullText')}</label>
                       <Textarea
                         value={formData.content || ''}
                         onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                        placeholder="Введите полный текст новости"
+                        placeholder={t('enterNewsContent')}
                         rows={6}
                       />
                     </div>
                     <div>
-                      <label className="text-sm font-medium">Дата публикации</label>
+                      <label className="text-sm font-medium">{t('publicationDate')}</label>
                       <Input
                         type="date"
                         value={formData.publishedAt ? new Date(formData.publishedAt).toISOString().split('T')[0] : ''}
@@ -810,16 +812,16 @@ function PublicationsContent() {
                 )}
                 <div className="flex gap-2">
                   <Button variant="outline" className="flex-1 bg-transparent" onClick={() => setModalOpen(false)} disabled={saving}>
-                    Отмена
+                    {t('cancel')}
                   </Button>
                   <Button className="flex-1" onClick={handleSaveContent} disabled={saving}>
                     {saving ? (
                       <>
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Сохранение...
+                        {t('saving')}
                       </>
                     ) : (
-                      'Сохранить'
+                      t('save')
                     )}
                   </Button>
                 </div>

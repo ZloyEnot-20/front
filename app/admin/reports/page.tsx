@@ -3,13 +3,25 @@
 import { useState, useEffect } from 'react'
 import { ProtectedRoute } from '@/components/auth/protected-route'
 import { AdminSidebar } from '@/components/admin/admin-sidebar'
+import { useLocale } from '@/lib/i18n'
 import { useAdmin } from '@/lib/admin-context'
 import { registrationsApi } from '@/lib/api'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { BarChart3, TrendingUp, Users, FileText } from 'lucide-react'
 
+const ROLE_LABEL_KEYS: Record<string, string> = {
+  visitor: 'visitor',
+  exhibitor: 'roleExhibitor',
+  participant: 'participant',
+  staff: 'roleStaff',
+  manager: 'roleManager',
+  content_manager: 'contentManager',
+  admin: 'admin',
+}
+
 function ReportsContent() {
+  const { t } = useLocale()
   const { users, exhibitions, news, isLoading: adminLoading } = useAdmin()
   const [allRegistrations, setAllRegistrations] = useState<{ id: string }[]>([])
   const [regsLoading, setRegsLoading] = useState(true)
@@ -30,30 +42,10 @@ function ReportsContent() {
   const totalNews = news.length
 
   const reportData = [
-    {
-      title: 'Всего регистраций',
-      value: totalRegistrations,
-      icon: Users,
-      color: 'bg-blue-100 text-blue-600',
-    },
-    {
-      title: 'Выставок',
-      value: totalExhibitions,
-      icon: BarChart3,
-      color: 'bg-green-100 text-green-600',
-    },
-    {
-      title: 'Опубликовано выставок',
-      value: activeExhibitions,
-      icon: TrendingUp,
-      color: 'bg-purple-100 text-purple-600',
-    },
-    {
-      title: 'Новостей',
-      value: totalNews,
-      icon: FileText,
-      color: 'bg-amber-100 text-amber-600',
-    },
+    { title: t('totalRegistrations'), value: totalRegistrations, icon: Users, color: 'bg-blue-100 text-blue-600' },
+    { title: t('exhibitionsCount'), value: totalExhibitions, icon: BarChart3, color: 'bg-green-100 text-green-600' },
+    { title: t('publishedExhibitionsCount'), value: activeExhibitions, icon: TrendingUp, color: 'bg-purple-100 text-purple-600' },
+    { title: t('newsCount'), value: totalNews, icon: FileText, color: 'bg-amber-100 text-amber-600' },
   ]
 
   const roleCounts = users.reduce(
@@ -78,15 +70,15 @@ function ReportsContent() {
         {/* Header */}
         <div className="border-b border-border/40 bg-white/50 backdrop-blur">
           <div className="px-4 sm:px-6 lg:px-8 py-4 lg:py-6">
-            <h1 className="text-2xl lg:text-3xl font-bold">Отчеты</h1>
-            <p className="text-muted-foreground mt-1">Аналитика и статистика платформы</p>
+            <h1 className="text-2xl lg:text-3xl font-bold">{t('reports')}</h1>
+            <p className="text-muted-foreground mt-1">{t('reportsSubtitle')}</p>
           </div>
         </div>
 
         {/* Content */}
         <div className="p-4 sm:p-6 lg:p-8">
           {isLoading ? (
-            <div className="text-center py-12 text-muted-foreground">Загрузка данных с API...</div>
+            <div className="text-center py-12 text-muted-foreground">{t('loadingDataFromApi')}</div>
           ) : (
             <>
           {/* Stats Grid */}
@@ -115,7 +107,7 @@ function ReportsContent() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
             <Card>
               <CardHeader>
-                <CardTitle>Пользователи по ролям</CardTitle>
+                <CardTitle>{t('usersByRole')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
@@ -123,7 +115,7 @@ function ReportsContent() {
                     roleDistribution.map((item) => (
                       <div key={item.role}>
                         <div className="flex justify-between mb-1">
-                          <span className="text-sm font-medium">{item.role}</span>
+                          <span className="text-sm font-medium">{t(ROLE_LABEL_KEYS[item.role] ?? item.role)}</span>
                           <span className="text-sm text-muted-foreground">{item.count}</span>
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-2">
@@ -135,7 +127,7 @@ function ReportsContent() {
                       </div>
                     ))
                   ) : (
-                    <p className="text-sm text-muted-foreground">Нет данных</p>
+                    <p className="text-sm text-muted-foreground">{t('noData')}</p>
                   )}
                 </div>
               </CardContent>
@@ -143,14 +135,14 @@ function ReportsContent() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Статус выставок</CardTitle>
+                <CardTitle>{t('exhibitionStatusChart')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
                   {totalExhibitions > 0 ? (
                     [
-                      { status: 'Опубликовано', count: activeExhibitions, color: 'bg-green-500' },
-                      { status: 'Черновик', count: totalExhibitions - activeExhibitions, color: 'bg-yellow-500' },
+                      { status: t('published'), count: activeExhibitions, color: 'bg-green-500' },
+                      { status: t('draft'), count: totalExhibitions - activeExhibitions, color: 'bg-yellow-500' },
                     ].map((item) => (
                       <div key={item.status}>
                         <div className="flex justify-between mb-1">
@@ -166,7 +158,7 @@ function ReportsContent() {
                       </div>
                     ))
                   ) : (
-                    <p className="text-sm text-muted-foreground">Нет выставок</p>
+                    <p className="text-sm text-muted-foreground">{t('noExhibitions')}</p>
                   )}
                 </div>
               </CardContent>
@@ -176,13 +168,13 @@ function ReportsContent() {
           {/* Export Options */}
           <Card className="mt-6">
             <CardHeader>
-              <CardTitle>Экспорт данных</CardTitle>
+              <CardTitle>{t('exportData')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex flex-col sm:flex-row gap-3">
-                <Button>Экспортировать в CSV</Button>
-                <Button variant="outline">Экспортировать в PDF</Button>
-                <Button variant="outline">Отправить на email</Button>
+                <Button>{t('exportCsv')}</Button>
+                <Button variant="outline">{t('exportPdf')}</Button>
+                <Button variant="outline">{t('sendByEmail')}</Button>
               </div>
             </CardContent>
           </Card>

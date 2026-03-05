@@ -49,8 +49,23 @@ export const authApi = {
   verifyEmailCode: (email: string, code: string) =>
     api<{ verified: boolean }>('/api/auth/verify-email-code', { method: 'POST', body: JSON.stringify({ email, code }) }),
   me: () => api<ApiUser>('/api/auth/me'),
-  updateMe: (data: { name?: string; avatar?: string; phone?: string; exhibitorDescription?: string; exhibitorAddress?: string; exhibitorWebsite?: string; exhibitorPhotos?: string[] }) =>
-    api<ApiUser>('/api/auth/me', { method: 'PATCH', body: JSON.stringify(data) }),
+  updateMe: (data: {
+    name?: string
+    avatar?: string
+    phone?: string
+    firstName?: string
+    lastName?: string
+    city?: string
+    visitorStatus?: 'student' | 'parent' | 'specialist'
+    languageKnowledge?: string
+    interest?: 'Bachelor' | 'Master' | 'MBA' | 'Short Courses' | 'School'
+    countryOfInterest?: string
+    admissionPlan?: '0-3' | '3-6' | '6-12' | '12+'
+    exhibitorDescription?: string
+    exhibitorAddress?: string
+    exhibitorWebsite?: string
+    exhibitorPhotos?: string[]
+  }) => api<ApiUser>('/api/auth/me', { method: 'PATCH', body: JSON.stringify(data) }),
 }
 
 export type RegisterPayload =

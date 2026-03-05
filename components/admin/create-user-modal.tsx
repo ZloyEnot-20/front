@@ -1,8 +1,8 @@
 'use client'
 
 import React from "react"
-
 import { useState } from 'react'
+import { useLocale } from '@/lib/i18n'
 import { useAdmin } from '@/lib/admin-context'
 import {
   Dialog,
@@ -28,15 +28,16 @@ interface CreateUserModalProps {
   onOpenChange: (open: boolean) => void
 }
 
-const ROLES = [
-  { value: 'visitor', label: 'Посетитель' },
-  { value: 'exhibitor', label: 'Университет' },
-  { value: 'staff', label: 'Сотрудник (Staff)' },
-  { value: 'content_manager', label: 'Менеджер контента (Content Manager)' },
-  { value: 'admin', label: 'Администратор' },
+const ROLE_OPTIONS = [
+  { value: 'visitor' as const, key: 'visitor' },
+  { value: 'exhibitor' as const, key: 'roleExhibitor' },
+  { value: 'staff' as const, key: 'roleStaff' },
+  { value: 'content_manager' as const, key: 'contentManager' },
+  { value: 'admin' as const, key: 'admin' },
 ]
 
 export function CreateUserModal({ isOpen, onOpenChange }: CreateUserModalProps) {
+  const { t } = useLocale()
   const { addUser } = useAdmin()
   const [formData, setFormData] = useState({
     firstName: '',
@@ -69,35 +70,35 @@ export function CreateUserModal({ isOpen, onOpenChange }: CreateUserModalProps) 
   const validateForm = () => {
     if (isExhibitor) {
       if (!formData.universityName.trim()) {
-        setError('Введите название университета')
+        setError(t('enterUniversityName'))
         return false
       }
     } else {
       if (!formData.firstName.trim()) {
-        setError('Введите имя')
+        setError(t('enterFirstName'))
         return false
       }
       if (!formData.lastName.trim()) {
-        setError('Введите фамилию')
+        setError(t('enterLastName'))
         return false
       }
     }
     if (!formData.email.trim() || !formData.email.includes('@')) {
-      setError('Введите корректный email')
+      setError(t('enterValidEmail'))
       return false
     }
     const phoneDigits = formData.phone.replace(/\D/g, '')
     const validPhone = (phoneDigits.length === 12 && phoneDigits.startsWith('998')) || (phoneDigits.length === 9 && !phoneDigits.startsWith('0'))
     if (!formData.phone.trim()) {
-      setError('Введите номер телефона')
+      setError(t('enterPhone'))
       return false
     }
     if (!validPhone) {
-      setError('Введите корректный узбекский номер: +998 XX XXX XX XX')
+      setError(t('enterValidUzPhone'))
       return false
     }
     if (!formData.password || formData.password.length < 8) {
-      setError('Задайте пароль (не менее 8 символов, цифры, заглавная буква, символ)')
+      setError(t('setPasswordHint'))
       return false
     }
     return true
@@ -128,7 +129,7 @@ export function CreateUserModal({ isOpen, onOpenChange }: CreateUserModalProps) 
       await addUser(newUser)
       setSuccess(true)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Ошибка создания пользователя')
+      setError(err instanceof Error ? err.message : t('createUserError'))
       return
     } finally {
       setSaving(false)
@@ -153,22 +154,22 @@ export function CreateUserModal({ isOpen, onOpenChange }: CreateUserModalProps) 
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Создать нового пользователя</DialogTitle>
+          <DialogTitle>{t('createNewUser')}</DialogTitle>
           <DialogDescription>
-            Заполните форму для добавления нового пользователя в систему
+            {t('createNewUserDesc')}
           </DialogDescription>
         </DialogHeader>
 
         {success ? (
           <div className="py-8 text-center">
             <CheckCircle2 className="w-12 h-12 text-green-600 mx-auto mb-4" />
-            <p className="font-semibold mb-2">Пользователь создан успешно!</p>
+            <p className="font-semibold mb-2">{t('userCreatedSuccess')}</p>
             <p className="text-sm text-muted-foreground">
-              {displayName} был добавлен в систему
+              {displayName} {t('addedToSystem')}
             </p>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
             {error && (
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
@@ -178,29 +179,29 @@ export function CreateUserModal({ isOpen, onOpenChange }: CreateUserModalProps) 
 
             {isExhibitor ? (
               <div>
-                <label className="text-sm font-medium">Название университета</label>
+                <label className="text-sm font-medium">{t('universityNameLabel')}</label>
                 <Input
                   value={formData.universityName}
                   onChange={(e) => setFormData({ ...formData, universityName: e.target.value })}
-                  placeholder="МГУ им. М. В. Ломоносова"
+                  placeholder={t('universityPlaceholder')}
                 />
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium">Имя</label>
+                  <label className="text-sm font-medium">{t('firstNameLabel')}</label>
                   <Input
                     value={formData.firstName}
                     onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                    placeholder="Иван"
+                    placeholder={t('firstNamePlaceholder')}
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium">Фамилия</label>
+                  <label className="text-sm font-medium">{t('lastNameLabel')}</label>
                   <Input
                     value={formData.lastName}
                     onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                    placeholder="Петров"
+                    placeholder={t('lastNamePlaceholder')}
                   />
                 </div>
               </div>
@@ -217,7 +218,7 @@ export function CreateUserModal({ isOpen, onOpenChange }: CreateUserModalProps) 
             </div>
 
             <div>
-              <label className="text-sm font-medium">Номер телефона</label>
+              <label className="text-sm font-medium">{t('phoneLabel')}</label>
               <Input
                 type="tel"
                 value={formData.phone}
@@ -228,7 +229,7 @@ export function CreateUserModal({ isOpen, onOpenChange }: CreateUserModalProps) 
 
             <div>
               <div className="flex items-center justify-between gap-2 mb-2">
-                <label className="text-sm font-medium">Пароль (задаётся администратором)</label>
+                <label className="text-sm font-medium">{t('passwordAdminLabel')}</label>
                 <Button
                   type="button"
                   variant="outline"
@@ -237,22 +238,24 @@ export function CreateUserModal({ isOpen, onOpenChange }: CreateUserModalProps) 
                   onClick={() => setFormData({ ...formData, password: generateStrongPassword() })}
                 >
                   <KeyRound className="w-3.5 h-3.5" />
-                  Сгенерировать надёжный пароль
+                  {t('generatePassword')}
                 </Button>
               </div>
               <div className="relative">
                 <Input
                   type={showPassword ? 'text' : 'password'}
+                  name="admin-create-user-password"
+                  autoComplete="new-password"
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  placeholder="Минимум 8 символов, цифры, буквы, символы"
+                  placeholder={t('passwordPlaceholder')}
                   className="pr-10"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
                   className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted"
-                  aria-label={showPassword ? 'Скрыть пароль' : 'Показать пароль'}
+                  aria-label={showPassword ? t('hidePassword') : t('showPassword')}
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -260,15 +263,15 @@ export function CreateUserModal({ isOpen, onOpenChange }: CreateUserModalProps) 
             </div>
 
             <div>
-              <label className="text-sm font-medium">Роль</label>
+              <label className="text-sm font-medium">{t('role')}</label>
               <Select value={formData.role} onValueChange={(value) => setFormData({ ...formData, role: value as typeof formData.role })}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {ROLES.map((role) => (
+                  {ROLE_OPTIONS.map((role) => (
                     <SelectItem key={role.value} value={role.value}>
-                      {role.label}
+                      {t(role.key)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -283,16 +286,16 @@ export function CreateUserModal({ isOpen, onOpenChange }: CreateUserModalProps) 
                 onClick={() => onOpenChange(false)}
                 disabled={saving}
               >
-                Отмена
+                {t('cancel')}
               </Button>
               <Button type="submit" className="flex-1" disabled={saving}>
                 {saving ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Создание...
+                    {t('saving')}
                   </>
                 ) : (
-                  'Создать'
+                  t('createButton')
                 )}
               </Button>
             </div>

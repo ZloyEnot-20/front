@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { ProtectedRoute } from '@/components/auth/protected-route'
 import { AdminSidebar } from '@/components/admin/admin-sidebar'
+import { useLocale } from '@/lib/i18n'
 import { citiesApi, ApiCity } from '@/lib/api'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -16,6 +17,7 @@ import {
 import { Plus, Loader2, Trash2, MapPin } from 'lucide-react'
 
 function ReferenceContent() {
+  const { t } = useLocale()
   const [cities, setCities] = useState<ApiCity[]>([])
   const [citiesLoading, setCitiesLoading] = useState(true)
   const [modalOpen, setModalOpen] = useState(false)
@@ -30,7 +32,7 @@ function ReferenceContent() {
       const list = await citiesApi.list()
       setCities(list)
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Ошибка загрузки городов')
+      setError(e instanceof Error ? e.message : t('errorLoadCities'))
     } finally {
       setCitiesLoading(false)
     }
@@ -51,7 +53,7 @@ function ReferenceContent() {
       setModalOpen(false)
       await loadCities()
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Ошибка создания')
+      setError(e instanceof Error ? e.message : t('errorCreate'))
     } finally {
       setSaving(false)
     }
@@ -71,7 +73,7 @@ function ReferenceContent() {
       await loadCities()
       setCityToDelete(null)
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Ошибка удаления')
+      setError(e instanceof Error ? e.message : t('errorDelete'))
     } finally {
       setDeletingId(null)
     }
@@ -83,19 +85,19 @@ function ReferenceContent() {
       <main className="flex-1 pt-14 lg:pt-0 ml-0 lg:ml-64 min-h-screen min-w-0">
         <div className="border-b border-border/40 bg-white/50 backdrop-blur">
           <div className="px-4 sm:px-6 lg:px-8 py-4 lg:py-6">
-            <h1 className="text-2xl lg:text-3xl font-bold">Справочники</h1>
-            <p className="text-muted-foreground mt-1">Города и другие справочные данные</p>
+            <h1 className="text-2xl lg:text-3xl font-bold">{t('reference')}</h1>
+            <p className="text-muted-foreground mt-1">{t('referenceSubtitle')}</p>
           </div>
         </div>
         <div className="p-4 sm:p-6 lg:p-8">
           <div className="space-y-6">
               <div className="flex flex-col sm:flex-row gap-4 justify-between items-start pb-4 border-b border-border/60">
                 <p className="text-sm text-muted-foreground">
-                  Города из этого списка можно выбирать при создании выставки (множественный выбор).
+                  {t('citiesReferenceHint')}
                 </p>
                 <Button onClick={() => { setModalOpen(true); setError(null); setNewCityName(''); }}>
                   <Plus className="w-4 h-4 mr-2" />
-                  Добавить город
+                  {t('addCity')}
                 </Button>
               </div>
               {error && (
@@ -107,7 +109,7 @@ function ReferenceContent() {
                     <Card key={i} className="overflow-hidden py-0">
                       <CardContent className="p-4 flex items-center gap-3">
                         <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
-                        <span className="text-sm text-muted-foreground">Загрузка...</span>
+                        <span className="text-sm text-muted-foreground">{t('loading')}</span>
                       </CardContent>
                     </Card>
                   ))}
@@ -141,7 +143,7 @@ function ReferenceContent() {
               ) : (
                 <Card>
                   <CardContent className="py-12 text-center text-muted-foreground">
-                    Нет городов. Добавьте первый город, чтобы выбирать его при создании выставки.
+                    {t('noCitiesAddFirst')}
                   </CardContent>
                 </Card>
               )}
@@ -152,22 +154,22 @@ function ReferenceContent() {
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
-            <DialogTitle>Новый город</DialogTitle>
+            <DialogTitle>{t('newCity')}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 pt-2">
             <div>
-              <label className="text-sm font-medium">Название</label>
+              <label className="text-sm font-medium">{t('title')}</label>
               <Input
                 value={newCityName}
                 onChange={(e) => setNewCityName(e.target.value)}
-                placeholder="Например: Москва"
+                placeholder={t('cityNamePlaceholder')}
                 className="mt-1"
                 onKeyDown={(e) => e.key === 'Enter' && handleCreateCity()}
               />
             </div>
             <Button className="w-full" onClick={handleCreateCity} disabled={saving || !newCityName.trim()}>
               {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-              Создать
+              {t('createButton')}
             </Button>
           </div>
         </DialogContent>
@@ -176,20 +178,20 @@ function ReferenceContent() {
       <Dialog open={!!cityToDelete} onOpenChange={(open) => !open && setCityToDelete(null)}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
-            <DialogTitle>Удалить город?</DialogTitle>
+            <DialogTitle>{t('deleteCity')}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 pt-2">
             {cityToDelete && (
               <p className="text-sm text-muted-foreground">
-                Город «{cityToDelete.name}» будет удалён из справочника. Ранее созданные выставки с этим городом так и останутся с указанием этого города.
+                «{cityToDelete.name}». {t('cityDeleteWarning')}
               </p>
             )}
             <div className="flex gap-2">
               <Button variant="outline" className="flex-1" onClick={() => setCityToDelete(null)}>
-                Отмена
+                {t('cancel')}
               </Button>
               <Button className="flex-1 bg-red-600 text-white hover:bg-red-700" onClick={handleDeleteCityConfirm} disabled={deletingId !== null}>
-                {deletingId ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Удалить'}
+                {deletingId ? <Loader2 className="w-4 h-4 animate-spin" /> : t('delete')}
               </Button>
             </div>
           </div>

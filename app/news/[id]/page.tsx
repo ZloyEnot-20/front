@@ -66,11 +66,9 @@ export default function NewsDetailPage({ params }: NewsPageProps) {
         )}
         <div className="absolute inset-0 bg-black/40" />
         <div className="absolute top-0 left-0 z-10 p-4 md:p-6">
-          <Button variant="ghost" size="icon" asChild className="text-white hover:bg-white/20 rounded-full">
-            <Link href="/news" aria-label="Назад к новостям">
-              <ArrowLeft className="w-5 h-5" />
-            </Link>
-          </Button>
+          <Link href="/news" aria-label="Назад к новостям" className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors">
+            <ArrowLeft className="w-5 h-5" />
+          </Link>
         </div>
         <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
           <div className="container mx-auto px-4">

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { ProtectedRoute } from '@/components/auth/protected-route'
 import { AdminSidebar } from '@/components/admin/admin-sidebar'
+import { useLocale } from '@/lib/i18n'
 import { scansApi, auditLogsApi, type ApiScanLogItem, type ApiAuditLogItem } from '@/lib/api'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -31,19 +32,20 @@ interface UnifiedLog {
 
 const PAGE_SIZE = 50
 
-const LOG_TYPE_LABELS: Record<LogTypeFilter, string> = {
-  all: 'Все',
-  LOGIN: 'Вход',
-  LOGIN_FAILED: 'Ошибка входа',
-  CREATE_USER: 'Создание пользователя',
-  EDIT: 'Редактирование',
-  DELETE: 'Удаление',
-  PUBLISH: 'Публикация',
-  SCAN_SUCCESS: 'Скан (успех)',
-  SCAN_ERROR: 'Скан (ошибка)',
+const LOG_TYPE_KEYS: Record<LogTypeFilter, string> = {
+  all: 'logTypeAll',
+  LOGIN: 'logTypeLogin',
+  LOGIN_FAILED: 'logTypeLoginFailed',
+  CREATE_USER: 'logTypeCreateUser',
+  EDIT: 'logTypeEdit',
+  DELETE: 'logTypeDelete',
+  PUBLISH: 'logTypePublish',
+  SCAN_SUCCESS: 'logTypeScanSuccess',
+  SCAN_ERROR: 'logTypeScanError',
 }
 
 function LogsContent() {
+  const { t } = useLocale()
   const [scanLogs, setScanLogs] = useState<ApiScanLogItem[]>([])
   const [auditLogs, setAuditLogs] = useState<ApiAuditLogItem[]>([])
   const [loading, setLoading] = useState(true)
@@ -71,7 +73,7 @@ function LogsContent() {
       type: (l.success ? 'SCAN_SUCCESS' : 'SCAN_ERROR') as LogTypeFilter,
       timestamp: l.scannedAt,
       userEmail: l.registration?.email ?? l.scannedByUserId ?? '—',
-      action: [l.exhibition?.title, l.errorMessage].filter(Boolean).join(' — ') || (l.success ? 'Вход отмечен' : 'Ошибка скана'),
+      action: [l.exhibition?.title, l.errorMessage].filter(Boolean).join(' — ') || (l.success ? t('scanEntryMarked') : t('scanErrorMsg')),
       status: (l.success ? 'success' : 'error') as 'success' | 'error',
     })),
     ...auditLogs.map((l) => ({
@@ -107,9 +109,9 @@ function LogsContent() {
   }, [filteredLogs.length])
 
   const getStatusBadge = (status: UnifiedLog['status']) => {
-    if (status === 'success') return <Badge className="bg-green-600">Успех</Badge>
-    if (status === 'error') return <Badge className="bg-red-600">Ошибка</Badge>
-    return <Badge className="bg-yellow-600">Предупреждение</Badge>
+    if (status === 'success') return <Badge className="bg-green-600">{t('success')}</Badge>
+    if (status === 'error') return <Badge className="bg-red-600">{t('error')}</Badge>
+    return <Badge className="bg-yellow-600">{t('warning')}</Badge>
   }
 
   const logTypes: LogTypeFilter[] = [
@@ -131,8 +133,8 @@ function LogsContent() {
       <main className="flex-1 pt-14 lg:pt-0 ml-0 lg:ml-64 min-h-screen min-w-0">
         <div className="border-b border-border/40 bg-white/50 backdrop-blur">
           <div className="px-4 sm:px-6 lg:px-8 py-4 lg:py-6">
-            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">Логи системы</h1>
-            <p className="text-muted-foreground mt-1 text-sm">Аудит и сканы QR с API</p>
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">{t('systemLogs')}</h1>
+            <p className="text-muted-foreground mt-1 text-sm">{t('auditAndScans')}</p>
           </div>
         </div>
 
@@ -140,16 +142,16 @@ function LogsContent() {
           <Card className="mb-4 lg:mb-6">
             <CardContent className="pt-4 lg:pt-6 space-y-4">
               <div>
-                <label className="text-sm font-medium">Поиск</label>
+                <label className="text-sm font-medium">{t('search')}</label>
                 <Input
-                  placeholder="По email или действию..."
+                  placeholder={t('searchByEmailOrAction')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="mt-1"
                 />
               </div>
               <div>
-                <label className="text-sm font-medium">Тип</label>
+                <label className="text-sm font-medium">{t('type')}</label>
                 <div className="flex flex-wrap gap-2 mt-2">
                   {logTypes.map((type) => (
                     <Button
@@ -158,7 +160,7 @@ function LogsContent() {
                       size="sm"
                       onClick={() => setFilterType(type)}
                     >
-                      {LOG_TYPE_LABELS[type]}
+                      {t(LOG_TYPE_KEYS[type])}
                     </Button>
                   ))}
                 </div>
@@ -169,16 +171,16 @@ function LogsContent() {
           <Card>
             <div className="overflow-x-auto">
               {loading ? (
-                <div className="p-8 text-center text-muted-foreground">Загрузка...</div>
+                <div className="p-8 text-center text-muted-foreground">{t('loading')}</div>
               ) : (
                 <table className="w-full min-w-[600px]">
                   <thead>
                     <tr className="border-b border-border/40 bg-muted/50">
-                      <th className="text-left p-3 lg:p-4 font-medium text-xs lg:text-sm text-muted-foreground">Время</th>
-                      <th className="text-left p-3 lg:p-4 font-medium text-xs lg:text-sm text-muted-foreground">Тип</th>
-                      <th className="text-left p-3 lg:p-4 font-medium text-xs lg:text-sm text-muted-foreground">Пользователь</th>
-                      <th className="text-left p-3 lg:p-4 font-medium text-xs lg:text-sm text-muted-foreground">Действие</th>
-                      <th className="text-left p-3 lg:p-4 font-medium text-xs lg:text-sm text-muted-foreground">Статус</th>
+                      <th className="text-left p-3 lg:p-4 font-medium text-xs lg:text-sm text-muted-foreground">{t('time')}</th>
+                      <th className="text-left p-3 lg:p-4 font-medium text-xs lg:text-sm text-muted-foreground">{t('type')}</th>
+                      <th className="text-left p-3 lg:p-4 font-medium text-xs lg:text-sm text-muted-foreground">{t('user')}</th>
+                      <th className="text-left p-3 lg:p-4 font-medium text-xs lg:text-sm text-muted-foreground">{t('action')}</th>
+                      <th className="text-left p-3 lg:p-4 font-medium text-xs lg:text-sm text-muted-foreground">{t('status')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -188,7 +190,7 @@ function LogsContent() {
                           <td className="p-3 lg:p-4 text-xs lg:text-sm text-muted-foreground whitespace-nowrap">
                             {new Date(log.timestamp).toLocaleString('ru-RU')}
                           </td>
-                          <td className="p-3 lg:p-4 text-xs lg:text-sm font-medium">{LOG_TYPE_LABELS[log.type]}</td>
+                          <td className="p-3 lg:p-4 text-xs lg:text-sm font-medium">{t(LOG_TYPE_KEYS[log.type])}</td>
                           <td className="p-3 lg:p-4 text-xs lg:text-sm">{log.userEmail}</td>
                           <td className="p-3 lg:p-4 text-xs lg:text-sm">{log.action}</td>
                           <td className="p-3 lg:p-4">{getStatusBadge(log.status)}</td>
@@ -197,7 +199,7 @@ function LogsContent() {
                     ) : (
                       <tr>
                         <td colSpan={5} className="p-4 text-center text-muted-foreground text-sm">
-                          {unified.length === 0 && !loading ? 'Нет записей' : 'Нет записей по фильтру'}
+                          {unified.length === 0 && !loading ? t('noRecords') : t('noRecordsByFilter')}
                         </td>
                       </tr>
                     )}

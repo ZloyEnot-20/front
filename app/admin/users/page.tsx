@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { ProtectedRoute } from '@/components/auth/protected-route'
 import { AdminSidebar } from '@/components/admin/admin-sidebar'
 import { CreateUserModal } from '@/components/admin/create-user-modal'
+import { useLocale } from '@/lib/i18n'
 import { useAdmin } from '@/lib/admin-context'
 import { useAuth } from '@/lib/auth-context'
 import { Card, CardContent } from '@/components/ui/card'
@@ -35,17 +36,18 @@ import type { User } from '@/lib/types'
 
 const PAGE_SIZE = 50
 
-const ROLE_LABELS: Record<string, string> = {
-  visitor: 'Посетитель',
-  exhibitor: 'Университет',
-  participant: 'Участник',
-  staff: 'Сотрудник',
-  manager: 'Менеджер',
-  content_manager: 'Менеджер контента',
-  admin: 'Администратор',
+const ROLE_LABEL_KEYS: Record<string, string> = {
+  visitor: 'visitor',
+  exhibitor: 'roleExhibitor',
+  participant: 'participant',
+  staff: 'roleStaff',
+  manager: 'roleManager',
+  content_manager: 'contentManager',
+  admin: 'admin',
 }
 
 function UsersModeration() {
+  const { t } = useLocale()
   const { user: currentUser } = useAuth()
   const { users, updateUser, isLoading, refresh } = useAdmin()
   const [searchQuery, setSearchQuery] = useState('')
@@ -84,8 +86,8 @@ function UsersModeration() {
   }, [filteredUsers.length])
 
   const roleFilters = [
-    { value: 'all', label: 'Все' },
-    ...Object.entries(ROLE_LABELS).map(([value, label]) => ({ value, label })),
+    { value: 'all', label: t('all') },
+    ...Object.entries(ROLE_LABEL_KEYS).map(([value]) => ({ value, label: t(ROLE_LABEL_KEYS[value] ?? value) })),
   ].filter((f) => f.value !== 'participant')
 
   const stats = {
@@ -95,23 +97,14 @@ function UsersModeration() {
     awaitingModeration: users.filter((u) => u.status === 'blocked').length,
   }
 
-  const getRoleLabel = (role: string) => {
-    const labels: Record<string, string> = {
-      visitor: 'Visitor',
-      exhibitor: 'Университет',
-      staff: 'Staff',
-      manager: 'Content Manager',
-      admin: 'Admin',
-    }
-    return labels[role] || role
-  }
+  const getRoleLabel = (role: string) => t(ROLE_LABEL_KEYS[role] ?? role)
 
   const getStatusBadge = (status: string) => {
     if (status === 'active')
-      return <Badge className="bg-green-600">Активен</Badge>
+      return <Badge className="bg-green-600">{t('active')}</Badge>
     if (status === 'pending')
-      return <Badge variant="outline" className="text-yellow-600 border-yellow-600">Ожидает</Badge>
-    return <Badge variant="secondary">Неактивен</Badge>
+      return <Badge variant="outline" className="text-yellow-600 border-yellow-600">{t('pending')}</Badge>
+    return <Badge variant="secondary">{t('inactive')}</Badge>
   }
 
   return (
@@ -122,8 +115,8 @@ function UsersModeration() {
         {/* Header */}
         <div className="border-b border-border/40 bg-white/50 backdrop-blur">
           <div className="px-4 sm:px-6 lg:px-8 py-3 lg:py-4 max-w-7xl mx-auto">
-            <h1 className="text-2xl lg:text-3xl font-bold">Модерация пользователей</h1>
-            <p className="text-muted-foreground mt-1">Управление пользователями системы</p>
+            <h1 className="text-2xl lg:text-3xl font-bold">{t('usersModeration')}</h1>
+            <p className="text-muted-foreground mt-1">{t('manageUsers')}</p>
           </div>
         </div>
 
@@ -138,7 +131,7 @@ function UsersModeration() {
                     <Users className="w-6 h-6" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Всего пользователей</p>
+                    <p className="text-sm text-muted-foreground">{t('totalUsers')}</p>
                     <p className="text-2xl font-bold">{stats.totalUsers}</p>
                     <p className="text-xs text-green-600 mt-1">+12% vs прошлый месяц</p>
                   </div>
@@ -153,8 +146,8 @@ function UsersModeration() {
                     <Activity className="w-6 h-6" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Активных сессий</p>
-                    <p className="text-2xl font-bold">Скоро</p>
+                    <p className="text-sm text-muted-foreground">{t('activeSessions')}</p>
+                    <p className="text-2xl font-bold">{t('soon')}</p>
                     <p className="text-xs text-green-600 mt-1">+5% vs прошлый месяц</p>
                   </div>
                 </div>
@@ -168,8 +161,8 @@ function UsersModeration() {
                     <Clock className="w-6 h-6" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Новых сегодня</p>
-                    <p className="text-2xl font-bold">Скоро</p>
+                    <p className="text-sm text-muted-foreground">{t('newToday')}</p>
+                    <p className="text-2xl font-bold">{t('soon')}</p>
                   </div>
                 </div>
               </CardContent>
@@ -182,8 +175,8 @@ function UsersModeration() {
                     <Clock className="w-6 h-6" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Ожидают модерации</p>
-                    <p className="text-2xl font-bold">Скоро</p>
+                    <p className="text-sm text-muted-foreground">{t('awaitingModeration')}</p>
+                    <p className="text-2xl font-bold">{t('soon')}</p>
                   </div>
                 </div>
               </CardContent>
@@ -194,17 +187,17 @@ function UsersModeration() {
           <div className="mb-6 space-y-4">
             <div className="flex flex-col sm:flex-row gap-4">
               <Input
-                placeholder="Поиск по имени или email..."
+                placeholder={t('searchByNameOrEmail')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
               <Button onClick={() => setCreateUserOpen(true)} className="gap-2 w-full sm:w-auto shrink-0">
                 <Plus className="w-4 h-4" />
-                Создать пользователя
+                {t('createUser')}
               </Button>
             </div>
             <div>
-              <label className="text-sm font-medium mb-2 block">Роль</label>
+              <label className="text-sm font-medium mb-2 block">{t('role')}</label>
               <div className="flex flex-wrap gap-2">
                 {roleFilters.map((r) => (
                   <Button
@@ -226,12 +219,12 @@ function UsersModeration() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-border/40 bg-muted/50">
-                    <th className="text-left p-4 font-medium text-sm text-muted-foreground">Имя</th>
+                    <th className="text-left p-4 font-medium text-sm text-muted-foreground">{t('name')}</th>
                     <th className="text-left p-4 font-medium text-sm text-muted-foreground">Email</th>
-                    <th className="text-left p-4 font-medium text-sm text-muted-foreground">Роль</th>
-                    <th className="text-left p-4 font-medium text-sm text-muted-foreground">Статус</th>
-                    <th className="text-left p-4 font-medium text-sm text-muted-foreground">Дата регистрации</th>
-                    <th className="text-center p-4 font-medium text-sm text-muted-foreground">Действия</th>
+                    <th className="text-left p-4 font-medium text-sm text-muted-foreground">{t('role')}</th>
+                    <th className="text-left p-4 font-medium text-sm text-muted-foreground">{t('status')}</th>
+                    <th className="text-left p-4 font-medium text-sm text-muted-foreground">{t('dateRegistered')}</th>
+                    <th className="text-center p-4 font-medium text-sm text-muted-foreground">{t('actions')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -265,7 +258,7 @@ function UsersModeration() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem onClick={() => setViewUser(user)}>
-                              Просмотр профиля
+                              {t('viewProfile')}
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => {
                               setEditUser(user)
@@ -278,17 +271,17 @@ function UsersModeration() {
                               })
                               setEditError('')
                             }}>
-                              Редактировать
+                              {t('editUser')}
                             </DropdownMenuItem>
                             <DropdownMenuItem>
-                              Отправить письмо
+                              {t('sendEmail')}
                             </DropdownMenuItem>
                             {currentUser?.id !== user.id && (
                               <DropdownMenuItem
                                 onClick={() => updateUser(user.id, { status: user.status === 'active' ? 'blocked' : 'active' })}
                                 className={user.status === 'blocked' ? 'text-green-600' : 'text-destructive'}
                               >
-                                {user.status === 'blocked' ? 'Разблокировать' : 'Заблокировать'}
+                                {user.status === 'blocked' ? t('unblock') : t('block')}
                               </DropdownMenuItem>
                             )}
                           </DropdownMenuContent>
@@ -339,12 +332,12 @@ function UsersModeration() {
         <Dialog open={!!viewUser} onOpenChange={(open) => !open && setViewUser(null)}>
           <DialogContent className="max-w-md">
             <DialogHeader>
-              <DialogTitle>Профиль пользователя</DialogTitle>
+              <DialogTitle>{t('userProfile')}</DialogTitle>
             </DialogHeader>
             {viewUser && (
               <div className="space-y-4 pt-2">
                 <div>
-                  <p className="text-xs text-muted-foreground">Имя</p>
+                  <p className="text-xs text-muted-foreground">{t('name')}</p>
                   <p className="font-medium">{viewUser.name}</p>
                 </div>
                 <div>
@@ -352,21 +345,21 @@ function UsersModeration() {
                   <p className="font-medium">{viewUser.email}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">Роль</p>
-                  <p className="font-medium">{ROLE_LABELS[viewUser.role] ?? viewUser.role}</p>
+                  <p className="text-xs text-muted-foreground">{t('role')}</p>
+                  <p className="font-medium">{getRoleLabel(viewUser.role ?? '')}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">Статус</p>
+                  <p className="text-xs text-muted-foreground">{t('status')}</p>
                   <p className="font-medium">{getStatusBadge(viewUser.status ?? 'active')}</p>
                 </div>
                 {viewUser.phone && (
                   <div>
-                    <p className="text-xs text-muted-foreground">Телефон</p>
+                    <p className="text-xs text-muted-foreground">{t('phone')}</p>
                     <p className="font-medium">{viewUser.phone}</p>
                   </div>
                 )}
                 <div>
-                  <p className="text-xs text-muted-foreground">Зарегистрирован</p>
+                  <p className="text-xs text-muted-foreground">{t('registeredAt')}</p>
                   <p className="font-medium text-sm">{viewUser.createdAt instanceof Date ? viewUser.createdAt.toLocaleDateString('ru-RU') : new Date(viewUser.createdAt).toLocaleDateString('ru-RU')}</p>
                 </div>
               </div>
@@ -383,7 +376,7 @@ function UsersModeration() {
         }}>
           <DialogContent className="max-w-md">
             <DialogHeader>
-              <DialogTitle>Редактировать пользователя</DialogTitle>
+              <DialogTitle>{t('editUser')}</DialogTitle>
             </DialogHeader>
             {editUser && (
               <form
@@ -392,11 +385,11 @@ function UsersModeration() {
                   e.preventDefault()
                   setEditError('')
                   if (!editForm.name.trim()) {
-                    setEditError('Введите имя')
+                    setEditError(t('enterName'))
                     return
                   }
                   if (!editForm.email.trim() || !editForm.email.includes('@')) {
-                    setEditError('Введите корректный email')
+                    setEditError(t('enterValidEmail'))
                     return
                   }
                   setEditSaving(true)
@@ -410,19 +403,19 @@ function UsersModeration() {
                     })
                     setEditUser(null)
                   } catch (err) {
-                    setEditError(err instanceof Error ? err.message : 'Ошибка сохранения')
+                    setEditError(err instanceof Error ? err.message : t('saveError'))
                   } finally {
                     setEditSaving(false)
                   }
                 }}
               >
                 <div>
-                  <label className="text-sm font-medium">Имя</label>
+                  <label className="text-sm font-medium">{t('name')}</label>
                   <Input
                     className="mt-1"
                     value={editForm.name}
                     onChange={(e) => setEditForm((p) => ({ ...p, name: e.target.value }))}
-                    placeholder="Имя"
+                    placeholder={t('firstNameLabel')}
                   />
                 </div>
                 <div>
@@ -436,33 +429,33 @@ function UsersModeration() {
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium">Роль</label>
+                  <label className="text-sm font-medium">{t('role')}</label>
                   <Select value={editForm.role} onValueChange={(v) => setEditForm((p) => ({ ...p, role: v }))}>
                     <SelectTrigger className="mt-1">
-                      <SelectValue placeholder="Выберите роль" />
+                      <SelectValue placeholder={t('chooseRole')} />
                     </SelectTrigger>
                     <SelectContent>
-                      {Object.entries(ROLE_LABELS).map(([value, label]) => (
-                        <SelectItem key={value} value={value}>{label}</SelectItem>
+                      {roleFilters.filter((r) => r.value !== 'all').map((r) => (
+                        <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
                 <div>
-                  <label className="text-sm font-medium">Статус</label>
+                  <label className="text-sm font-medium">{t('status')}</label>
                   <Select value={editForm.status} onValueChange={(v) => setEditForm((p) => ({ ...p, status: v }))}>
                     <SelectTrigger className="mt-1">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="active">Активен</SelectItem>
-                      <SelectItem value="blocked">Заблокирован</SelectItem>
-                      <SelectItem value="pending">Ожидает</SelectItem>
+                      <SelectItem value="active">{t('active')}</SelectItem>
+                      <SelectItem value="blocked">{t('blocked')}</SelectItem>
+                      <SelectItem value="pending">{t('pending')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div>
-                  <label className="text-sm font-medium">Телефон</label>
+                  <label className="text-sm font-medium">{t('phone')}</label>
                   <Input
                     className="mt-1"
                     value={editForm.phone}
@@ -473,10 +466,10 @@ function UsersModeration() {
                 {editError && <p className="text-sm text-destructive">{editError}</p>}
                 <div className="flex gap-2 justify-end">
                   <Button type="button" variant="outline" onClick={() => setEditUser(null)}>
-                    Отмена
+                    {t('cancel')}
                   </Button>
                   <Button type="submit" disabled={editSaving}>
-                    {editSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Сохранить'}
+                    {editSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : t('save')}
                   </Button>
                 </div>
               </form>
