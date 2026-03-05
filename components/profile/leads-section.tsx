@@ -60,10 +60,10 @@ export function LeadsSection() {
   const [rowsPerPage, setRowsPerPage] = useState(19)
   const [search, setSearch] = useState('')
   const [exhibitionIds, setExhibitionIds] = useState<string[]>([])
-  const [statusFilter, setStatusFilter] = useState<string>('')
+  const [statusFilter, setStatusFilter] = useState<string>('__all__')
   const [appliedSearch, setAppliedSearch] = useState('')
   const [appliedExhibitionIds, setAppliedExhibitionIds] = useState<string[]>([])
-  const [appliedStatus, setAppliedStatus] = useState('')
+  const [appliedStatus, setAppliedStatus] = useState('__all__')
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
 
   const fetchLeads = useCallback(async () => {
@@ -79,7 +79,7 @@ export function LeadsSection() {
         rowsPerPage,
         search: appliedSearch || undefined,
         exhibitionIds: appliedExhibitionIds.length ? appliedExhibitionIds : undefined,
-        status: appliedStatus || undefined,
+        status: appliedStatus === '__all__' ? undefined : appliedStatus || undefined,
       })
       setData(res)
     } catch {
@@ -103,14 +103,13 @@ export function LeadsSection() {
   const clearFilters = () => {
     setSearch('')
     setExhibitionIds([])
-    setStatusFilter('')
+    setStatusFilter('__all__')
     setAppliedSearch('')
     setAppliedExhibitionIds([])
-    setAppliedStatus('')
+    setAppliedStatus('__all__')
     setPage(1)
   }
-
-  const activeFilterCount = [appliedSearch, appliedExhibitionIds.length, appliedStatus].filter(Boolean).length
+  const activeFilterCount = [!!appliedSearch, appliedExhibitionIds.length > 0, appliedStatus !== '__all__'].filter(Boolean).length
 
   const handleExport = async () => {
     try {
@@ -119,7 +118,7 @@ export function LeadsSection() {
         rowsPerPage: 10000,
         search: appliedSearch || undefined,
         exhibitionIds: appliedExhibitionIds.length ? appliedExhibitionIds : undefined,
-        status: appliedStatus || undefined,
+        status: appliedStatus === '__all__' ? undefined : appliedStatus || undefined,
       })
       const columns: { key: keyof ApiLeadRow; label: string }[] = [
         { key: 'name', label: t('nameColumn') },
@@ -136,7 +135,7 @@ export function LeadsSection() {
       const rows = res.items.map((r) => ({
         ...r,
         status: statusLabels[r.status] ?? r.status,
-      }))
+      })) as ApiLeadRow[]
       downloadCsv(rows, columns)
     } catch {
       // ignore
@@ -234,7 +233,7 @@ export function LeadsSection() {
                   <SelectValue placeholder={t('allStatuses')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">{t('allStatuses')}</SelectItem>
+                  <SelectItem value="__all__">{t('allStatuses')}</SelectItem>
                   <SelectItem value="registered">{t('statusRegistered')}</SelectItem>
                   <SelectItem value="visited">{t('statusVisited')}</SelectItem>
                 </SelectContent>
