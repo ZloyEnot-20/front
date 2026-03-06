@@ -624,16 +624,53 @@ function PublicationsContent() {
                 </DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
-                <Tabs defaultValue="main" className="w-full">
-                  <TabsList className="grid w-full grid-cols-4">
-                    <TabsTrigger value="main">{t('tabMain')}</TabsTrigger>
-                    <TabsTrigger value="ru">{t('tabLangRu')}</TabsTrigger>
-                    <TabsTrigger value="uz">{t('tabLangUz')}</TabsTrigger>
-                    <TabsTrigger value="en">{t('tabLangEn')}</TabsTrigger>
-                  </TabsList>
+                <Tabs defaultValue="main" className="w-full space-y-0">
+                  <div>
+                    <TabsList className="h-auto w-full rounded-none bg-transparent p-0 gap-4 sm:gap-6 shadow-none min-h-0 pb-0 grid grid-cols-4">
+                      <TabsTrigger
+                        value="main"
+                        className="group relative rounded-none bg-transparent px-0 pt-3 pb-0 text-muted-foreground data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 flex flex-col items-center col-span-1"
+                      >
+                        <span className="inline-block">
+                          {t('tabMain')}
+                          <span className="block w-full h-[3px] rounded-full bg-primary opacity-0 group-data-[state=active]:opacity-100 mt-0 shrink-0" aria-hidden />
+                        </span>
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="ru"
+                        className="group relative rounded-none bg-transparent px-0 pt-3 pb-0 text-muted-foreground data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 flex flex-col items-center col-span-1"
+                      >
+                        <span className="inline-block">
+                          {t('tabLangRu')}
+                          <span className="block w-full h-[3px] rounded-full bg-primary opacity-0 group-data-[state=active]:opacity-100 mt-0 shrink-0" aria-hidden />
+                        </span>
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="uz"
+                        className="group relative rounded-none bg-transparent px-0 pt-3 pb-0 text-muted-foreground data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 flex flex-col items-center col-span-1"
+                      >
+                        <span className="inline-block">
+                          {t('tabLangUz')}
+                          <span className="block w-full h-[3px] rounded-full bg-primary opacity-0 group-data-[state=active]:opacity-100 mt-0 shrink-0" aria-hidden />
+                        </span>
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="en"
+                        className="group relative rounded-none bg-transparent px-0 pt-3 pb-0 text-muted-foreground data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 flex flex-col items-center col-span-1"
+                      >
+                        <span className="inline-block">
+                          {t('tabLangEn')}
+                          <span className="block w-full h-[3px] rounded-full bg-primary opacity-0 group-data-[state=active]:opacity-100 mt-0 shrink-0" aria-hidden />
+                        </span>
+                      </TabsTrigger>
+                    </TabsList>
+                    <div className="h-[3px] -mt-[3px] flex items-end">
+                      <div className="w-full h-px bg-border rounded-full" aria-hidden />
+                    </div>
+                  </div>
 
                   {/* Вкладка «Основное»: картинки, даты, место, города, участники */}
-                  <TabsContent value="main" className="space-y-4 mt-4">
+                  <TabsContent value="main" className="space-y-4 pt-6">
                     <div>
                       <label className="text-sm font-medium">{t('image')}</label>
                       <p className="text-xs text-muted-foreground mt-0.5 mb-1">{t('bannerCardHint')}</p>
@@ -880,7 +917,7 @@ function PublicationsContent() {
                   </TabsContent>
 
                   {/* Вкладка RU: название, описание/контент, краткое описание */}
-                  <TabsContent value="ru" className="space-y-4 mt-4">
+                  <TabsContent value="ru" className="space-y-4 pt-6">
                     <div>
                       <label className="text-sm font-medium">{t('title')} (RU) *</label>
                       <Input value={formData.titleRu ?? formData.title ?? ''} onChange={(e) => setFormData({ ...formData, titleRu: e.target.value })} placeholder={t('enterTitle')} />
@@ -905,7 +942,7 @@ function PublicationsContent() {
                   </TabsContent>
 
                   {/* Вкладка UZ */}
-                  <TabsContent value="uz" className="space-y-4 mt-4">
+                  <TabsContent value="uz" className="space-y-4 pt-6">
                     <div>
                       <label className="text-sm font-medium">{t('title')} (UZ) *</label>
                       <Input value={formData.titleUz ?? ''} onChange={(e) => setFormData({ ...formData, titleUz: e.target.value })} placeholder={t('enterTitle')} />
@@ -930,7 +967,7 @@ function PublicationsContent() {
                   </TabsContent>
 
                   {/* Вкладка EN */}
-                  <TabsContent value="en" className="space-y-4 mt-4">
+                  <TabsContent value="en" className="space-y-4 pt-6">
                     <div>
                       <label className="text-sm font-medium">{t('title')} (EN) *</label>
                       <Input value={formData.titleEn ?? ''} onChange={(e) => setFormData({ ...formData, titleEn: e.target.value })} placeholder={t('enterTitle')} />

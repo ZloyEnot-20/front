@@ -5,6 +5,7 @@ import { Search, Settings, Bell, Download, ChevronDown, X, ArrowUpDown, Calendar
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import {
   DropdownMenu,
@@ -35,6 +36,8 @@ function formatExhibitionDate(d: Date | string, lang: 'uz' | 'ru' | 'en' = 'ru')
 function DataTable({ data, selectedIds, onSelectAll, onSelectRow, onSort, sortConfig, t }: any) {
   const getStatusLabel = (status: string) =>
     status === 'visited' ? t('statusVisited') : t('statusRegistered');
+  const getInterestLabel = (val: string) =>
+    val ? t(val === 'Short Courses' ? 'interestShortCourses' : `interest${val}`) : '';
   const allSelected = data.length > 0 && selectedIds.length === data.length;
 
   const SortHeader = ({ column, label }: any) => (
@@ -159,7 +162,7 @@ function DataTable({ data, selectedIds, onSelectAll, onSelectRow, onSort, sortCo
                 </Badge>
               </td>
               <td className={`${cellCls} w-36 max-w-36`}><span className={textCls}>{row.exhibitionTitle || '—'}</span></td>
-              <td className={cellCls}><span className={textCls}>{row.interest || '—'}</span></td>
+              <td className={cellCls}><span className={textCls}>{getInterestLabel(row.interest ?? '') || '—'}</span></td>
               <td className={cellCls}><span className={textCls}>{row.countryOfInterest || '—'}</span></td>
               <td className={cellCls}><span className={textCls}>{row.admissionPlan || '—'}</span></td>
             </tr>
@@ -203,14 +206,18 @@ function Sidebar({
   const sidebarRef = useRef<HTMLDivElement>(null);
 
   const toggleDropdown = (key: string) => {
-    setOpenDropdowns(prev => ({ ...prev, [key]: !prev[key] }));
+    setOpenDropdowns(prev => {
+      const willOpen = !prev[key];
+      if (willOpen) return { [key]: true };
+      return { ...prev, [key]: false };
+    });
   };
 
   useEffect(() => {
     const hasOpen = Object.values(openDropdowns).some(Boolean);
     if (!hasOpen) return;
     const handleClickOutside = (e: MouseEvent) => {
-      if (sidebarRef.current?.contains(e.target as Node)) return;
+      if ((e.target as Element).closest?.('[data-filter-dropdown]')) return;
       setOpenDropdowns({});
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -278,14 +285,12 @@ function Sidebar({
       <div className="p-6 space-y-4 flex-1 min-h-0 overflow-y-auto">
         {/* Name Filter */}
         <div>
-          <div className="flex items-center gap-3 px-3 py-3 border border-border rounded-lg bg-card hover:border-foreground/30 transition focus-within:border-foreground/50">
-            <svg className="w-5 h-5 text-muted-foreground flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" />
-            </svg>
+          <label className="text-xs font-medium text-muted-foreground mb-1.5 block">{t('name')}</label>
+          <div className="flex items-center px-3 py-3 border border-border rounded-lg bg-card hover:border-foreground/30 transition focus-within:border-foreground/50">
             <input
               type="text"
-              placeholder="Имя"
-              className="bg-transparent outline-none text-sm flex-1 placeholder-muted-foreground text-foreground"
+              placeholder={t('nameFilterPlaceholder')}
+              className="bg-transparent outline-none text-sm flex-1 placeholder-muted-foreground text-foreground min-w-0"
               value={filters.name}
               onChange={(e) => setFilters((f: typeof filters) => ({ ...f, name: e.target.value }))}
             />
@@ -293,16 +298,13 @@ function Sidebar({
         </div>
 
         {/* Выставки (множественный выбор — выставки, где универ участник) */}
-        <div className="relative">
+        <div className="relative" data-filter-dropdown>
           <button
             type="button"
             onClick={() => toggleDropdown('exhibitions')}
             className="w-full flex items-center justify-between gap-3 px-3 py-3 border border-border rounded-lg bg-card hover:border-foreground/30 transition min-w-0 overflow-hidden"
           >
-            <div className="flex items-center gap-3 flex-1 min-w-0 overflow-hidden">
-              <svg className="w-5 h-5 text-muted-foreground flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z" />
-              </svg>
+            <div className="flex items-center gap-2 flex-1 min-w-0 overflow-hidden">
               <div className="flex items-center gap-2 flex-wrap text-left min-w-0 overflow-hidden">
                 {(filters.exhibitionIds || []).length > 0 ? (
                   (filters.exhibitionIds || []).map((id: string) => {
@@ -335,7 +337,7 @@ function Sidebar({
             />
           </button>
           {openDropdowns.exhibitions && exhibitorExhibitions.length > 0 && (
-            <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-lg p-3 space-y-2 animate-in fade-in duration-200 z-50 shadow-lg max-h-60 overflow-y-auto">
+            <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-lg p-3 space-y-2 animate-in fade-in duration-200 z-50 shadow-lg max-h-60 overflow-y-auto" data-filter-dropdown>
               {exhibitorExhibitions.map((ex) => (
                 <label key={ex.id} className="flex items-center gap-2 cursor-pointer hover:bg-muted/50 p-2 rounded transition">
                   <input
@@ -352,7 +354,7 @@ function Sidebar({
         </div>
 
         {/* Статус */}
-        <div className="relative">
+        <div className="relative" data-filter-dropdown>
           <button
             type="button"
             onClick={() => toggleDropdown('status')}
@@ -373,7 +375,7 @@ function Sidebar({
             />
           </button>
           {openDropdowns.status && (
-            <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-lg p-3 space-y-2 animate-in fade-in duration-200 z-50 shadow-lg">
+            <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-lg p-3 space-y-2 animate-in fade-in duration-200 z-50 shadow-lg" data-filter-dropdown>
               {[
                 { value: '__all__', label: t('all') },
                 { value: 'registered', label: t('statusRegistered') },
@@ -400,7 +402,7 @@ function Sidebar({
         </div>
 
         {/* Интерес */}
-        <div className="relative">
+        <div className="relative" data-filter-dropdown>
           <button
             type="button"
             onClick={() => toggleDropdown('interest')}
@@ -419,8 +421,8 @@ function Sidebar({
             />
           </button>
           {openDropdowns.interest && (
-            <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-lg p-3 space-y-2 animate-in fade-in duration-200 z-50 shadow-lg max-h-60 overflow-y-auto">
-              {['Bachelor', 'Master', 'MBA', 'Short Courses', 'School'].map((val) => (
+            <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-lg p-3 space-y-2 animate-in fade-in duration-200 z-50 shadow-lg max-h-60 overflow-y-auto" data-filter-dropdown>
+              {(['Bachelor', 'Master', 'MBA', 'Short Courses', 'School'] as const).map((val) => (
                 <label key={val} className="flex items-center gap-2 cursor-pointer hover:bg-muted/50 p-2 rounded transition">
                   <input
                     type="checkbox"
@@ -430,53 +432,30 @@ function Sidebar({
                     }
                     className="rounded w-4 h-4 cursor-pointer"
                   />
-                  <span className="text-sm text-foreground">{val}</span>
+                  <span className="text-sm text-foreground">{t(val === 'Short Courses' ? 'interestShortCourses' : `interest${val}`)}</span>
                 </label>
               ))}
             </div>
           )}
         </div>
 
-        {/* Страна интереса */}
-        <div className="relative">
-          <button
-            type="button"
-            onClick={() => toggleDropdown('countryOfInterest')}
-            className="w-full flex items-center justify-between gap-3 px-3 py-3 border border-border rounded-lg bg-card hover:border-foreground/30 transition min-w-0 overflow-hidden"
-          >
-            <div className="flex items-center gap-3 flex-1 min-w-0 overflow-hidden">
-              <span className="text-sm text-foreground truncate">
-                {(filters.countryOfInterest || []).length > 0
-                  ? `${t('countryOfInterestColumn')} (${(filters.countryOfInterest || []).length})`
-                  : t('countryOfInterestColumn')}
-              </span>
-            </div>
-            <ChevronDown
-              size={18}
-              className={`text-muted-foreground flex-shrink-0 transition ${openDropdowns.countryOfInterest ? 'rotate-180' : ''}`}
-            />
-          </button>
-          {openDropdowns.countryOfInterest && (
-            <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-lg p-3 space-y-2 animate-in fade-in duration-200 z-50 shadow-lg max-h-60 overflow-y-auto">
-              {['Россия', 'США', 'Великобритания', 'Германия', 'Франция', 'Канада', 'Австралия', 'Нидерланды', 'Италия', 'Испания', 'Швейцария', 'Китай', 'Япония', 'Южная Корея'].map((val) => (
-                <label key={val} className="flex items-center gap-2 cursor-pointer hover:bg-muted/50 p-2 rounded transition">
-                  <input
-                    type="checkbox"
-                    checked={(filters.countryOfInterest || []).includes(val)}
-                    onChange={(e) =>
-                      e.target.checked ? handleAddFilter('countryOfInterest', val) : handleRemoveFilter('countryOfInterest', val)
-                    }
-                    className="rounded w-4 h-4 cursor-pointer"
-                  />
-                  <span className="text-sm text-foreground">{val}</span>
-                </label>
-              ))}
-            </div>
-          )}
+        {/* Страна интереса — произвольное поле */}
+        <div>
+          <label className="text-xs font-medium text-muted-foreground mb-1.5 block">{t('countryOfInterestColumn')}</label>
+          <Input
+            type="text"
+            value={(filters.countryOfInterest || [])[0] ?? ''}
+            onChange={(e) => {
+              const v = e.target.value.trim();
+              setFilters((prev) => ({ ...prev, countryOfInterest: v ? [v] : [] }));
+            }}
+            placeholder={t('countryOfInterestPlaceholder')}
+            className="h-9"
+          />
         </div>
 
         {/* План поступления */}
-        <div className="relative">
+        <div className="relative" data-filter-dropdown>
           <button
             type="button"
             onClick={() => toggleDropdown('admissionPlan')}
@@ -495,7 +474,7 @@ function Sidebar({
             />
           </button>
           {openDropdowns.admissionPlan && (
-            <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-lg p-3 space-y-2 animate-in fade-in duration-200 z-50 shadow-lg">
+            <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-lg p-3 space-y-2 animate-in fade-in duration-200 z-50 shadow-lg" data-filter-dropdown>
               {['0-3', '3-6', '6-12', '12+'].map((val) => (
                 <label key={val} className="flex items-center gap-2 cursor-pointer hover:bg-muted/50 p-2 rounded transition">
                   <input
@@ -523,7 +502,7 @@ function Sidebar({
             className="flex-1 border border-border rounded-lg bg-card text-destructive hover:text-white hover:bg-destructive hover:border-transparent"
             onClick={clearAllFilters}
           >
-            Очистить {activeCount > 0 ? `(${activeCount})` : ''}
+            {t('clearFilters')} {activeCount > 0 ? `(${activeCount})` : ''}
           </Button>
           <Button
             size="sm"
@@ -739,7 +718,7 @@ function ExhibitionsTabContent({
               <Search size={16} className="text-muted-foreground flex-shrink-0" />
               <input
                 type="text"
-                placeholder="Поиск"
+                placeholder={t('exhibitorSearchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="bg-transparent outline-none w-full placeholder-muted-foreground text-foreground"
@@ -834,12 +813,12 @@ function ExhibitionsTabContent({
                           <img src={reg.qrCode} alt={t('qrCodeForEntry')} className="w-44 h-44 object-contain" loading="lazy" />
                           <span className="text-xs text-muted-foreground flex items-center gap-1">
                             <MapPin size={12} />
-                            Покажите QR-код на входе
+                            {t('showQrAtEntry')}
                           </span>
                         </div>
                       )}
                       <Button variant="outline" className="w-full mt-auto" asChild>
-                        <Link href={`/exhibitions/${reg.exhibitionId}`}>Подробнее о выставке</Link>
+                        <Link href={`/exhibitions/${reg.exhibitionId}`}>{t('moreAboutExhibition')}</Link>
                       </Button>
                     </div>
                   );
@@ -847,9 +826,9 @@ function ExhibitionsTabContent({
             </div>
             ) : (
               <div className="rounded-lg border bg-card p-12 text-center">
-                <p className="text-muted-foreground mb-4">Вы ещё не зарегистрированы ни на одну выставку</p>
+                <p className="text-muted-foreground mb-4">{t('notRegisteredOnExhibitions')}</p>
                 <Button asChild>
-                  <Link href="/exhibitions">Смотреть выставки</Link>
+                  <Link href="/exhibitions">{t('viewExhibitions')}</Link>
                 </Button>
               </div>
             )}
@@ -862,6 +841,7 @@ function ExhibitionsTabContent({
 
 // Вкладка «Университеты» для админа: карточки как у выставок, по клику «Показать» — модалка университета
 function UniversitiesTabContent({ exhibitions }: { exhibitions: Exhibition[] }) {
+  const { t } = useLocale()
   const [searchTerm, setSearchTerm] = useState('');
   const [exhibitorModal, setExhibitorModal] = useState<ExhibitorInfo | null>(null);
 
@@ -892,15 +872,15 @@ function UniversitiesTabContent({ exhibitions }: { exhibitions: Exhibition[] }) 
       <div className="w-full shrink-0 border-b border-border bg-card px-6 pt-4 pb-6">
         <div className="max-w-[1400px] mx-auto flex flex-col sm:flex-row sm:items-center gap-4">
           <div>
-            <h2 className="text-lg font-semibold text-foreground mb-1">Университеты</h2>
-            <p className="text-sm text-muted-foreground">Участники выставок</p>
+            <h2 className="text-lg font-semibold text-foreground mb-1">{t('tabUniversities')}</h2>
+            <p className="text-sm text-muted-foreground">{t('universitiesSubtitle')}</p>
           </div>
           <div className="ml-auto flex-1 min-w-0 max-w-xs">
             <div className="flex items-center bg-card rounded-lg px-3 py-2 gap-2 text-sm border border-border focus-within:border-foreground/50 transition">
               <Search size={16} className="text-muted-foreground flex-shrink-0" />
               <input
                 type="text"
-                placeholder="Поиск"
+                placeholder={t('exhibitorSearchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="bg-transparent outline-none w-full placeholder-muted-foreground text-foreground"
@@ -961,14 +941,14 @@ function UniversitiesTabContent({ exhibitions }: { exhibitions: Exhibition[] }) 
                   className="w-full mt-auto bg-primary hover:bg-primary/90 text-primary-foreground font-medium py-2 flex-shrink-0"
                   onClick={() => setExhibitorModal(exh)}
                 >
-                  Показать
+                  {t('show')}
                 </Button>
               </div>
             ))}
           </div>
           {filteredExhibitors.length === 0 && (
             <div className="flex flex-col items-center justify-center py-12">
-              <p className="text-muted-foreground">Университеты не найдены</p>
+              <p className="text-muted-foreground">{t('universitiesNotFound')}</p>
             </div>
           )}
         </div>
@@ -1082,12 +1062,12 @@ function MyExhibitionsTabContent({
                       <img src={reg.qrCode} alt={t('qrCodeForEntry')} className="w-44 h-44 object-contain" loading="lazy" />
                       <span className="text-xs text-muted-foreground flex items-center gap-1">
                         <MapPin size={12} />
-                        Покажите QR-код на входе
+                        {t('showQrAtEntry')}
                       </span>
                     </div>
                   )}
                   <Button variant="outline" className="w-full mt-auto" asChild>
-                    <Link href={`/exhibitions/${reg.exhibitionId}`}>Подробнее о выставке</Link>
+                    <Link href={`/exhibitions/${reg.exhibitionId}`}>{t('moreAboutExhibition')}</Link>
                   </Button>
                 </div>
               );
@@ -1173,7 +1153,15 @@ function Header({
                 <DropdownMenuContent align="end">
                   <DropdownMenuLabel>{user.email}</DropdownMenuLabel>
                   <DropdownMenuLabel className="text-xs font-normal text-muted-foreground capitalize">
-                    {user.role === 'exhibitor' ? t('roleExhibitor') : user.role === 'admin' ? 'Админ' : user.role}
+                    {user.role === 'exhibitor'
+                      ? t('roleExhibitor')
+                      : user.role === 'admin'
+                        ? t('admin')
+                        : user.role === 'content_manager'
+                          ? t('contentManager')
+                          : user.role === 'participant'
+                            ? t('participant')
+                            : t('visitor')}
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>

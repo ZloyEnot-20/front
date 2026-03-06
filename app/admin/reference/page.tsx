@@ -15,7 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Plus, Loader2, Trash2, MapPin } from 'lucide-react'
+import { Plus, Loader2, Trash2, MapPin, Pencil } from 'lucide-react'
 
 function ReferenceContent() {
   const { t, lang } = useLocale()
@@ -67,8 +67,40 @@ function ReferenceContent() {
   }
 
   const [cityToDelete, setCityToDelete] = useState<ApiCity | null>(null)
+  const [editingCity, setEditingCity] = useState<ApiCity | null>(null)
+  const [editNameUz, setEditNameUz] = useState('')
+  const [editNameRu, setEditNameRu] = useState('')
+  const [editNameEn, setEditNameEn] = useState('')
+  const [updatingId, setUpdatingId] = useState<string | null>(null)
 
   const handleDeleteCityClick = (city: ApiCity) => setCityToDelete(city)
+
+  const handleEditCityClick = (city: ApiCity) => {
+    setEditingCity(city)
+    setEditNameUz(city.nameUz ?? city.name ?? '')
+    setEditNameRu(city.nameRu ?? city.name ?? '')
+    setEditNameEn(city.nameEn ?? city.name ?? '')
+    setError(null)
+  }
+
+  const handleUpdateCity = async () => {
+    if (!editingCity) return
+    const nameUz = editNameUz.trim()
+    const nameRu = editNameRu.trim()
+    const nameEn = editNameEn.trim()
+    if (!nameUz || !nameRu || !nameEn) return
+    setUpdatingId(editingCity.id)
+    setError(null)
+    try {
+      await citiesApi.update(editingCity.id, { nameUz, nameRu, nameEn })
+      setEditingCity(null)
+      await loadCities()
+    } catch (e) {
+      setError(e instanceof Error ? e.message : t('errorCreate'))
+    } finally {
+      setUpdatingId(null)
+    }
+  }
 
   const handleDeleteCityConfirm = async () => {
     if (!cityToDelete) return
@@ -130,19 +162,35 @@ function ReferenceContent() {
                           <MapPin className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                           <span className="font-medium text-sm truncate">{getCityName(city, lang)}</span>
                         </div>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="flex-shrink-0 h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                          onClick={() => handleDeleteCityClick(city)}
-                          disabled={deletingId === city.id}
-                        >
-                          {deletingId === city.id ? (
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                          ) : (
-                            <Trash2 className="w-4 h-4" />
-                          )}
-                        </Button>
+                        <div className="flex items-center gap-1 flex-shrink-0">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                            onClick={() => handleEditCityClick(city)}
+                            disabled={updatingId === city.id}
+                            title={t('editCity')}
+                          >
+                            {updatingId === city.id ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <Pencil className="w-4 h-4" />
+                            )}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                            onClick={() => handleDeleteCityClick(city)}
+                            disabled={deletingId === city.id}
+                          >
+                            {deletingId === city.id ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <Trash2 className="w-4 h-4" />
+                            )}
+                          </Button>
+                        </div>
                       </CardContent>
                     </Card>
                   ))}
@@ -196,6 +244,53 @@ function ReferenceContent() {
               {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
               {t('createButton')}
             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!editingCity} onOpenChange={(open) => !open && setEditingCity(null)}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>{t('editCity')}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-2">
+            <div>
+              <label className="text-sm font-medium">{t('title')} (UZ)</label>
+              <Input
+                value={editNameUz}
+                onChange={(e) => setEditNameUz(e.target.value)}
+                placeholder={t('cityNamePlaceholder')}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">{t('title')} (RU)</label>
+              <Input
+                value={editNameRu}
+                onChange={(e) => setEditNameRu(e.target.value)}
+                placeholder={t('cityNamePlaceholder')}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">{t('title')} (EN)</label>
+              <Input
+                value={editNameEn}
+                onChange={(e) => setEditNameEn(e.target.value)}
+                placeholder={t('cityNamePlaceholder')}
+                className="mt-1"
+                onKeyDown={(e) => e.key === 'Enter' && handleUpdateCity()}
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" className="flex-1" onClick={() => setEditingCity(null)}>
+                {t('cancel')}
+              </Button>
+              <Button className="flex-1" onClick={handleUpdateCity} disabled={updatingId !== null || !editNameUz.trim() || !editNameRu.trim() || !editNameEn.trim()}>
+                {updatingId ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                {t('save')}
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>

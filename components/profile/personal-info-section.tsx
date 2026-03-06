@@ -3,30 +3,31 @@
 import { useState, useEffect } from 'react'
 import { User } from '@/lib/types'
 import { useAuth } from '@/lib/auth-context'
+import { useLocale } from '@/lib/i18n'
 import { authApi } from '@/lib/api'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Loader2, CheckCircle2, Pencil } from 'lucide-react'
 
-const VISITOR_STATUS_OPTIONS = [
-  { value: 'student', label: 'Студент' },
-  { value: 'parent', label: 'Родитель' },
-  { value: 'specialist', label: 'Специалист' },
-] as const
-const INTEREST_OPTIONS = ['Bachelor', 'Master', 'MBA', 'Short Courses', 'School'] as const
-const ADMISSION_PLAN_OPTIONS = [
-  { value: '0-3', label: '0–3 мес.' },
-  { value: '3-6', label: '3–6 мес.' },
-  { value: '6-12', label: '6–12 мес.' },
-  { value: '12+', label: '12+ мес.' },
-] as const
-
-function visitorStatusLabel(v: string) {
-  return (VISITOR_STATUS_OPTIONS.find((o) => o.value === v)?.label ?? v) || '—'
+const VISITOR_STATUS_KEYS: Record<string, string> = {
+  student: 'statusStudent',
+  parent: 'statusParent',
+  specialist: 'statusSpecialist',
 }
-function admissionPlanLabel(v: string) {
-  return (ADMISSION_PLAN_OPTIONS.find((o) => o.value === v)?.label ?? v) || '—'
+const ADMISSION_PLAN_KEYS: Record<string, string> = {
+  '0-3': 'admissionPlan03',
+  '3-6': 'admissionPlan36',
+  '6-12': 'admissionPlan612',
+  '12+': 'admissionPlan12plus',
+}
+const INTEREST_OPTIONS = ['Bachelor', 'Master', 'MBA', 'Short Courses', 'School'] as const
+const INTEREST_LABEL_KEYS: Record<(typeof INTEREST_OPTIONS)[number], string> = {
+  Bachelor: 'interestBachelor',
+  Master: 'interestMaster',
+  MBA: 'interestMBA',
+  'Short Courses': 'interestShortCourses',
+  School: 'interestSchool',
 }
 
 interface PersonalInfoSectionProps {
@@ -43,7 +44,10 @@ function FieldRow({ label, value }: { label: string; value: string }) {
 }
 
 export function PersonalInfoSection({ user }: PersonalInfoSectionProps) {
+  const { t } = useLocale()
   const { refreshUser } = useAuth()
+  const visitorStatusLabel = (v: string) => (VISITOR_STATUS_KEYS[v] ? t(VISITOR_STATUS_KEYS[v]) : v) || '—'
+  const admissionPlanLabel = (v: string) => (ADMISSION_PLAN_KEYS[v] ? t(ADMISSION_PLAN_KEYS[v]) : v) || '—'
   const [isEditing, setIsEditing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [saved, setSaved] = useState(false)
@@ -105,7 +109,7 @@ export function PersonalInfoSection({ user }: PersonalInfoSectionProps) {
       setIsEditing(false)
       setTimeout(() => setSaved(false), 3000)
     } catch (e) {
-      setSaveError(e instanceof Error ? e.message : 'Ошибка сохранения')
+      setSaveError(e instanceof Error ? e.message : t('saveError'))
     } finally {
       setIsSaving(false)
     }
@@ -114,12 +118,12 @@ export function PersonalInfoSection({ user }: PersonalInfoSectionProps) {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <h3 className="text-lg font-bold text-foreground">Личные данные</h3>
+        <h3 className="text-lg font-bold text-foreground">{t('personalInfo')}</h3>
         <div className="flex items-center gap-2">
           {saved && (
             <span className="flex items-center gap-1.5 text-sm text-green-600">
               <CheckCircle2 className="w-4 h-4" />
-              Сохранено
+              {t('saved')}
             </span>
           )}
           {!isEditing ? (
@@ -130,15 +134,15 @@ export function PersonalInfoSection({ user }: PersonalInfoSectionProps) {
               onClick={() => setIsEditing(true)}
             >
               <Pencil className="w-4 h-4" />
-              Редактировать
+              {t('edit')}
             </Button>
           ) : (
             <div className="flex gap-2">
               <Button variant="ghost" size="sm" onClick={() => setIsEditing(false)}>
-                Отмена
+                {t('cancel')}
               </Button>
               <Button size="sm" onClick={handleSave} disabled={isSaving}>
-                {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Сохранить'}
+                {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : t('save')}
               </Button>
             </div>
           )}
@@ -147,19 +151,19 @@ export function PersonalInfoSection({ user }: PersonalInfoSectionProps) {
 
       {!isEditing ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          <FieldRow label="Имя" value={formData.firstName} />
-          <FieldRow label="Фамилия" value={formData.lastName} />
-          <FieldRow label="Email" value={formData.email} />
-          <FieldRow label="Телефон" value={formData.phone} />
+          <FieldRow label={t('firstNameLabel')} value={formData.firstName} />
+          <FieldRow label={t('lastNameLabel')} value={formData.lastName} />
+          <FieldRow label={t('emailLabel')} value={formData.email} />
+          <FieldRow label={t('phoneLabelShort')} value={formData.phone} />
           {user.role === 'visitor' && (
             <>
-              <FieldRow label="Страна" value={formData.country} />
-              <FieldRow label="Город" value={formData.city} />
-              <FieldRow label="Статус" value={visitorStatusLabel(formData.visitorStatus)} />
-              <FieldRow label="Знание языков" value={formData.languageKnowledge} />
-              <FieldRow label="Интерес" value={formData.interest} />
-              <FieldRow label="Страна интереса" value={formData.countryOfInterest} />
-              <FieldRow label="План поступления" value={admissionPlanLabel(formData.admissionPlan)} />
+              <FieldRow label={t('country')} value={formData.country} />
+              <FieldRow label={t('cityColumn')} value={formData.city} />
+              <FieldRow label={t('status')} value={visitorStatusLabel(formData.visitorStatus)} />
+              <FieldRow label={t('languageKnowledge')} value={formData.languageKnowledge} />
+              <FieldRow label={t('interestColumn')} value={formData.interest} />
+              <FieldRow label={t('countryOfInterestColumn')} value={formData.countryOfInterest} />
+              <FieldRow label={t('admissionPlanColumn')} value={admissionPlanLabel(formData.admissionPlan)} />
             </>
           )}
         </div>
@@ -167,39 +171,39 @@ export function PersonalInfoSection({ user }: PersonalInfoSectionProps) {
         <div className="space-y-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div>
-              <label className="block text-xs text-muted-foreground mb-1.5">Имя</label>
+              <label className="block text-xs text-muted-foreground mb-1.5">{t('firstNameLabel')}</label>
               <Input
                 value={formData.firstName}
                 onChange={(e) => handleChange('firstName', e.target.value)}
-                placeholder="Введите имя"
+                placeholder={t('enterFirstName')}
                 className="h-9"
               />
             </div>
             <div>
-              <label className="block text-xs text-muted-foreground mb-1.5">Фамилия</label>
+              <label className="block text-xs text-muted-foreground mb-1.5">{t('lastNameLabel')}</label>
               <Input
                 value={formData.lastName}
                 onChange={(e) => handleChange('lastName', e.target.value)}
-                placeholder="Введите фамилию"
+                placeholder={t('enterLastName')}
                 className="h-9"
               />
             </div>
             <div>
-              <label className="block text-xs text-muted-foreground mb-1.5">Email</label>
+              <label className="block text-xs text-muted-foreground mb-1.5">{t('emailLabel')}</label>
               <Input
                 type="email"
                 value={formData.email}
                 onChange={(e) => handleChange('email', e.target.value)}
-                placeholder="Введите email"
+                placeholder={t('enterEmail')}
                 className="h-9"
               />
             </div>
             <div>
-              <label className="block text-xs text-muted-foreground mb-1.5">Телефон</label>
+              <label className="block text-xs text-muted-foreground mb-1.5">{t('phoneLabelShort')}</label>
               <Input
                 value={formData.phone}
                 onChange={(e) => handleChange('phone', e.target.value)}
-                placeholder="Введите номер"
+                placeholder={t('enterPhone')}
                 className="h-9"
               />
             </div>
@@ -208,90 +212,90 @@ export function PersonalInfoSection({ user }: PersonalInfoSectionProps) {
           {user.role === 'visitor' && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div>
-                <label className="block text-xs text-muted-foreground mb-1.5">Страна</label>
+                <label className="block text-xs text-muted-foreground mb-1.5">{t('country')}</label>
                 <Input
                   value={formData.country}
                   onChange={(e) => handleChange('country', e.target.value)}
-                  placeholder="Введите страну"
+                  placeholder={t('enterCountry')}
                   className="h-9"
                 />
               </div>
               <div>
-                <label className="block text-xs text-muted-foreground mb-1.5">Город</label>
+                <label className="block text-xs text-muted-foreground mb-1.5">{t('cityColumn')}</label>
                 <Input
                   value={formData.city}
                   onChange={(e) => handleChange('city', e.target.value)}
-                  placeholder="Введите город"
+                  placeholder={t('enterCity')}
                   className="h-9"
                 />
               </div>
               <div>
-                <label className="block text-xs text-muted-foreground mb-1.5">Статус</label>
+                <label className="block text-xs text-muted-foreground mb-1.5">{t('status')}</label>
                 <Select
                   value={formData.visitorStatus || undefined}
                   onValueChange={(v) => handleChange('visitorStatus', v)}
                 >
                   <SelectTrigger className="h-9">
-                    <SelectValue placeholder="Выберите статус" />
+                    <SelectValue placeholder={t('selectStatus')} />
                   </SelectTrigger>
                   <SelectContent>
-                    {VISITOR_STATUS_OPTIONS.map((o) => (
-                      <SelectItem key={o.value} value={o.value}>
-                        {o.label}
+                    {(['student', 'parent', 'specialist'] as const).map((val) => (
+                      <SelectItem key={val} value={val}>
+                        {t(VISITOR_STATUS_KEYS[val])}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
               <div>
-                <label className="block text-xs text-muted-foreground mb-1.5">Знание языков</label>
+                <label className="block text-xs text-muted-foreground mb-1.5">{t('languageKnowledge')}</label>
                 <Input
                   value={formData.languageKnowledge}
                   onChange={(e) => handleChange('languageKnowledge', e.target.value)}
-                  placeholder="Например: Английский B2"
+                  placeholder={t('languagePlaceholder')}
                   className="h-9"
                 />
               </div>
               <div>
-                <label className="block text-xs text-muted-foreground mb-1.5">Интерес</label>
+                <label className="block text-xs text-muted-foreground mb-1.5">{t('interestColumn')}</label>
                 <Select
                   value={formData.interest || undefined}
                   onValueChange={(v) => handleChange('interest', v)}
                 >
                   <SelectTrigger className="h-9">
-                    <SelectValue placeholder="Выберите интерес" />
+                    <SelectValue placeholder={t('selectInterest')} />
                   </SelectTrigger>
                   <SelectContent>
                     {INTEREST_OPTIONS.map((opt) => (
                       <SelectItem key={opt} value={opt}>
-                        {opt}
+                        {t(INTEREST_LABEL_KEYS[opt])}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
               <div>
-                <label className="block text-xs text-muted-foreground mb-1.5">Страна интереса</label>
+                <label className="block text-xs text-muted-foreground mb-1.5">{t('countryOfInterestColumn')}</label>
                 <Input
                   value={formData.countryOfInterest}
                   onChange={(e) => handleChange('countryOfInterest', e.target.value)}
-                  placeholder="Необязательно"
+                  placeholder={t('optional')}
                   className="h-9"
                 />
               </div>
               <div>
-                <label className="block text-xs text-muted-foreground mb-1.5">План поступления</label>
+                <label className="block text-xs text-muted-foreground mb-1.5">{t('admissionPlanColumn')}</label>
                 <Select
                   value={formData.admissionPlan || undefined}
                   onValueChange={(v) => handleChange('admissionPlan', v)}
                 >
                   <SelectTrigger className="h-9">
-                    <SelectValue placeholder="Выберите план" />
+                    <SelectValue placeholder={t('selectPlan')} />
                   </SelectTrigger>
                   <SelectContent>
-                    {ADMISSION_PLAN_OPTIONS.map((o) => (
-                      <SelectItem key={o.value} value={o.value}>
-                        {o.label}
+                    {(['0-3', '3-6', '6-12', '12+'] as const).map((val) => (
+                      <SelectItem key={val} value={val}>
+                        {t(ADMISSION_PLAN_KEYS[val])}
                       </SelectItem>
                     ))}
                   </SelectContent>

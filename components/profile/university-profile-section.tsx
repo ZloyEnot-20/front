@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { User } from '@/lib/types'
 import { useAuth } from '@/lib/auth-context'
+import { useLocale } from '@/lib/i18n'
 import { authApi, getImageUrl, uploadFile } from '@/lib/api'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -14,6 +15,7 @@ interface UniversityProfileSectionProps {
 }
 
 export function UniversityProfileSection({ user }: UniversityProfileSectionProps) {
+  const { t } = useLocale()
   const { refreshUser } = useAuth()
   const [isSaving, setIsSaving] = useState(false)
   const [saveError, setSaveError] = useState('')
@@ -64,7 +66,7 @@ export function UniversityProfileSection({ user }: UniversityProfileSectionProps
       })
       await refreshUser()
     } catch (e) {
-      setSaveError(e instanceof Error ? e.message : 'Ошибка сохранения')
+      setSaveError(e instanceof Error ? e.message : t('saveError'))
     } finally {
       setIsSaving(false)
     }
@@ -79,7 +81,7 @@ export function UniversityProfileSection({ user }: UniversityProfileSectionProps
       const { fileId } = await uploadFile(file)
       setFormData((prev) => ({ ...prev, avatar: fileId }))
     } catch (err) {
-      setSaveError(err instanceof Error ? err.message : 'Ошибка загрузки аватара')
+      setSaveError(err instanceof Error ? err.message : t('uploadAvatarError'))
     } finally {
       setAvatarUploading(false)
       e.target.value = ''
@@ -103,7 +105,7 @@ export function UniversityProfileSection({ user }: UniversityProfileSectionProps
         exhibitorPhotos: [...prev.exhibitorPhotos, fileId].slice(0, 10),
       }))
     } catch (err) {
-      setSaveError(err instanceof Error ? err.message : 'Ошибка загрузки фото')
+      setSaveError(err instanceof Error ? err.message : t('uploadPhotoError'))
     } finally {
       setPhotoUploading(false)
       e.target.value = ''
@@ -123,8 +125,8 @@ export function UniversityProfileSection({ user }: UniversityProfileSectionProps
     <div className="space-y-6">
       {/* Аватар профиля университета */}
       <div>
-        <h3 className="text-sm font-medium text-foreground mb-0.5">Аватар профиля университета</h3>
-        <p className="text-xs text-muted-foreground mb-3">Отображается на карточках участников на странице выставки</p>
+        <h3 className="text-sm font-medium text-foreground mb-0.5">{t('avatarTitle')}</h3>
+        <p className="text-xs text-muted-foreground mb-3">{t('avatarHint')}</p>
         <div className="flex items-center gap-4">
           <div className="w-24 h-24 rounded-xl overflow-hidden border bg-muted flex-shrink-0 flex items-center justify-center">
             {avatarSrc ? (
@@ -144,11 +146,11 @@ export function UniversityProfileSection({ user }: UniversityProfileSectionProps
               onClick={() => avatarInputRef.current?.click()}
             >
               {avatarUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-              Загрузить аватар
+              {t('uploadAvatar')}
             </Button>
             <Button type="button" variant="destructive" size="sm" className="gap-1.5 w-fit" onClick={handleAvatarRemove}>
               <Trash2 className="w-4 h-4" />
-              Удалить аватар
+              {t('deleteAvatar')}
             </Button>
           </div>
         </div>
@@ -157,21 +159,21 @@ export function UniversityProfileSection({ user }: UniversityProfileSectionProps
       {/* Название, Email, Телефон */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <label className="block text-xs text-muted-foreground">Название университета</label>
+          <label className="block text-xs text-muted-foreground">{t('universityName')}</label>
           <Input
             value={formData.name}
             onChange={(e) => handleChange('name', e.target.value)}
-            placeholder="Введите название"
+            placeholder={t('enterUniversityName')}
             className="h-9"
           />
         </div>
         <div className="space-y-2">
-          <label className="block text-xs text-muted-foreground">Email</label>
+          <label className="block text-xs text-muted-foreground">{t('emailLabel')}</label>
           <Input type="email" value={formData.email} disabled className="h-9 bg-muted" placeholder="Email" />
         </div>
       </div>
       <div className="space-y-2">
-        <label className="block text-xs text-muted-foreground">Телефон</label>
+        <label className="block text-xs text-muted-foreground">{t('phoneLabelShort')}</label>
         <Input
           value={formData.phone}
           onChange={(e) => handleChange('phone', e.target.value)}
@@ -182,11 +184,11 @@ export function UniversityProfileSection({ user }: UniversityProfileSectionProps
 
       {/* Описание университета */}
       <div className="space-y-2">
-        <label className="block text-xs text-muted-foreground">Описание университета</label>
+        <label className="block text-xs text-muted-foreground">{t('universityDescription')}</label>
         <Textarea
           value={formData.exhibitorDescription}
           onChange={(e) => handleChange('exhibitorDescription', e.target.value)}
-          placeholder="Краткое описание вашего университета"
+          placeholder={t('universityDescriptionPlaceholder')}
           rows={4}
           className="min-h-20 resize-y"
         />
@@ -195,16 +197,16 @@ export function UniversityProfileSection({ user }: UniversityProfileSectionProps
       {/* Адрес, Сайт */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <label className="block text-xs text-muted-foreground">Адрес</label>
+          <label className="block text-xs text-muted-foreground">{t('address')}</label>
           <Input
             value={formData.exhibitorAddress}
             onChange={(e) => handleChange('exhibitorAddress', e.target.value)}
-            placeholder="Город, улица, здание"
+            placeholder={t('addressPlaceholder')}
             className="h-9"
           />
         </div>
         <div className="space-y-2">
-          <label className="block text-xs text-muted-foreground">Сайт</label>
+          <label className="block text-xs text-muted-foreground">{t('website')}</label>
           <Input
             type="url"
             value={formData.exhibitorWebsite}
@@ -217,7 +219,7 @@ export function UniversityProfileSection({ user }: UniversityProfileSectionProps
 
       {/* Фото (до 10) */}
       <div>
-        <label className="block text-xs text-muted-foreground mb-2">Фото (до 10)</label>
+        <label className="block text-xs text-muted-foreground mb-2">{t('photosLabel')}</label>
         <div className="flex flex-wrap gap-3">
           {formData.exhibitorPhotos.map((fileId, index) => (
             <div key={fileId} className="relative group">
@@ -257,7 +259,7 @@ export function UniversityProfileSection({ user }: UniversityProfileSectionProps
 
       <Button onClick={handleSave} disabled={isSaving} className="w-full sm:w-auto min-w-[140px] gap-2">
         {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-        Сохранить
+        {t('save')}
       </Button>
     </div>
   )

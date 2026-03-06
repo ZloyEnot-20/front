@@ -1,48 +1,48 @@
 'use client'
 
 import { useAuth } from '@/lib/auth-context'
+import { useLocale } from '@/lib/i18n'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { useState } from 'react'
 
 export function SecuritySection() {
+  const { t } = useLocale()
   const { user } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
 
   return (
     <div className="flex justify-center items-center flex-1 p-8">
-      {/* <h1 className="text-3xl font-bold mb-8">Почта и пароль</h1> */}
-
       <div className="space-y-6 max-w-2xl w-full">
         <Card>
           <CardHeader>
-            <CardTitle>Email</CardTitle>
-            <CardDescription>Основной email для восстановления аккаунта</CardDescription>
+            <CardTitle>{t('emailLabel')}</CardTitle>
+            <CardDescription>{t('emailCardDesc')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <Input type="email" value={user?.email ?? ''} disabled className="bg-muted" />
-            <Button variant="outline">Изменить email</Button>
+            <Button variant="outline">{t('changeEmail')}</Button>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Пароль</CardTitle>
-            <CardDescription>Используйте надёжный пароль для безопасности</CardDescription>
+            <CardTitle>{t('passwordCardTitle')}</CardTitle>
+            <CardDescription>{t('passwordCardDesc')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <label className="text-sm font-medium block mb-2">Текущий пароль</label>
-              <Input type={showPassword ? 'text' : 'password'} placeholder="Введите текущий пароль" />
+              <label className="text-sm font-medium block mb-2">{t('currentPassword')}</label>
+              <Input type={showPassword ? 'text' : 'password'} placeholder={t('enterCurrentPassword')} />
             </div>
             <div>
-              <label className="text-sm font-medium block mb-2">Новый пароль</label>
-              <Input type={showPassword ? 'text' : 'password'} placeholder="Введите новый пароль" />
+              <label className="text-sm font-medium block mb-2">{t('newPassword')}</label>
+              <Input type={showPassword ? 'text' : 'password'} placeholder={t('enterNewPassword')} />
             </div>
             <div>
-              <label className="text-sm font-medium block mb-2">Подтвердите пароль</label>
-              <Input type={showPassword ? 'text' : 'password'} placeholder="Повторите новый пароль" />
+              <label className="text-sm font-medium block mb-2">{t('confirmPassword')}</label>
+              <Input type={showPassword ? 'text' : 'password'} placeholder={t('repeatNewPassword')} />
             </div>
             <div className="flex items-center gap-2">
               <input
@@ -52,19 +52,19 @@ export function SecuritySection() {
                 onChange={(e) => setShowPassword(e.target.checked)}
                 className="rounded"
               />
-              <label htmlFor="show-pwd" className="text-sm cursor-pointer">Показать пароли</label>
+              <label htmlFor="show-pwd" className="text-sm cursor-pointer">{t('showPasswords')}</label>
             </div>
-            <Button>Обновить пароль</Button>
+            <Button>{t('updatePassword')}</Button>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Двухфакторная аутентификация</CardTitle>
-            <CardDescription>Дополнительная защита вашего аккаунта</CardDescription>
+            <CardTitle>{t('twoFactorTitle')}</CardTitle>
+            <CardDescription>{t('twoFactorDesc')}</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button variant="outline">Включить 2FA</Button>
+            <Button variant="outline">{t('enable2FA')}</Button>
           </CardContent>
         </Card>
       </div>
