@@ -32,6 +32,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { ExhibitorModal } from '@/components/exhibitions/exhibitor-modal'
 import type { User } from '@/lib/types'
 
 const PAGE_SIZE = 50
@@ -241,7 +242,11 @@ function UsersModeration() {
                     ))
                   ) : (
                     paginatedUsers.map((user) => (
-                    <tr key={user.id} className="border-b border-border/40 hover:bg-muted/30">
+                    <tr
+                      key={user.id}
+                      className="border-b border-border/40 hover:bg-muted/30 cursor-pointer"
+                      onClick={() => setViewUser(user)}
+                    >
                       <td className="p-4 font-medium">{user.name}</td>
                       <td className="p-4 text-sm text-muted-foreground">{user.email}</td>
                       <td className="p-4 text-sm capitalize">{getRoleLabel(user.role ?? '')}</td>
@@ -249,7 +254,7 @@ function UsersModeration() {
                       <td className="p-4 text-sm text-muted-foreground">
                         {user.createdAt instanceof Date ? user.createdAt.toLocaleDateString('ru-RU') : new Date(user.createdAt).toLocaleDateString('ru-RU')}
                       </td>
-                      <td className="p-4 text-center">
+                      <td className="p-4 text-center" onClick={(e) => e.stopPropagation()}>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
@@ -306,7 +311,7 @@ function UsersModeration() {
                       onClick={() => setPage((p) => Math.max(1, p - 1))}
                       disabled={safePage <= 1}
                     >
-                      Назад
+                      {t('back')}
                     </Button>
                     <span className="text-sm text-muted-foreground px-2">
                       {safePage} / {totalPages}
@@ -317,7 +322,7 @@ function UsersModeration() {
                       onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                       disabled={safePage >= totalPages}
                     >
-                      Вперёд
+                      {t('forward')}
                     </Button>
                   </div>
                 )}
@@ -328,44 +333,60 @@ function UsersModeration() {
 
         <CreateUserModal isOpen={createUserOpen} onOpenChange={setCreateUserOpen} />
 
-        {/* View profile modal */}
-        <Dialog open={!!viewUser} onOpenChange={(open) => !open && setViewUser(null)}>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>{t('userProfile')}</DialogTitle>
-            </DialogHeader>
-            {viewUser && (
-              <div className="space-y-4 pt-2">
-                <div>
-                  <p className="text-xs text-muted-foreground">{t('name')}</p>
-                  <p className="font-medium">{viewUser.name}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Email</p>
-                  <p className="font-medium">{viewUser.email}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">{t('role')}</p>
-                  <p className="font-medium">{getRoleLabel(viewUser.role ?? '')}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">{t('status')}</p>
-                  <p className="font-medium">{getStatusBadge(viewUser.status ?? 'active')}</p>
-                </div>
-                {viewUser.phone && (
+        {/* View profile: университет — модалка университета, остальные — карточка пользователя */}
+        {viewUser?.role === 'exhibitor' ? (
+          <ExhibitorModal
+            exhibitor={{
+              id: viewUser.id,
+              name: viewUser.name,
+              avatar: viewUser.avatar,
+              exhibitorDescription: viewUser.exhibitorDescription,
+              exhibitorAddress: viewUser.exhibitorAddress,
+              exhibitorWebsite: viewUser.exhibitorWebsite,
+              exhibitorPhotos: viewUser.exhibitorPhotos,
+            }}
+            open={!!viewUser}
+            onOpenChange={(open) => !open && setViewUser(null)}
+          />
+        ) : (
+          <Dialog open={!!viewUser} onOpenChange={(open) => !open && setViewUser(null)}>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>{t('userProfile')}</DialogTitle>
+              </DialogHeader>
+              {viewUser && (
+                <div className="space-y-4 pt-2">
                   <div>
-                    <p className="text-xs text-muted-foreground">{t('phone')}</p>
-                    <p className="font-medium">{viewUser.phone}</p>
+                    <p className="text-xs text-muted-foreground">{t('name')}</p>
+                    <p className="font-medium">{viewUser.name}</p>
                   </div>
-                )}
-                <div>
-                  <p className="text-xs text-muted-foreground">{t('registeredAt')}</p>
-                  <p className="font-medium text-sm">{viewUser.createdAt instanceof Date ? viewUser.createdAt.toLocaleDateString('ru-RU') : new Date(viewUser.createdAt).toLocaleDateString('ru-RU')}</p>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Email</p>
+                    <p className="font-medium">{viewUser.email}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">{t('role')}</p>
+                    <p className="font-medium">{getRoleLabel(viewUser.role ?? '')}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">{t('status')}</p>
+                    <p className="font-medium">{getStatusBadge(viewUser.status ?? 'active')}</p>
+                  </div>
+                  {viewUser.phone && (
+                    <div>
+                      <p className="text-xs text-muted-foreground">{t('phone')}</p>
+                      <p className="font-medium">{viewUser.phone}</p>
+                    </div>
+                  )}
+                  <div>
+                    <p className="text-xs text-muted-foreground">{t('registeredAt')}</p>
+                    <p className="font-medium text-sm">{viewUser.createdAt instanceof Date ? viewUser.createdAt.toLocaleDateString('ru-RU') : new Date(viewUser.createdAt).toLocaleDateString('ru-RU')}</p>
+                  </div>
                 </div>
-              </div>
-            )}
-          </DialogContent>
-        </Dialog>
+              )}
+            </DialogContent>
+          </Dialog>
+        )}
 
         {/* Edit user modal */}
         <Dialog open={!!editUser} onOpenChange={(open) => {

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Header } from '@/components/layout/header'
 import { NewsCard } from '@/components/news/news-card'
 import { useAdmin } from '@/lib/admin-context'
+import { useLocale } from '@/lib/i18n'
 import {
   Pagination,
   PaginationContent,
@@ -16,6 +17,7 @@ import {
 const PER_PAGE = 10
 
 export default function NewsPage() {
+  const { t } = useLocale()
   const { news } = useAdmin()
   const publishedNews = news.filter((n) => n.status === 'published')
   const [page, setPage] = useState(1)
@@ -30,8 +32,8 @@ export default function NewsPage() {
 
       <section className="border-b border-border/40 flex-shrink-0">
         <div className="container mx-auto px-4 py-12">
-          <h1 className="text-3xl md:text-4xl font-bold mb-2">Новости</h1>
-          <p className="text-muted-foreground">Будьте в курсе последних событий в мире выставок</p>
+          <h1 className="text-3xl md:text-4xl font-bold mb-2">{t('news')}</h1>
+          <p className="text-muted-foreground">{t('newsSubtitle')}</p>
         </div>
       </section>
 
@@ -87,7 +89,7 @@ export default function NewsPage() {
             </>
           ) : (
             <div className="text-center py-12">
-              <p className="text-muted-foreground">Новостей пока нет</p>
+              <p className="text-muted-foreground">{t('noNewsYet')}</p>
             </div>
           )}
         </div>
@@ -97,19 +99,22 @@ export default function NewsPage() {
       <footer className="border-t border-border/40 py-12 bg-muted/40 mt-auto flex-shrink-0">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center gap-8">
-            <div>
-              <div className="font-bold text-lg mb-2">EDU Expo</div>
-              <p className="text-sm text-muted-foreground">Платформа для организации выставок</p>
+            <div className="flex items-center gap-3">
+              <img src="/logo.png" alt="" className="w-10 h-10 rounded-lg object-contain shrink-0" />
+              <div>
+                <div className="font-bold text-lg mb-0.5">{t('appName')}</div>
+                <p className="text-sm text-muted-foreground">{t('platformSubtitle')}</p>
+              </div>
             </div>
             <div className="flex gap-8 text-sm text-muted-foreground">
               <a href="#" className="hover:text-foreground transition-colors">
-                О нас
+                {t('aboutUs')}
               </a>
               <a href="#" className="hover:text-foreground transition-colors">
-                Контакты
+                {t('contacts')}
               </a>
-              <a href="#" className="hover:text-foreground transition-colors">
-                Политика конфиденциальности
+              <a href="/privacy" className="hover:text-foreground transition-colors">
+                {t('privacyPolicy')}
               </a>
             </div>
           </div>

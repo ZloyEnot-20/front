@@ -48,11 +48,17 @@ export interface City {
   updatedAt?: Date
 }
 
-// Выставка
+// Выставка (title/description — fallback; по языку: titleUz/Ru/En, descriptionUz/Ru/En)
 export interface Exhibition {
   id: string
   title: string
   description: string
+  titleUz?: string
+  titleRu?: string
+  titleEn?: string
+  descriptionUz?: string
+  descriptionRu?: string
+  descriptionEn?: string
   /** Место проведения */
   venue?: string
   startDate: Date
@@ -74,12 +80,21 @@ export interface Exhibition {
   updatedAt: Date
 }
 
-// Новость
+// Новость (title/content/excerpt — fallback; по языку: titleUz/Ru/En, contentUz/Ru/En, excerptUz/Ru/En)
 export interface News {
   id: string
   title: string
   content: string
   excerpt: string
+  titleUz?: string
+  titleRu?: string
+  titleEn?: string
+  contentUz?: string
+  contentRu?: string
+  contentEn?: string
+  excerptUz?: string
+  excerptRu?: string
+  excerptEn?: string
   image?: string
   /** Баннер: карточка и шапка страницы */
   banner?: string

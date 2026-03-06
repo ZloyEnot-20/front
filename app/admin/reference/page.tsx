@@ -5,6 +5,7 @@ import { ProtectedRoute } from '@/components/auth/protected-route'
 import { AdminSidebar } from '@/components/admin/admin-sidebar'
 import { useLocale } from '@/lib/i18n'
 import { citiesApi, ApiCity } from '@/lib/api'
+import { getCityName } from '@/lib/utils'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -17,11 +18,13 @@ import {
 import { Plus, Loader2, Trash2, MapPin } from 'lucide-react'
 
 function ReferenceContent() {
-  const { t } = useLocale()
+  const { t, lang } = useLocale()
   const [cities, setCities] = useState<ApiCity[]>([])
   const [citiesLoading, setCitiesLoading] = useState(true)
   const [modalOpen, setModalOpen] = useState(false)
-  const [newCityName, setNewCityName] = useState('')
+  const [newCityNameUz, setNewCityNameUz] = useState('')
+  const [newCityNameRu, setNewCityNameRu] = useState('')
+  const [newCityNameEn, setNewCityNameEn] = useState('')
   const [saving, setSaving] = useState(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -43,13 +46,17 @@ function ReferenceContent() {
   }, [])
 
   const handleCreateCity = async () => {
-    const name = newCityName.trim()
-    if (!name) return
+    const nameUz = newCityNameUz.trim()
+    const nameRu = newCityNameRu.trim()
+    const nameEn = newCityNameEn.trim()
+    if (!nameUz || !nameRu || !nameEn) return
     setSaving(true)
     setError(null)
     try {
-      await citiesApi.create({ name })
-      setNewCityName('')
+      await citiesApi.create({ nameUz, nameRu, nameEn })
+      setNewCityNameUz('')
+      setNewCityNameRu('')
+      setNewCityNameEn('')
       setModalOpen(false)
       await loadCities()
     } catch (e) {
@@ -95,7 +102,7 @@ function ReferenceContent() {
                 <p className="text-sm text-muted-foreground">
                   {t('citiesReferenceHint')}
                 </p>
-                <Button onClick={() => { setModalOpen(true); setError(null); setNewCityName(''); }}>
+                <Button onClick={() => { setModalOpen(true); setError(null); setNewCityNameUz(''); setNewCityNameRu(''); setNewCityNameEn(''); }}>
                   <Plus className="w-4 h-4 mr-2" />
                   {t('addCity')}
                 </Button>
@@ -121,7 +128,7 @@ function ReferenceContent() {
                       <CardContent className="p-4 flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2 min-w-0">
                           <MapPin className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                          <span className="font-medium text-sm truncate">{city.name}</span>
+                          <span className="font-medium text-sm truncate">{getCityName(city, lang)}</span>
                         </div>
                         <Button
                           variant="ghost"
@@ -158,16 +165,34 @@ function ReferenceContent() {
           </DialogHeader>
           <div className="space-y-4 pt-2">
             <div>
-              <label className="text-sm font-medium">{t('title')}</label>
+              <label className="text-sm font-medium">{t('title')} (UZ)</label>
               <Input
-                value={newCityName}
-                onChange={(e) => setNewCityName(e.target.value)}
+                value={newCityNameUz}
+                onChange={(e) => setNewCityNameUz(e.target.value)}
+                placeholder={t('cityNamePlaceholder')}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">{t('title')} (RU)</label>
+              <Input
+                value={newCityNameRu}
+                onChange={(e) => setNewCityNameRu(e.target.value)}
+                placeholder={t('cityNamePlaceholder')}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">{t('title')} (EN)</label>
+              <Input
+                value={newCityNameEn}
+                onChange={(e) => setNewCityNameEn(e.target.value)}
                 placeholder={t('cityNamePlaceholder')}
                 className="mt-1"
                 onKeyDown={(e) => e.key === 'Enter' && handleCreateCity()}
               />
             </div>
-            <Button className="w-full" onClick={handleCreateCity} disabled={saving || !newCityName.trim()}>
+            <Button className="w-full" onClick={handleCreateCity} disabled={saving || !newCityNameUz.trim() || !newCityNameRu.trim() || !newCityNameEn.trim()}>
               {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
               {t('createButton')}
             </Button>
@@ -183,7 +208,7 @@ function ReferenceContent() {
           <div className="space-y-4 pt-2">
             {cityToDelete && (
               <p className="text-sm text-muted-foreground">
-                «{cityToDelete.name}». {t('cityDeleteWarning')}
+                «{getCityName(cityToDelete, lang)}». {t('cityDeleteWarning')}
               </p>
             )}
             <div className="flex gap-2">

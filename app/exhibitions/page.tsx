@@ -3,6 +3,7 @@
 import { Header } from '@/components/layout/header'
 import { ExhibitionCard } from '@/components/exhibitions/exhibition-card'
 import { useAdmin } from '@/lib/admin-context'
+import { useLocale } from '@/lib/i18n'
 import { useState, useMemo, useEffect } from 'react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -20,6 +21,7 @@ import { Search, X } from 'lucide-react'
 const PER_PAGE = 10
 
 export default function ExhibitionsPage() {
+  const { t } = useLocale()
   const { exhibitions } = useAdmin()
   const publishedExhibitions = exhibitions.filter((e) => e.status === 'published')
   const [searchQuery, setSearchQuery] = useState('')
@@ -32,7 +34,11 @@ export default function ExhibitionsPage() {
         .filter((e) => {
           const q = searchQuery.toLowerCase()
           const matchTitle = e.title.toLowerCase().includes(q)
-          const matchCities = e.cities?.some((c) => c.name.toLowerCase().includes(q))
+          const matchCities = e.cities?.some((c) => {
+            const o = typeof c === 'object' && c !== null ? c as { name?: string; nameUz?: string; nameRu?: string; nameEn?: string } : null
+            const names = o ? [o.name, o.nameUz, o.nameRu, o.nameEn].filter(Boolean) : [String(c)]
+            return names.some((n) => String(n).toLowerCase().includes(q))
+          })
           return matchTitle || matchCities
         })
         .sort((a, b) => {
@@ -61,8 +67,8 @@ export default function ExhibitionsPage() {
 
       <section className="border-b border-border/40 flex-shrink-0">
         <div className="container mx-auto px-4 py-12">
-          <h1 className="text-3xl md:text-4xl font-bold mb-2">Выставки</h1>
-          <p className="text-muted-foreground">Найдите и посетите интересующие вас выставки</p>
+          <h1 className="text-3xl md:text-4xl font-bold mb-2">{t('exhibitions')}</h1>
+          <p className="text-muted-foreground">{t('findAndVisitExhibitions')}</p>
         </div>
       </section>
 
@@ -73,7 +79,7 @@ export default function ExhibitionsPage() {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder="Поиск по названию или месту..."
+                placeholder={t('searchByNameOrPlace')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10 pr-10"
@@ -90,11 +96,11 @@ export default function ExhibitionsPage() {
 
             <Select value={sortBy} onValueChange={setSortBy}>
               <SelectTrigger>
-                <SelectValue placeholder="Сортировка" />
+                <SelectValue placeholder={t('sortBy')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="upcoming">Ближайшие</SelectItem>
-                <SelectItem value="popular">Популярные</SelectItem>
+                <SelectItem value="upcoming">{t('sortNearest')}</SelectItem>
+                <SelectItem value="popular">{t('sortPopular')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -150,9 +156,9 @@ export default function ExhibitionsPage() {
             </>
           ) : (
             <div className="text-center py-12">
-              <p className="text-muted-foreground mb-4">Выставки не найдены</p>
+              <p className="text-muted-foreground mb-4">{t('exhibitionsNotFound')}</p>
               <Button variant="outline" onClick={() => setSearchQuery('')}>
-                Очистить фильтры
+                {t('clearFilters')}
               </Button>
             </div>
           )}
@@ -160,7 +166,7 @@ export default function ExhibitionsPage() {
           {/* Stats */}
           <div className="mt-12 pt-8 border-t border-border/40">
             <p className="text-sm text-muted-foreground text-center">
-              Найдено выставок: <span className="font-semibold text-foreground">{filteredExhibitions.length}</span>
+              {t('foundExhibitionsCount')} <span className="font-semibold text-foreground">{filteredExhibitions.length}</span>
             </p>
           </div>
         </div>
@@ -170,19 +176,22 @@ export default function ExhibitionsPage() {
       <footer className="border-t border-border/40 py-12 bg-muted/40 mt-auto flex-shrink-0">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center gap-8">
-            <div>
-              <div className="font-bold text-lg mb-2">EDU Expo</div>
-              <p className="text-sm text-muted-foreground">Платформа для организации выставок</p>
+            <div className="flex items-center gap-3">
+              <img src="/logo.png" alt="" className="w-10 h-10 rounded-lg object-contain shrink-0" />
+              <div>
+                <div className="font-bold text-lg mb-0.5">{t('appName')}</div>
+                <p className="text-sm text-muted-foreground">{t('platformSubtitle')}</p>
+              </div>
             </div>
             <div className="flex gap-8 text-sm text-muted-foreground">
               <a href="#" className="hover:text-foreground transition-colors">
-                О нас
+                {t('aboutUs')}
               </a>
               <a href="#" className="hover:text-foreground transition-colors">
-                Контакты
+                {t('contacts')}
               </a>
-              <a href="#" className="hover:text-foreground transition-colors">
-                Политика конфиденциальности
+              <a href="/privacy" className="hover:text-foreground transition-colors">
+                {t('privacyPolicy')}
               </a>
             </div>
           </div>

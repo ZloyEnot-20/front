@@ -4,6 +4,7 @@ import { Header } from '@/components/layout/header'
 import { ProtectedRoute } from '@/components/auth/protected-route'
 import { useAuth } from '@/lib/auth-context'
 import { useAdmin } from '@/lib/admin-context'
+import { useLocale } from '@/lib/i18n'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -14,11 +15,12 @@ import Link from 'next/link'
 import Image from 'next/image'
 
 function ParticipantContent() {
+  const { t } = useLocale()
   const { user } = useAuth()
   const { exhibitions, registrations } = useAdmin()
 
   if (!user) {
-    return <div>Загрузка...</div>
+    return <div>{t('loading')}</div>
   }
 
   const myRegistrations = registrations.filter((r) => r.userId === user.id)
@@ -31,8 +33,8 @@ function ParticipantContent() {
 
       <section className="border-b border-border/40">
         <div className="container mx-auto px-4 py-12">
-          <h1 className="text-3xl font-bold">Кабинет участника</h1>
-          <p className="text-muted-foreground mt-2">Управляйте участием в выставках</p>
+          <h1 className="text-3xl font-bold">{t('participantCabinet')}</h1>
+          <p className="text-muted-foreground mt-2">{t('manageParticipation')}</p>
         </div>
       </section>
 
@@ -47,7 +49,7 @@ function ParticipantContent() {
                     <Users className="w-6 h-6" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Выставок</p>
+                    <p className="text-sm text-muted-foreground">{t('exhibitionsCountShort')}</p>
                     <p className="text-2xl font-bold">{participatedExhibitions.length}</p>
                   </div>
                 </div>
@@ -61,7 +63,7 @@ function ParticipantContent() {
                     <TrendingUp className="w-6 h-6" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Подтверждено</p>
+                    <p className="text-sm text-muted-foreground">{t('confirmed')}</p>
                     <p className="text-2xl font-bold">
                       {myRegistrations.filter((r) => r.status === 'registered').length}
                     </p>
@@ -77,7 +79,7 @@ function ParticipantContent() {
                     <Calendar className="w-6 h-6" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Предстоящих</p>
+                    <p className="text-sm text-muted-foreground">{t('upcoming')}</p>
                     <p className="text-2xl font-bold">
                       {participatedExhibitions.filter((e) => new Date(e.startDate) > new Date()).length}
                     </p>
@@ -90,10 +92,10 @@ function ParticipantContent() {
           {/* Tabs */}
           <Tabs defaultValue="registered" className="max-w-4xl">
             <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="registered">Мои выставки (QR)</TabsTrigger>
-              <TabsTrigger value="all">Все выставки</TabsTrigger>
-              <TabsTrigger value="upcoming">Предстоящие</TabsTrigger>
-              <TabsTrigger value="past">Прошедшие</TabsTrigger>
+              <TabsTrigger value="registered">{t('myExhibitionsTab')}</TabsTrigger>
+              <TabsTrigger value="all">{t('allExhibitionsTab')}</TabsTrigger>
+              <TabsTrigger value="upcoming">{t('upcomingTab')}</TabsTrigger>
+              <TabsTrigger value="past">{t('pastTab')}</TabsTrigger>
             </TabsList>
 
             {/* My Registrations with QR Code */}
@@ -109,13 +111,13 @@ function ParticipantContent() {
                             <div className="space-y-3">
                               <h3 className="font-semibold">{exhibition?.title}</h3>
                               <div className="space-y-1 text-sm text-muted-foreground">
-                                <p>Имя: {registration.firstName} {registration.lastName}</p>
-                                <p>Email: {registration.email}</p>
-                                <p>Телефон: {registration.phone}</p>
-                                <p>Город: {registration.city}</p>
+                                <p>{t('nameLabel')} {registration.firstName} {registration.lastName}</p>
+                                <p>{t('emailLabel')} {registration.email}</p>
+                                <p>{t('phoneLabelShort')} {registration.phone}</p>
+                                <p>{t('cityLabelShort')} {registration.city}</p>
                               </div>
                               <Badge variant="outline" className="w-fit">
-                                Зарегистрирован
+                                {t('registeredAt')}
                               </Badge>
                             </div>
                             <div className="flex justify-center items-center">
@@ -132,11 +134,11 @@ function ParticipantContent() {
                             <div className="flex flex-col gap-2 justify-center">
                               <Button variant="outline" className="gap-2 bg-transparent">
                                 <Download className="w-4 h-4" />
-                                Скачать QR
+                                {t('downloadQr')}
                               </Button>
                               <Button variant="outline" className="gap-2 bg-transparent">
                                 <QrCode className="w-4 h-4" />
-                                Показать на экране
+                                {t('showOnScreen')}
                               </Button>
                             </div>
                           </div>
@@ -150,9 +152,9 @@ function ParticipantContent() {
                   <CardContent className="pt-6">
                     <div className="text-center py-12">
                       <QrCode className="w-12 h-12 mx-auto text-muted-foreground mb-4 opacity-50" />
-                      <p className="text-muted-foreground mb-4">Вы еще не зарегистрированы на выставки</p>
+                      <p className="text-muted-foreground mb-4">{t('notRegisteredOnExhibitions')}</p>
                       <Button asChild>
-                        <Link href="/exhibitions">Зарегистрироваться на выставку</Link>
+                        <Link href="/exhibitions">{t('registerOnExhibition')}</Link>
                       </Button>
                     </div>
                   </CardContent>
@@ -172,9 +174,9 @@ function ParticipantContent() {
                 <Card>
                   <CardContent className="pt-6">
                     <div className="text-center py-12">
-                      <p className="text-muted-foreground mb-4">Вы еще не участвуете в выставках</p>
+                      <p className="text-muted-foreground mb-4">{t('notParticipatingInExhibitions')}</p>
                       <Button asChild>
-                        <Link href="/exhibitions">Найти выставку</Link>
+                        <Link href="/exhibitions">{t('findExhibition')}</Link>
                       </Button>
                     </div>
                   </CardContent>
@@ -196,7 +198,7 @@ function ParticipantContent() {
                 <Card>
                   <CardContent className="pt-6">
                     <div className="text-center py-12">
-                      <p className="text-muted-foreground">Нет предстоящих выставок</p>
+                      <p className="text-muted-foreground">{t('noUpcomingExhibitions')}</p>
                     </div>
                   </CardContent>
                 </Card>
@@ -217,7 +219,7 @@ function ParticipantContent() {
                 <Card>
                   <CardContent className="pt-6">
                     <div className="text-center py-12">
-                      <p className="text-muted-foreground">Нет прошедших выставок</p>
+                      <p className="text-muted-foreground">{t('noPastExhibitions')}</p>
                     </div>
                   </CardContent>
                 </Card>

@@ -26,7 +26,10 @@ export function AdminSidebar() {
     <>
       {/* Mobile top bar */}
       <div className="lg:hidden fixed top-0 left-0 right-0 h-14 bg-slate-900 text-white flex items-center justify-between px-4 z-50 border-b border-slate-800">
-        <h1 className="text-lg font-bold">{t('appName')}</h1>
+        <div className="flex items-center gap-2">
+          <img src="/logo.png" alt="" className="w-8 h-8 rounded-lg object-contain shrink-0" />
+          <h1 className="text-lg font-bold">{t('appName')}</h1>
+        </div>
         <Button
           variant="ghost"
           size="icon"
@@ -56,9 +59,12 @@ export function AdminSidebar() {
         `}
       >
         <div className="p-4 lg:p-6 border-b border-slate-800 flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-bold">{t('appName')}</h1>
-            <p className="text-xs text-slate-400 mt-1">{t('adminDashboard')}</p>
+          <div className="flex items-center gap-3">
+            <img src="/logo.png" alt="" className="w-10 h-10 rounded-lg object-contain shrink-0" />
+            <div>
+              <h1 className="text-xl font-bold">{t('appName')}</h1>
+              <p className="text-xs text-slate-400 mt-0.5">{t('adminDashboard')}</p>
+            </div>
           </div>
           <Button
             variant="ghost"

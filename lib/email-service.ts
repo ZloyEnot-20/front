@@ -38,7 +38,7 @@ export async function sendRegistrationEmail(data: EmailData): Promise<boolean> {
 
     return true
   } catch (error) {
-    console.error('[v0] Ошибка при отправке email:', error)
+    console.error('[email] Ошибка при отправке email:', error)
     return false
   }
 }

@@ -289,6 +289,12 @@ export interface ApiExhibition {
   id: string
   title: string
   description: string
+  titleUz?: string
+  titleRu?: string
+  titleEn?: string
+  descriptionUz?: string
+  descriptionRu?: string
+  descriptionEn?: string
   venue?: string
   startDate: string
   endDate: string
@@ -315,12 +321,12 @@ export interface ApiExhibitorInfo {
   exhibitorPhotos?: string[]
 }
 
-// Справочник городов
+// Справочник городов (nameUz, nameRu, nameEn — на трёх языках; name — fallback для совместимости)
 export const citiesApi = {
   list: () => api<ApiCity[]>('/api/cities'),
-  create: (data: { name: string }) =>
+  create: (data: { nameUz: string; nameRu: string; nameEn: string }) =>
     api<ApiCity>('/api/cities', { method: 'POST', body: JSON.stringify(data) }),
-  update: (id: string, data: { name: string }) =>
+  update: (id: string, data: { nameUz: string; nameRu: string; nameEn: string }) =>
     api<ApiCity>(`/api/cities/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   delete: (id: string) => api<void>(`/api/cities/${id}`, { method: 'DELETE' }),
 }
@@ -328,6 +334,9 @@ export const citiesApi = {
 export interface ApiCity {
   id: string
   name: string
+  nameUz?: string
+  nameRu?: string
+  nameEn?: string
   createdAt?: string
   updatedAt?: string
 }
@@ -371,6 +380,15 @@ export interface ApiNews {
   title: string
   content: string
   excerpt: string
+  titleUz?: string
+  titleRu?: string
+  titleEn?: string
+  contentUz?: string
+  contentRu?: string
+  contentEn?: string
+  excerptUz?: string
+  excerptRu?: string
+  excerptEn?: string
   image?: string
   banner?: string
   images?: string[]

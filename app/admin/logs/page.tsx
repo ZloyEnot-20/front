@@ -222,7 +222,7 @@ function LogsContent() {
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   disabled={safePage <= 1}
                 >
-                  Назад
+                  {t('back')}
                 </Button>
                 <span className="text-sm text-muted-foreground px-2">
                   {safePage} / {totalPages}
@@ -233,7 +233,7 @@ function LogsContent() {
                   onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                   disabled={safePage >= totalPages}
                 >
-                  Вперёд
+                  {t('forward')}
                 </Button>
               </div>
             )}

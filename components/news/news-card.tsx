@@ -1,5 +1,7 @@
 import { News } from '@/lib/types'
 import { getImageUrl } from '@/lib/api'
+import { useLocale } from '@/lib/i18n'
+import { getDateLocale, getContentTitle, getNewsContent } from '@/lib/utils'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
@@ -13,7 +15,8 @@ interface NewsCardProps {
 }
 
 export function NewsCard({ news, featured = false, priority = false }: NewsCardProps) {
-  const publishedDate = new Date(news.publishedAt).toLocaleDateString('ru-RU', {
+  const { lang } = useLocale()
+  const publishedDate = new Date(news.publishedAt).toLocaleDateString(getDateLocale(lang), {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
@@ -27,7 +30,7 @@ export function NewsCard({ news, featured = false, priority = false }: NewsCardP
             {news.image && (
               <OptimizedImage
                 src={getImageUrl(news.image) || "/placeholder.svg"}
-                alt={news.title}
+                alt={getContentTitle(news, lang)}
                 fill
                 sizes="(max-width: 768px) 100vw, 50vw"
                 priority={priority}
@@ -35,8 +38,8 @@ export function NewsCard({ news, featured = false, priority = false }: NewsCardP
             )}
           </div>
           <div className="flex flex-col justify-center p-6">
-            <CardTitle className="text-2xl mb-2">{news.title}</CardTitle>
-            <CardDescription className="text-base mb-4 line-clamp-3">{(news.content ?? '').replace(/<[^>]*>/g, '').trim().slice(0, 200)}{(news.content ?? '').length > 200 ? '…' : ''}</CardDescription>
+            <CardTitle className="text-2xl mb-2">{getContentTitle(news, lang)}</CardTitle>
+            <CardDescription className="text-base mb-4 line-clamp-3">{(getNewsContent(news, lang) ?? '').replace(/<[^>]*>/g, '').trim().slice(0, 200)}{(getNewsContent(news, lang) ?? '').length > 200 ? '…' : ''}</CardDescription>
             <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
               <Calendar className="w-4 h-4" />
               {publishedDate}
@@ -56,7 +59,7 @@ export function NewsCard({ news, featured = false, priority = false }: NewsCardP
         {news.image && (
           <OptimizedImage
             src={getImageUrl(news.image) || "/placeholder.svg"}
-            alt={news.title}
+            alt={getContentTitle(news, lang)}
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
@@ -64,8 +67,8 @@ export function NewsCard({ news, featured = false, priority = false }: NewsCardP
       </div>
 
       <CardHeader className="flex-1">
-        <CardTitle className="line-clamp-2">{news.title}</CardTitle>
-        <CardDescription className="line-clamp-2">{(news.content ?? '').replace(/<[^>]*>/g, '').trim().slice(0, 120)}{(news.content ?? '').length > 120 ? '…' : ''}</CardDescription>
+        <CardTitle className="line-clamp-2">{getContentTitle(news, lang)}</CardTitle>
+        <CardDescription className="line-clamp-2">{(getNewsContent(news, lang) ?? '').replace(/<[^>]*>/g, '').trim().slice(0, 120)}{(getNewsContent(news, lang) ?? '').length > 120 ? '…' : ''}</CardDescription>
       </CardHeader>
 
       <CardContent className="space-y-4">

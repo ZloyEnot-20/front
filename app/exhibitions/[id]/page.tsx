@@ -5,6 +5,8 @@ import { Header } from '@/components/layout/header'
 import { useAdmin } from '@/lib/admin-context'
 import { getImageUrl } from '@/lib/api'
 import { useAuth } from '@/lib/auth-context'
+import { useLocale } from '@/lib/i18n'
+import { getCityName, getDateLocale, getContentTitle, getContentDescription } from '@/lib/utils'
 import { RegistrationModal } from '@/components/exhibitions/registration-modal'
 import { ChangeCityModal } from '@/components/exhibitions/change-city-modal'
 import { Button } from '@/components/ui/button'
@@ -12,6 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
 import { ArrowLeft, MapPin, Calendar, Users, ExternalLink, Building2, X } from 'lucide-react'
+import { ExhibitorModal } from '@/components/exhibitions/exhibitor-modal'
 import { OptimizedImage } from '@/components/ui/optimized-image'
 import { ExhibitionDetailSkeleton } from '@/components/exhibitions/exhibition-detail-skeleton'
 import {
@@ -40,13 +43,14 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
   const [exhibitorModal, setExhibitorModal] = useState<ExhibitorInfo | null>(null)
   const [galleryImageModal, setGalleryImageModal] = useState<string | null>(null)
   const { user } = useAuth()
+  const { lang, t } = useLocale()
   const { exhibitions, getRegistrationsByUser, isLoading, refresh } = useAdmin()
   const exhibition = exhibitions.find((e) => e.id === id)
   const userRegistrations = user ? getRegistrationsByUser(user.id) : []
   const currentRegistration = userRegistrations.find((r) => r.exhibitionId === id && r.status === 'registered')
   const isRegistered = !!currentRegistration
   const participants = exhibition?.participants ?? []
-  const exhibitionCities = exhibition?.cities?.map((c) => c.name) ?? []
+  const exhibitionCities = exhibition?.cities?.map((c) => getCityName(c, lang)) ?? []
   const canChangeCity = isRegistered && exhibitionCities.length >= 1
 
   if (isLoading) {
@@ -59,9 +63,9 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
         <Header />
         <div className="container mx-auto px-4 py-20">
           <div className="text-center">
-            <h1 className="text-2xl font-bold mb-4">Выставка не найдена</h1>
+            <h1 className="text-2xl font-bold mb-4">{t('exhibitionNotFound')}</h1>
             <Button asChild>
-              <Link href="/exhibitions">Вернуться к выставкам</Link>
+              <Link href="/exhibitions">{t('backToExhibitions')}</Link>
             </Button>
           </div>
         </div>
@@ -69,14 +73,15 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
     )
   }
 
-  const startDate = new Date(exhibition.startDate).toLocaleDateString('ru-RU', {
+  const dateLocale = getDateLocale(lang)
+  const startDate = new Date(exhibition.startDate).toLocaleDateString(dateLocale, {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
     day: 'numeric',
   })
 
-  const endDate = new Date(exhibition.endDate).toLocaleDateString('ru-RU', {
+  const endDate = new Date(exhibition.endDate).toLocaleDateString(dateLocale, {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
@@ -92,7 +97,7 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
         {(exhibition.banner ?? exhibition.image) && (
           <OptimizedImage
             src={getImageUrl(exhibition.banner ?? exhibition.image) || "/placeholder.svg"}
-            alt={exhibition.title}
+            alt={getContentTitle(exhibition, lang)}
             fill
             sizes="100vw"
             priority
@@ -101,8 +106,8 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
         <div className="absolute inset-0 bg-black/40" />
         <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
           <div className="container mx-auto px-4">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">{exhibition.title}</h1>
-            <Badge className="bg-violet-600 hover:bg-violet-700 text-white border-0">Выставка</Badge>
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">{getContentTitle(exhibition, lang)}</h1>
+            <Badge className="bg-violet-600 hover:bg-violet-700 text-white border-0">{t('exhibitionBadge')}</Badge>
           </div>
         </div>
       </section>
@@ -112,7 +117,7 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
         <Button variant="ghost" size="sm" className="gap-2 -ml-2" asChild>
           <Link href="/exhibitions">
             <ArrowLeft className="w-4 h-4" />
-            Назад
+            {t('back')}
           </Link>
         </Button>
       </div>
@@ -126,10 +131,10 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
               {/* Description */}
               <Card>
                 <CardHeader>
-                  <CardTitle>О выставке</CardTitle>
+                  <CardTitle>{t('aboutExhibition')}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-foreground/80 leading-relaxed">{exhibition.description}</p>
+                  <p className="text-foreground/80 leading-relaxed">{getContentDescription(exhibition, lang)}</p>
                 </CardContent>
               </Card>
 
@@ -145,7 +150,7 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
                     >
                       <OptimizedImage
                         src={getImageUrl(url) || '/placeholder.svg'}
-                        alt={`${exhibition.title} — ${idx + 1}`}
+                        alt={`${getContentTitle(exhibition, lang)} — ${idx + 1}`}
                         fill
                         sizes="160px"
                         className="object-cover"
@@ -158,13 +163,13 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
               {/* Details */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Информация</CardTitle>
+                  <CardTitle>{t('info')}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex items-start gap-4">
                     <Calendar className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="font-medium">Даты проведения</p>
+                      <p className="font-medium">{t('datesHeld')}</p>
                       <p className="text-sm text-muted-foreground">
                         {startDate} - {endDate}
                       </p>
@@ -175,21 +180,23 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
                     <div className="flex items-start gap-4">
                       <MapPin className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
                       <div>
-                        <p className="font-medium">Место проведения</p>
+                        <p className="font-medium">{t('venueLabel')}</p>
                         <p className="text-sm text-muted-foreground">
-                          {[exhibition.venue, exhibition.cities?.map((c) => c.name).join(', ')].filter(Boolean).join(' · ')}
+                          {[exhibition.venue, exhibition.cities?.map((c) => getCityName(c, lang)).join(', ')].filter(Boolean).join(' · ')}
                         </p>
                       </div>
                     </div>
                   )}
 
-                  <div className="flex items-start gap-4">
-                    <Users className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="font-medium">Зарегистрировано</p>
-                      <p className="text-sm text-muted-foreground">{exhibition.registrations} посетителей</p>
+                  {user?.role !== 'visitor' && user?.role !== 'exhibitor' && (
+                    <div className="flex items-start gap-4">
+                      <Users className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+                      <div>
+                        <p className="font-medium">{t('registeredLabel')}</p>
+                        <p className="text-sm text-muted-foreground">{exhibition.registrations} {t('visitorsCount')}</p>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </CardContent>
               </Card>
 
@@ -197,8 +204,8 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
               {participants.length > 0 && (
                 <Card>
                   <CardHeader>
-                    <CardTitle>Участники</CardTitle>
-                    <p className="text-sm text-muted-foreground">Университеты выставки</p>
+                    <CardTitle>{t('participantsLabel')}</CardTitle>
+                    <p className="text-sm text-muted-foreground">{t('universitiesOfExhibition')}</p>
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -240,16 +247,16 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
               <div className="lg:col-span-1">
                 <Card className="sticky top-24">
                   <CardHeader>
-                    <CardTitle>Регистрация</CardTitle>
+                    <CardTitle>{t('registrationTitle')}</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <p className="text-sm text-muted-foreground">
                       {user
-                        ? 'Выберите город для посещения выставки.'
-                        : 'Войдите в аккаунт для регистрации на выставку.'}
+                        ? t('chooseCityForVisit')
+                        : t('signInToRegister')}
                     </p>
                     <Button className="w-full" onClick={() => setRegistrationOpen(true)}>
-                      {user ? 'Зарегистрироваться' : 'Войти и зарегистрироваться'}
+                      {user ? t('submitRegistration') : t('signInAndRegister')}
                     </Button>
                   </CardContent>
                 </Card>
@@ -260,24 +267,24 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
               <div className="lg:col-span-1">
                 <Card className="sticky top-24">
                   <CardHeader>
-                    <CardTitle>Регистрация</CardTitle>
+                    <CardTitle>{t('registrationTitle')}</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     {currentRegistration && (
                       <p className="text-sm text-muted-foreground">
-                        Город: <strong>{currentRegistration.city}</strong>
+                        {t('city')}: <strong>{currentRegistration.city}</strong>
                       </p>
                     )}
                     <p className="text-sm font-medium text-green-600">
-                      Вы зарегистрированы на эту выставку. QR-код для входа доступен в разделе «Мои выставки» в профиле.
+                      {t('youAreRegisteredOnExhibition')}
                     </p>
                     {canChangeCity && currentRegistration && (
                       <Button variant="outline" className="w-full" onClick={() => setChangeCityOpen(true)}>
-                        Изменить город
+                        {t('changeCity')}
                       </Button>
                     )}
                     <Button variant="default" className="w-full" asChild>
-                      <Link href="/profile?tab=exhibitions">Перейти в профиль</Link>
+                      <Link href="/profile?tab=exhibitions">{t('goToProfile')}</Link>
                     </Button>
                   </CardContent>
                 </Card>
@@ -292,8 +299,8 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
         isOpen={registrationOpen}
         onOpenChange={setRegistrationOpen}
         exhibitionId={exhibition.id}
-        exhibitionTitle={exhibition.title}
-        cities={exhibition.cities?.map((c) => c.name) ?? []}
+        exhibitionTitle={getContentTitle(exhibition, lang)}
+        cities={exhibitionCities}
       />
 
       {/* Change city modal */}
@@ -317,7 +324,7 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
                 type="button"
                 className="absolute top-2 right-2 z-10 rounded-full p-1.5 text-foreground/80 hover:text-foreground hover:bg-muted focus:outline-none"
                 onClick={() => setGalleryImageModal(null)}
-                aria-label="Закрыть"
+                aria-label={t('close')}
               >
                 <X className="w-6 h-6" />
               </button>
@@ -333,92 +340,28 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
         </DialogContent>
       </Dialog>
 
-      {/* Exhibitor detail modal */}
-      <Dialog open={!!exhibitorModal} onOpenChange={(open) => !open && setExhibitorModal(null)}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-          {exhibitorModal && (
-            <>
-              <DialogHeader>
-                <DialogTitle className="flex items-center gap-3">
-                  <div className="h-12 w-12 rounded-lg bg-muted overflow-hidden flex-shrink-0">
-                    {exhibitorModal.avatar ? (
-                      <img src={getImageUrl(exhibitorModal.avatar)} alt="" className="h-full w-full object-cover" />
-                    ) : (
-                      <div className="h-full w-full flex items-center justify-center">
-                        <Building2 className="w-6 h-6 text-muted-foreground" />
-                      </div>
-                    )}
-                  </div>
-                  {exhibitorModal.name}
-                </DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4 pt-2">
-                {exhibitorModal.exhibitorDescription && (
-                  <p className="text-sm text-foreground/80 leading-relaxed">{exhibitorModal.exhibitorDescription}</p>
-                )}
-                {exhibitorModal.exhibitorAddress && (
-                  <div className="flex items-start gap-2">
-                    <MapPin className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-                    <p className="text-sm text-muted-foreground">{exhibitorModal.exhibitorAddress}</p>
-                  </div>
-                )}
-                {exhibitorModal.exhibitorWebsite && (
-                  <a
-                    href={exhibitorModal.exhibitorWebsite.startsWith('http') ? exhibitorModal.exhibitorWebsite : `https://${exhibitorModal.exhibitorWebsite}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-sm text-primary hover:underline"
-                  >
-                    <ExternalLink className="w-4 h-4" />
-                    {exhibitorModal.exhibitorWebsite}
-                  </a>
-                )}
-                {exhibitorModal.exhibitorPhotos && exhibitorModal.exhibitorPhotos.length > 0 && (
-                  <div className="relative w-full">
-                    <Carousel opts={{ align: 'start', loop: exhibitorModal.exhibitorPhotos.length > 1, containScroll: 'trimSnaps' }} className="w-full">
-                      <CarouselContent className="-ml-2">
-                        {exhibitorModal.exhibitorPhotos.map((url, i) => (
-                          <CarouselItem key={i} className="pl-2 basis-1/3">
-                            <img
-                              src={getImageUrl(url) || url}
-                              alt=""
-                              className="rounded-lg object-cover aspect-square w-full"
-                            />
-                          </CarouselItem>
-                        ))}
-                      </CarouselContent>
-                      {exhibitorModal.exhibitorPhotos.length > 1 && (
-                        <>
-                          <CarouselPrevious className="left-2 border-0 bg-black/50 text-white hover:bg-black/70 disabled:opacity-30" />
-                          <CarouselNext className="right-2 border-0 bg-black/50 text-white hover:bg-black/70 disabled:opacity-30" />
-                        </>
-                      )}
-                    </Carousel>
-                  </div>
-                )}
-              </div>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
+      <ExhibitorModal exhibitor={exhibitorModal} open={!!exhibitorModal} onOpenChange={(open) => !open && setExhibitorModal(null)} />
 
       {/* Footer */}
       <footer className="border-t border-border/40 py-12 bg-muted/40 mt-12">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center gap-8">
-            <div>
-              <div className="font-bold text-lg mb-2">EDU Expo</div>
-              <p className="text-sm text-muted-foreground">Платформа для организации выставок</p>
+            <div className="flex items-center gap-3">
+              <img src="/logo.png" alt="" className="w-10 h-10 rounded-lg object-contain shrink-0" />
+              <div>
+                <div className="font-bold text-lg mb-0.5">{t('appName')}</div>
+                <p className="text-sm text-muted-foreground">{t('platformSubtitle')}</p>
+              </div>
             </div>
             <div className="flex gap-8 text-sm text-muted-foreground">
               <a href="#" className="hover:text-foreground transition-colors">
-                О нас
+                {t('aboutUs')}
               </a>
               <a href="#" className="hover:text-foreground transition-colors">
-                Контакты
+                {t('contacts')}
               </a>
-              <a href="#" className="hover:text-foreground transition-colors">
-                Политика конфиденциальности
+              <a href="/privacy" className="hover:text-foreground transition-colors">
+                {t('privacyPolicy')}
               </a>
             </div>
           </div>

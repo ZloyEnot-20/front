@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { Header } from '@/components/layout/header'
+import { useLocale } from '@/lib/i18n'
 import { ArrowLeft } from 'lucide-react'
 
 const SECTIONS = [
@@ -69,6 +70,7 @@ function Paragraph({ text }: { text: string }) {
 }
 
 export default function PrivacyPage() {
+  const { t } = useLocale()
   return (
     <div className="min-h-screen flex flex-col bg-muted/30">
       <Header />
@@ -79,10 +81,10 @@ export default function PrivacyPage() {
             className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground mb-6 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            На главную
+            {t('toHome')}
           </Link>
           <h1 className="text-3xl font-bold text-foreground mb-8">
-            Политика конфиденциальности
+            {t('privacyPageTitle')}
           </h1>
           <div className="space-y-8">
             {SECTIONS.map((section, i) => (

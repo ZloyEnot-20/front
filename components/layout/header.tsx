@@ -92,9 +92,7 @@ export function Header({ profileTabs }: HeaderProps) {
             </SheetContent>
           </Sheet>
           <Link href="/" className="hidden md:flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold shrink-0">
-              E
-            </div>
+            <img src="/logo.png" alt="" className="w-8 h-8 rounded-lg object-contain shrink-0" />
             <span className="font-bold text-lg">{t('appName')}</span>
           </Link>
         </div>
@@ -171,17 +169,19 @@ export function Header({ profileTabs }: HeaderProps) {
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>{user.email}</DropdownMenuLabel>
                 <DropdownMenuLabel className="text-xs font-normal text-muted-foreground capitalize">
-                  {user.role === 'content_manager'
-                    ? t('contentManager')
-                    : user.role === 'participant'
-                      ? t('participant')
-                      : user.role === 'admin'
-                        ? t('admin')
-                        : t('visitor')}
+                  {user.role === 'exhibitor'
+                    ? t('roleExhibitor')
+                    : user.role === 'content_manager'
+                      ? t('contentManager')
+                      : user.role === 'participant'
+                        ? t('participant')
+                        : user.role === 'admin'
+                          ? t('admin')
+                          : t('visitor')}
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link href="/profile">{t('profile')}</Link>
+                  <Link href="/profile">{user.role === 'exhibitor' ? t('adminDashboard') : t('profile')}</Link>
                 </DropdownMenuItem>
                 {user.role === 'admin' && (
                   <DropdownMenuItem asChild>

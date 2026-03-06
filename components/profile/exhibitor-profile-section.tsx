@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
-import { Search, Settings, Bell, Download, Plus, ChevronDown, X, ArrowUpDown, Calendar, MapPin, Users, Upload } from 'lucide-react';
+import { Search, Settings, Bell, Download, ChevronDown, X, ArrowUpDown, Calendar, MapPin, Users, Building2 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -17,24 +17,24 @@ import {
 import { useAuth } from '@/lib/auth-context';
 import { useAdmin } from '@/lib/admin-context';
 import { useLocale } from '@/lib/i18n';
-import { leadsApi, registrationsApi, exhibitionsApi, type ApiLeadRow, type ApiRegistration } from '@/lib/api';
+import { leadsApi, registrationsApi, exhibitionsApi, getImageUrl, type ApiLeadRow, type ApiRegistration } from '@/lib/api';
 import { PersonalInfoSection } from '@/components/profile/personal-info-section';
 import { UniversityProfileSection } from '@/components/profile/university-profile-section';
 import { SecuritySection } from '@/components/profile/security-section';
 import { Skeleton } from '@/components/ui/skeleton';
-import type { Exhibition } from '@/lib/types';
+import { ExhibitorModal } from '@/components/exhibitions/exhibitor-modal';
+import { getCityName, getContentTitle, getContentDescription } from '@/lib/utils';
+import type { Exhibition, ExhibitorInfo, ExhibitionRegistration } from '@/lib/types';
 
-function formatExhibitionDate(d: Date | string) {
-  return new Date(d).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
+function formatExhibitionDate(d: Date | string, lang: 'uz' | 'ru' | 'en' = 'ru') {
+  const locale = lang === 'uz' ? 'uz-UZ' : lang === 'en' ? 'en-US' : 'ru-RU';
+  return new Date(d).toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' });
 }
 
-const STATUS_LABELS: Record<string, string> = {
-  registered: 'Зарегистрирован',
-  visited: 'Посетил выставку',
-};
-
 // Data Table Component — лиды: данные из профиля + статус + выставка
-function DataTable({ data, selectedIds, onSelectAll, onSelectRow, onSort, sortConfig }: any) {
+function DataTable({ data, selectedIds, onSelectAll, onSelectRow, onSort, sortConfig, t }: any) {
+  const getStatusLabel = (status: string) =>
+    status === 'visited' ? t('statusVisited') : t('statusRegistered');
   const allSelected = data.length > 0 && selectedIds.length === data.length;
 
   const SortHeader = ({ column, label }: any) => (
@@ -93,31 +93,31 @@ function DataTable({ data, selectedIds, onSelectAll, onSelectRow, onSort, sortCo
               />
             </th>
             <th className="px-4 py-2 text-left border border-border bg-card">
-              <SortHeader column="name" label="Имя" />
+              <SortHeader column="name" label={t('nameLabel')} />
             </th>
             <th className="px-4 py-2 text-left border border-border bg-card">
-              <SortHeader column="email" label="Email" />
+              <SortHeader column="email" label={t('emailLabel')} />
             </th>
             <th className="px-4 py-2 text-left border border-border bg-card">
-              <SortHeader column="phone" label="Телефон" />
+              <SortHeader column="phone" label={t('phoneLabelShort')} />
             </th>
             <th className="px-4 py-2 text-left border border-border bg-card w-28 max-w-28">
-              <SortHeader column="city" label="Город" />
+              <SortHeader column="city" label={t('cityColumn')} />
             </th>
             <th className="px-4 py-2 text-left border border-border bg-card">
-              <SortHeader column="status" label="Статус" />
+              <SortHeader column="status" label={t('status')} />
             </th>
             <th className="px-4 py-2 text-left border border-border bg-card w-36 max-w-36">
-              <SortHeader column="exhibitionTitle" label="Выставка" />
+              <SortHeader column="exhibitionTitle" label={t('exhibitionFallback')} />
             </th>
             <th className="px-4 py-2 text-left border border-border bg-card">
-              <SortHeader column="interest" label="Интерес" />
+              <SortHeader column="interest" label={t('interestColumn')} />
             </th>
             <th className="px-4 py-2 text-left border border-border bg-card">
-              <SortHeader column="countryOfInterest" label="Страна интереса" />
+              <SortHeader column="countryOfInterest" label={t('countryOfInterestColumn')} />
             </th>
             <th className="px-4 py-2 text-left border border-border bg-card">
-              <SortHeader column="admissionPlan" label="План поступления" />
+              <SortHeader column="admissionPlan" label={t('admissionPlanColumn')} />
             </th>
           </tr>
         </thead>
@@ -155,7 +155,7 @@ function DataTable({ data, selectedIds, onSelectAll, onSelectRow, onSort, sortCo
                       : 'border-transparent bg-purple-600 text-white hover:bg-purple-600'
                   }
                 >
-                  {STATUS_LABELS[row.status] ?? row.status}
+                  {getStatusLabel(row.status)}
                 </Badge>
               </td>
               <td className={`${cellCls} w-36 max-w-36`}><span className={textCls}>{row.exhibitionTitle || '—'}</span></td>
@@ -198,6 +198,7 @@ function Sidebar({
   exhibitorExhibitions: { id: string; title: string }[];
   onApply: () => void;
 }) {
+  const { t } = useLocale();
   const [openDropdowns, setOpenDropdowns] = useState<Record<string, boolean>>({});
   const sidebarRef = useRef<HTMLDivElement>(null);
 
@@ -324,7 +325,7 @@ function Sidebar({
                     );
                   })
                 ) : (
-                  <span className="text-sm text-foreground">Выставки</span>
+                  <span className="text-sm text-foreground">{t('tabExhibitions')}</span>
                 )}
               </div>
             </div>
@@ -360,10 +361,10 @@ function Sidebar({
             <div className="flex items-center gap-3 flex-1 min-w-0 overflow-hidden">
               <span className="text-sm text-foreground truncate">
                 {filters.status === 'visited'
-                  ? 'Посетил выставку'
+                  ? t('statusVisited')
                   : filters.status === 'registered'
-                    ? 'Зарегистрирован'
-                    : 'Статус'}
+                    ? t('statusRegistered')
+                    : t('status')}
               </span>
             </div>
             <ChevronDown
@@ -374,9 +375,9 @@ function Sidebar({
           {openDropdowns.status && (
             <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-lg p-3 space-y-2 animate-in fade-in duration-200 z-50 shadow-lg">
               {[
-                { value: '__all__', label: 'Все' },
-                { value: 'registered', label: 'Зарегистрирован' },
-                { value: 'visited', label: 'Посетил выставку' },
+                { value: '__all__', label: t('all') },
+                { value: 'registered', label: t('statusRegistered') },
+                { value: 'visited', label: t('statusVisited') },
               ].map(({ value, label }) => (
                 <button
                   key={value}
@@ -408,8 +409,8 @@ function Sidebar({
             <div className="flex items-center gap-3 flex-1 min-w-0 overflow-hidden">
               <span className="text-sm text-foreground truncate">
                 {(filters.interest || []).length > 0
-                  ? `Интерес (${(filters.interest || []).length})`
-                  : 'Интерес'}
+                  ? `${t('interestColumn')} (${(filters.interest || []).length})`
+                  : t('interestColumn')}
               </span>
             </div>
             <ChevronDown
@@ -446,8 +447,8 @@ function Sidebar({
             <div className="flex items-center gap-3 flex-1 min-w-0 overflow-hidden">
               <span className="text-sm text-foreground truncate">
                 {(filters.countryOfInterest || []).length > 0
-                  ? `Страна интереса (${(filters.countryOfInterest || []).length})`
-                  : 'Страна интереса'}
+                  ? `${t('countryOfInterestColumn')} (${(filters.countryOfInterest || []).length})`
+                  : t('countryOfInterestColumn')}
               </span>
             </div>
             <ChevronDown
@@ -484,8 +485,8 @@ function Sidebar({
             <div className="flex items-center gap-3 flex-1 min-w-0 overflow-hidden">
               <span className="text-sm text-foreground truncate">
                 {(filters.admissionPlan || []).length > 0
-                  ? `План поступления (${(filters.admissionPlan || []).length})`
-                  : 'План поступления'}
+                  ? `${t('admissionPlanColumn')} (${(filters.admissionPlan || []).length})`
+                  : t('admissionPlanColumn')}
               </span>
             </div>
             <ChevronDown
@@ -529,7 +530,7 @@ function Sidebar({
             className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground"
             onClick={onApply}
           >
-            Применить
+            {t('apply')}
           </Button>
         </div>
       </div>
@@ -537,8 +538,18 @@ function Sidebar({
   );
 }
 
-// Вкладка «Выставки» — карточки кампаний, макс. ширина 400px
-function ExhibitionsTabContent({ exhibitions }: { exhibitions: Exhibition[] }) {
+// Вкладка «Выставки» — карточки кампаний, макс. ширина 400px. Для админа: exhibitions = мои (созданные), registeredExhibitions + registrationsForRegistered = на которые зареган (с QR как у визитора)
+function ExhibitionsTabContent({
+  exhibitions,
+  registeredExhibitions,
+  registrationsForRegistered,
+}: {
+  exhibitions: Exhibition[];
+  registeredExhibitions?: Exhibition[];
+  registrationsForRegistered?: ExhibitionRegistration[];
+}) {
+  const { lang, t } = useLocale();
+  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCities, setSelectedCities] = useState<string[]>([]);
   const [dateFrom, setDateFrom] = useState('');
@@ -562,7 +573,7 @@ function ExhibitionsTabContent({ exhibitions }: { exhibitions: Exhibition[] }) {
     () =>
       Array.from(
         new Set(
-          exhibitions.flatMap((e) => (e.cities ?? []).map((c) => (typeof c === 'object' && c !== null && 'name' in c ? c.name : String(c))))
+          exhibitions.flatMap((e) => (e.cities ?? []).map((c) => (typeof c === 'object' && c !== null ? getCityName(c, lang) : String(c))))
         )
       ).sort(),
     [exhibitions]
@@ -578,11 +589,18 @@ function ExhibitionsTabContent({ exhibitions }: { exhibitions: Exhibition[] }) {
 
   const filteredExhibitions = useMemo(() => {
     let list = exhibitions.filter((ex) => {
-      const cityNames = (ex.cities ?? []).map((c) => (typeof c === 'object' && c !== null && 'name' in c ? c.name : String(c)));
-      const matchesSearch =
-        ex.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        cityNames.some((city) => city.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (ex.description ?? '').toLowerCase().includes(searchTerm.toLowerCase());
+      const cityNames = (ex.cities ?? []).map((c) => (typeof c === 'object' && c !== null ? getCityName(c, lang) : String(c)));
+      const titleUz = (ex.titleUz ?? ex.title ?? '').toLowerCase();
+        const titleRu = (ex.titleRu ?? ex.title ?? '').toLowerCase();
+        const titleEn = (ex.titleEn ?? ex.title ?? '').toLowerCase();
+        const descUz = (ex.descriptionUz ?? ex.description ?? '').toLowerCase();
+        const descRu = (ex.descriptionRu ?? ex.description ?? '').toLowerCase();
+        const descEn = (ex.descriptionEn ?? ex.description ?? '').toLowerCase();
+        const q = searchTerm.toLowerCase();
+        const matchesSearch =
+          titleUz.includes(q) || titleRu.includes(q) || titleEn.includes(q) ||
+          descUz.includes(q) || descRu.includes(q) || descEn.includes(q) ||
+          cityNames.some((city) => city.toLowerCase().includes(q));
       const matchesCities =
         selectedCities.length === 0 ||
         cityNames.some((city) => selectedCities.some((s) => city.toLowerCase().includes(s.toLowerCase())));
@@ -600,7 +618,7 @@ function ExhibitionsTabContent({ exhibitions }: { exhibitions: Exhibition[] }) {
     } else if (sortBy === 'participants') {
       list = [...list].sort((a, b) => (b.registrations ?? 0) - (a.registrations ?? 0));
     } else if (sortBy === 'name') {
-      list = [...list].sort((a, b) => a.title.localeCompare(b.title));
+      list = [...list].sort((a, b) => getContentTitle(a, lang).localeCompare(getContentTitle(b, lang)));
     }
     return list;
   }, [exhibitions, searchTerm, selectedCities, dateFrom, dateTo, sortBy]);
@@ -610,30 +628,25 @@ function ExhibitionsTabContent({ exhibitions }: { exhibitions: Exhibition[] }) {
       <div className="space-y-6">
         <div className="flex items-start justify-between flex-wrap gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Выставки</h1>
-            <p className="text-muted-foreground mt-1">Выставки и мероприятия, в которых вы участвуете</p>
-          </div>
-          <div className="flex gap-3">
-            <Button variant="outline" size="sm" className="gap-2">
-              <Upload size={16} />
-              Экспорт
-            </Button>
-            <Button size="sm" className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground" asChild>
-              <Link href="/exhibitions">Новая выставка</Link>
-            </Button>
+            <h1 className="text-3xl font-bold text-foreground">{t('tabExhibitions')}</h1>
+            <p className="text-muted-foreground mt-1">
+              {registeredExhibitions != null ? t('registeredExhibitionsTitle') : t('exhibitionsAndEventsTitle')}
+            </p>
           </div>
         </div>
 
+        {registeredExhibitions == null && (
+        <>
         <div ref={filtersBarRef} className="flex gap-3 items-center flex-wrap">
           <div className="relative">
             <Button variant="outline" size="sm" className="gap-2" onClick={() => toggleFilter('date')}>
               <Calendar size={16} />
-              {dateFrom || dateTo ? `${dateFrom || 'Начало'} — ${dateTo || 'Конец'}` : 'Даты'}
+              {dateFrom || dateTo ? `${dateFrom || t('dateFrom')} — ${dateTo || t('dateTo')}` : t('dates')}
             </Button>
             {openFilters.date && (
               <div className="absolute top-full left-0 mt-1 bg-card border border-border rounded-lg p-4 space-y-3 z-50 shadow-lg min-w-72">
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground mb-1 block">С</label>
+                  <label className="text-xs font-medium text-muted-foreground mb-1 block">{t('dateFromShort')}</label>
                   <input
                     type="date"
                     value={dateFrom}
@@ -642,7 +655,7 @@ function ExhibitionsTabContent({ exhibitions }: { exhibitions: Exhibition[] }) {
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground mb-1 block">По</label>
+                  <label className="text-xs font-medium text-muted-foreground mb-1 block">{t('dateToShort')}</label>
                   <input
                     type="date"
                     value={dateTo}
@@ -660,10 +673,10 @@ function ExhibitionsTabContent({ exhibitions }: { exhibitions: Exhibition[] }) {
                       setDateTo('');
                     }}
                   >
-                    Очистить
+                    {t('clearFilters')}
                   </Button>
                   <Button size="sm" className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground" onClick={() => toggleFilter('date')}>
-                    Применить
+                    {t('apply')}
                   </Button>
                 </div>
               </div>
@@ -673,7 +686,7 @@ function ExhibitionsTabContent({ exhibitions }: { exhibitions: Exhibition[] }) {
           <div className="relative">
             <Button variant="outline" size="sm" className="gap-2" onClick={() => toggleFilter('city')}>
               <MapPin size={16} />
-              {selectedCities.length > 0 ? `Города (${selectedCities.length})` : 'Город'}
+              {selectedCities.length > 0 ? `${t('cities')} (${selectedCities.length})` : t('cityColumn')}
             </Button>
             {openFilters.city && (
               <div className="absolute top-full left-0 mt-1 bg-card border border-border rounded-lg p-3 space-y-2 z-50 shadow-lg min-w-60 max-h-60 overflow-y-auto">
@@ -694,14 +707,14 @@ function ExhibitionsTabContent({ exhibitions }: { exhibitions: Exhibition[] }) {
 
           <div className="relative">
             <Button variant="outline" size="sm" className="gap-2" onClick={() => toggleFilter('sort')}>
-              Сортировка
+              {t('sortBy')}
             </Button>
             {openFilters.sort && (
               <div className="absolute top-full left-0 mt-1 bg-card border border-border rounded-lg p-3 space-y-2 z-50 shadow-lg min-w-48">
                 {[
-                  { value: 'date' as const, label: 'По дате' },
-                  { value: 'participants' as const, label: 'По участникам' },
-                  { value: 'name' as const, label: 'По названию (А–Я)' },
+                  { value: 'date' as const, label: t('sortByDate') },
+                  ...(user?.role !== 'exhibitor' ? [{ value: 'participants' as const, label: t('sortByParticipants') }] : []),
+                  { value: 'name' as const, label: t('sortByName') },
                 ].map((option) => (
                   <button
                     key={option.value}
@@ -735,9 +748,11 @@ function ExhibitionsTabContent({ exhibitions }: { exhibitions: Exhibition[] }) {
           </div>
         </div>
 
+        <h2 className="text-xl font-semibold text-foreground">{t('myExhibitions')}</h2>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 items-stretch">
           {filteredExhibitions.map((ex) => {
-            const cityNames = (ex.cities ?? []).map((c) => (typeof c === 'object' && c !== null && 'name' in c ? c.name : String(c)));
+            const cityNames = (ex.cities ?? []).map((c) => (typeof c === 'object' && c !== null ? getCityName(c, lang) : String(c)));
             const locationLine = [ex.venue, cityNames.length ? cityNames.join(' | ') : ''].filter(Boolean).join(' · ') || '—';
             return (
               <div
@@ -745,15 +760,15 @@ function ExhibitionsTabContent({ exhibitions }: { exhibitions: Exhibition[] }) {
                 className="bg-card rounded-lg border border-border p-6 hover:shadow-md transition cursor-pointer max-w-[400px] w-full h-full min-h-[320px] flex flex-col"
               >
                 <div className="mb-4 flex-shrink-0">
-                  <h3 className="text-lg font-semibold text-foreground mb-1 line-clamp-1">{ex.title}</h3>
-                  <p className="text-sm text-muted-foreground line-clamp-2">{ex.description || '—'}</p>
+                  <h3 className="text-lg font-semibold text-foreground mb-1 line-clamp-1">{getContentTitle(ex, lang)}</h3>
+                  <p className="text-sm text-muted-foreground line-clamp-2">{getContentDescription(ex, lang) || '—'}</p>
                 </div>
                 <div className="mb-4 pb-4 border-b border-border flex-shrink-0">
                   <div className="flex items-start gap-2">
                     <Calendar size={16} className="text-primary mt-0.5 flex-shrink-0" />
                     <div className="min-w-0">
                       <p className="text-sm font-medium text-foreground">
-                        {formatExhibitionDate(ex.startDate)} — {formatExhibitionDate(ex.endDate)}
+                        {formatExhibitionDate(ex.startDate, lang)} — {formatExhibitionDate(ex.endDate, lang)}
                       </p>
                     </div>
                   </div>
@@ -766,16 +781,18 @@ function ExhibitionsTabContent({ exhibitions }: { exhibitions: Exhibition[] }) {
                     </p>
                   </div>
                 </div>
+                {user?.role !== 'exhibitor' && (
                 <div className="mb-6 flex-shrink-0">
                   <div className="flex items-center gap-2">
                     <Users size={16} className="text-primary" />
                     <p className="text-sm font-medium text-foreground">
-                      {ex.registrations ?? 0} <span className="text-muted-foreground">участников</span>
+                      {ex.registrations ?? 0} <span className="text-muted-foreground">{t('participantsLabel')}</span>
                     </p>
                   </div>
                 </div>
+                )}
                 <Button className="w-full mt-auto bg-primary hover:bg-primary/90 text-primary-foreground font-medium py-2 flex-shrink-0" asChild>
-                  <Link href={`/exhibitions/${ex.id}`}>Показать</Link>
+                  <Link href={`/exhibitions/${ex.id}`}>{t('show')}</Link>
                 </Button>
               </div>
             );
@@ -784,7 +801,58 @@ function ExhibitionsTabContent({ exhibitions }: { exhibitions: Exhibition[] }) {
 
         {filteredExhibitions.length === 0 && (
           <div className="flex flex-col items-center justify-center py-12">
-            <p className="text-muted-foreground">Выставки не найдены</p>
+            <p className="text-muted-foreground">{t('exhibitionsNotFound')}</p>
+          </div>
+        )}
+        </>
+        )}
+
+        {registeredExhibitions != null && (
+          <div className="space-y-4">
+            {(registrationsForRegistered ?? []).filter((r) => r.status === 'registered' || !r.cancelledAt).length > 0 ? (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {(registrationsForRegistered ?? [])
+                .filter((r) => r.status === 'registered' || !r.cancelledAt)
+                .map((reg) => {
+                  const ex = registeredExhibitions.find((e) => e.id === reg.exhibitionId);
+                  const startDate = ex?.startDate ? formatExhibitionDate(ex.startDate, lang) : null;
+                  const endDate = ex?.endDate ? formatExhibitionDate(ex.endDate, lang) : null;
+                  return (
+                    <div key={reg.id} className="rounded-xl border bg-card p-6 flex flex-col">
+                      <div className="mb-3">
+                        <h3 className="text-lg font-semibold">{ex ? getContentTitle(ex, lang) : t('exhibitionFallback')}</h3>
+                        <p className="text-sm text-muted-foreground mt-1">{reg.city}</p>
+                      </div>
+                      {(startDate || endDate) && (
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
+                          <Calendar size={16} />
+                          {startDate && endDate ? `${startDate} — ${endDate}` : startDate || endDate}
+                        </div>
+                      )}
+                      {reg.qrCode && (
+                        <div className="rounded-lg border bg-muted/30 p-4 mb-4 flex flex-col items-center gap-2">
+                          <img src={reg.qrCode} alt={t('qrCodeForEntry')} className="w-44 h-44 object-contain" loading="lazy" />
+                          <span className="text-xs text-muted-foreground flex items-center gap-1">
+                            <MapPin size={12} />
+                            Покажите QR-код на входе
+                          </span>
+                        </div>
+                      )}
+                      <Button variant="outline" className="w-full mt-auto" asChild>
+                        <Link href={`/exhibitions/${reg.exhibitionId}`}>Подробнее о выставке</Link>
+                      </Button>
+                    </div>
+                  );
+                })}
+            </div>
+            ) : (
+              <div className="rounded-lg border bg-card p-12 text-center">
+                <p className="text-muted-foreground mb-4">Вы ещё не зарегистрированы ни на одну выставку</p>
+                <Button asChild>
+                  <Link href="/exhibitions">Смотреть выставки</Link>
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -792,27 +860,147 @@ function ExhibitionsTabContent({ exhibitions }: { exhibitions: Exhibition[] }) {
   );
 }
 
-const EXHIBITOR_ADMIN_TABS = [
-  { id: 'leads', label: 'Лиды' },
-  { id: 'exhibitions', label: 'Выставки' },
-  { id: 'university', label: 'Профиль Университета' },
-  { id: 'mail', label: 'Почта и Пароль' },
-] as const;
+// Вкладка «Университеты» для админа: карточки как у выставок, по клику «Показать» — модалка университета
+function UniversitiesTabContent({ exhibitions }: { exhibitions: Exhibition[] }) {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [exhibitorModal, setExhibitorModal] = useState<ExhibitorInfo | null>(null);
 
-const VISITOR_TABS = [
-  { id: 'myExhibitions', label: 'Мои выставки' },
-  { id: 'profile', label: 'Личные данные' },
-  { id: 'mail', label: 'Почта и Пароль' },
-] as const;
+  const uniqueExhibitors = useMemo(() => {
+    const map = new Map<string, ExhibitorInfo>();
+    for (const ex of exhibitions) {
+      for (const p of ex.participants ?? []) {
+        const exhibitor = typeof p === 'object' && p !== null && 'id' in p ? (p as ExhibitorInfo) : null;
+        if (exhibitor?.id && !map.has(exhibitor.id)) map.set(exhibitor.id, exhibitor);
+      }
+    }
+    return Array.from(map.values());
+  }, [exhibitions]);
+
+  const filteredExhibitors = useMemo(() => {
+    if (!searchTerm.trim()) return uniqueExhibitors;
+    const q = searchTerm.toLowerCase();
+    return uniqueExhibitors.filter(
+      (u) =>
+        (u.name ?? '').toLowerCase().includes(q) ||
+        (u.exhibitorDescription ?? '').toLowerCase().includes(q) ||
+        (u.exhibitorAddress ?? '').toLowerCase().includes(q)
+    );
+  }, [uniqueExhibitors, searchTerm]);
+
+  return (
+    <div className="flex-1 min-h-0 overflow-auto flex flex-col">
+      <div className="w-full shrink-0 border-b border-border bg-card px-6 pt-4 pb-6">
+        <div className="max-w-[1400px] mx-auto flex flex-col sm:flex-row sm:items-center gap-4">
+          <div>
+            <h2 className="text-lg font-semibold text-foreground mb-1">Университеты</h2>
+            <p className="text-sm text-muted-foreground">Участники выставок</p>
+          </div>
+          <div className="ml-auto flex-1 min-w-0 max-w-xs">
+            <div className="flex items-center bg-card rounded-lg px-3 py-2 gap-2 text-sm border border-border focus-within:border-foreground/50 transition">
+              <Search size={16} className="text-muted-foreground flex-shrink-0" />
+              <input
+                type="text"
+                placeholder="Поиск"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="bg-transparent outline-none w-full placeholder-muted-foreground text-foreground"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="flex-1 overflow-auto p-4 md:p-6">
+        <div className="max-w-[1400px] mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 items-stretch">
+            {filteredExhibitors.map((exh) => (
+              <div
+                key={exh.id}
+                className="bg-card rounded-lg border border-border p-6 hover:shadow-md transition max-w-[400px] w-full h-full min-h-[320px] flex flex-col"
+              >
+                <div className="mb-4 flex-shrink-0 flex items-start gap-3">
+                  <div className="h-14 w-14 rounded-xl bg-muted overflow-hidden flex-shrink-0 flex items-center justify-center">
+                    {exh.avatar ? (
+                      <img src={getImageUrl(exh.avatar)} alt="" className="h-full w-full object-cover" />
+                    ) : (
+                      <Building2 className="w-7 h-7 text-muted-foreground" />
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-lg font-semibold text-foreground mb-1 line-clamp-1">{exh.name}</h3>
+                    <p className="text-sm text-muted-foreground line-clamp-2">{exh.exhibitorDescription || '—'}</p>
+                  </div>
+                </div>
+                {exh.exhibitorAddress && (
+                  <div className="mb-4 pb-4 border-b border-border flex-shrink-0 min-w-0">
+                    <div className="flex items-start gap-2">
+                      <MapPin size={16} className="text-primary mt-0.5 flex-shrink-0" />
+                      <p className="text-sm font-medium text-foreground truncate" title={exh.exhibitorAddress}>
+                        {exh.exhibitorAddress}
+                      </p>
+                    </div>
+                  </div>
+                )}
+                {exh.exhibitorWebsite && (
+                  <div className="mb-6 flex-shrink-0 min-w-0">
+                    <p className="text-sm text-muted-foreground truncate" title={exh.exhibitorWebsite}>
+                      {exh.exhibitorWebsite}
+                    </p>
+                  </div>
+                )}
+                {!exh.exhibitorAddress && !exh.exhibitorWebsite && <div className="mb-6 flex-shrink-0" />}
+                <div className="mb-4 flex-shrink-0 h-12 flex gap-1.5 items-center">
+                  {Array.isArray(exh.exhibitorPhotos) && exh.exhibitorPhotos.length > 0
+                    ? exh.exhibitorPhotos.slice(0, 3).map((photoId) => (
+                        <div key={photoId} className="h-12 w-12 rounded-lg overflow-hidden bg-muted flex-shrink-0">
+                          <img src={getImageUrl(photoId)} alt="" className="h-full w-full object-cover" />
+                        </div>
+                      ))
+                    : null}
+                </div>
+                <Button
+                  className="w-full mt-auto bg-primary hover:bg-primary/90 text-primary-foreground font-medium py-2 flex-shrink-0"
+                  onClick={() => setExhibitorModal(exh)}
+                >
+                  Показать
+                </Button>
+              </div>
+            ))}
+          </div>
+          {filteredExhibitors.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-12">
+              <p className="text-muted-foreground">Университеты не найдены</p>
+            </div>
+          )}
+        </div>
+      </div>
+      <ExhibitorModal exhibitor={exhibitorModal} open={!!exhibitorModal} onOpenChange={(open) => !open && setExhibitorModal(null)} />
+    </div>
+  );
+}
 
 function getProfileTabs(role: string | undefined, t: (key: string) => string): { id: string; label: string }[] {
-  if (role === 'exhibitor' || role === 'admin') {
-    return EXHIBITOR_ADMIN_TABS.map((tab) => ({ id: tab.id, label: tab.label }));
+  if (role === 'admin') {
+    return [
+      { id: 'leads', label: t('tabLeads') },
+      { id: 'exhibitions', label: t('tabExhibitions') },
+      { id: 'university', label: t('tabUniversities') },
+      { id: 'profile', label: t('tabPersonalData') },
+      { id: 'mail', label: t('tabEmailPassword') },
+    ];
   }
-  return VISITOR_TABS.map((tab) => ({
-    id: tab.id,
-    label: tab.id === 'profile' ? 'Личные данные' : tab.id === 'myExhibitions' ? t('myExhibitions') : tab.label,
-  }));
+  if (role === 'exhibitor') {
+    return [
+      { id: 'leads', label: t('tabLeads') },
+      { id: 'exhibitions', label: t('tabExhibitions') },
+      { id: 'university', label: t('tabUniversityProfile') },
+      { id: 'mail', label: t('tabEmailPassword') },
+    ];
+  }
+  return [
+    { id: 'myExhibitions', label: t('myExhibitions') },
+    { id: 'profile', label: t('tabPersonalData') },
+    { id: 'mail', label: t('tabEmailPassword') },
+  ];
 }
 
 // Скелетон для «Мои выставки»
@@ -850,6 +1038,7 @@ function MyExhibitionsTabContent({
   exhibitions: Exhibition[];
   loading: boolean;
 }) {
+  const { lang, t } = useLocale();
   if (loading) {
     return <MyExhibitionsSkeleton />;
   }
@@ -860,14 +1049,14 @@ function MyExhibitionsTabContent({
     <div className="flex-1 overflow-auto p-4 px-[15%]">
       <div className="max-w-[1400px] mx-auto space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Мои выставки</h1>
-          <p className="text-muted-foreground mt-1">Выставки, на которые вы зарегистрированы. QR-код для входа ниже.</p>
+          <h1 className="text-3xl font-bold text-foreground">{t('myExhibitions')}</h1>
+          <p className="text-muted-foreground mt-1">{t('registeredExhibitionsTitle')}. {t('qrCodeForEntry')}.</p>
         </div>
         {activeRegs.length === 0 ? (
           <div className="rounded-lg border bg-card p-12 text-center">
-            <p className="text-muted-foreground mb-4">Вы ещё не зарегистрированы ни на одну выставку</p>
+            <p className="text-muted-foreground mb-4">{t('notRegisteredOnExhibitions')}</p>
             <Button asChild>
-              <Link href="/exhibitions">Смотреть выставки</Link>
+              <Link href="/exhibitions">{t('viewExhibitions')}</Link>
             </Button>
           </div>
         ) : (
@@ -879,7 +1068,7 @@ function MyExhibitionsTabContent({
               return (
                 <div key={reg.id} className="rounded-xl border bg-card p-6 flex flex-col">
                   <div className="mb-3">
-                    <h3 className="text-lg font-semibold">{ex?.title ?? 'Выставка'}</h3>
+                    <h3 className="text-lg font-semibold">{ex ? getContentTitle(ex, lang) : t('exhibitionFallback')}</h3>
                     <p className="text-sm text-muted-foreground mt-1">{reg.city}</p>
                   </div>
                   {(startDate || endDate) && (
@@ -890,7 +1079,7 @@ function MyExhibitionsTabContent({
                   )}
                   {reg.qrCode && (
                     <div className="rounded-lg border bg-muted/30 p-4 mb-4 flex flex-col items-center gap-2">
-                      <img src={reg.qrCode} alt="QR-код для входа" className="w-44 h-44 object-contain" loading="lazy" />
+                      <img src={reg.qrCode} alt={t('qrCodeForEntry')} className="w-44 h-44 object-contain" loading="lazy" />
                       <span className="text-xs text-muted-foreground flex items-center gap-1">
                         <MapPin size={12} />
                         Покажите QR-код на входе
@@ -934,9 +1123,7 @@ function Header({
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <div className="flex items-center shrink-0">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-white font-bold shrink-0">
-              E
-            </div>
+            <img src="/logo.png" alt="" className="w-8 h-8 rounded-lg object-contain shrink-0" />
             <span className="font-bold text-lg hidden sm:inline">{t('appName')}</span>
           </Link>
         </div>
@@ -1023,8 +1210,8 @@ function Header({
 // Main Page Component
 export function ExhibitorProfileSection() {
   const { user } = useAuth();
-  const { t } = useLocale();
-  const { exhibitions: allExhibitions } = useAdmin();
+  const { t, lang } = useLocale();
+  const { exhibitions: allExhibitions, registrations: adminRegistrations } = useAdmin();
   const profileTabs = useMemo(() => getProfileTabs(user?.role, t), [user?.role, t]);
   const initialTab = user?.role === 'exhibitor' || user?.role === 'admin' ? 'leads' : 'myExhibitions';
   const [profileSectionTab, setProfileSectionTab] = useState(initialTab);
@@ -1090,11 +1277,32 @@ export function ExhibitorProfileSection() {
   }, [profileSectionTab, myExhibitionsHasFetched]);
 
   const exhibitorExhibitionIds =
-    allExhibitions?.filter((e) => (e.participants ?? []).some((p) => (typeof p === 'object' ? p.id : p) === user?.id)).map((e) => e.id) ?? [];
-  const exhibitorExhibitions = (allExhibitions ?? []).filter((e) => exhibitorExhibitionIds.includes(e.id));
+    user?.role === 'admin'
+      ? (allExhibitions ?? []).map((e) => e.id)
+      : (allExhibitions?.filter((e) => (e.participants ?? []).some((p) => (typeof p === 'object' ? p.id : p) === user?.id)).map((e) => e.id) ?? []);
+  const exhibitorExhibitions =
+    user?.role === 'admin' ? (allExhibitions ?? []) : (allExhibitions ?? []).filter((e) => exhibitorExhibitionIds.includes(e.id));
+
+  // Для админа во вкладке «Выставки»: созданные мной и те, на которые зареган
+  const adminMyExhibitions = useMemo(
+    () => (user?.role === 'admin' && allExhibitions ? allExhibitions.filter((e) => e.createdBy === user?.id) : []),
+    [user?.role, user?.id, allExhibitions]
+  );
+  const adminRegisteredExhibitions = useMemo(() => {
+    if (user?.role !== 'admin' || !allExhibitions?.length || !adminRegistrations?.length) return [];
+    const ids = new Set(adminRegistrations.map((r) => r.exhibitionId));
+    return allExhibitions.filter((e) => ids.has(e.id));
+  }, [user?.role, allExhibitions, adminRegistrations]);
 
   const fetchLeads = useCallback(async () => {
-    if (user?.role !== 'exhibitor' || exhibitorExhibitionIds.length === 0) {
+    const isExhibitor = user?.role === 'exhibitor';
+    const isAdmin = user?.role === 'admin';
+    if (!isExhibitor && !isAdmin) {
+      setLeadsData({ items: [], total: 0, page: 1, rowsPerPage: 19, totalPages: 0 });
+      setLoading(false);
+      return;
+    }
+    if (isExhibitor && exhibitorExhibitionIds.length === 0) {
       setLeadsData({ items: [], total: 0, page: 1, rowsPerPage: 19, totalPages: 0 });
       setLoading(false);
       return;
@@ -1168,13 +1376,13 @@ export function ExhibitorProfileSection() {
       row.email,
       row.phone ?? '',
       row.city ?? '',
-      STATUS_LABELS[row.status] ?? row.status,
+      row.status === 'visited' ? t('statusVisited') : t('statusRegistered'),
       row.exhibitionTitle ?? '',
       row.interest ?? '',
       row.countryOfInterest ?? '',
       row.admissionPlan ?? '',
     ]);
-    const csv = [['Имя', 'Email', 'Телефон', 'Город', 'Статус', 'Выставка', 'Интерес', 'Страна интереса', 'План поступления'], ...rows]
+    const csv = [[t('nameLabel'), t('emailLabel'), t('phoneLabelShort'), t('cityColumn'), t('status'), t('exhibitionFallback'), t('interestColumn'), t('countryOfInterestColumn'), t('admissionPlanColumn')], ...rows]
       .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(','))
       .join('\n');
     const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
@@ -1194,19 +1402,15 @@ export function ExhibitorProfileSection() {
         {/* Второй хедер: заголовок и описание слева, кнопки справа */}
         <div className="w-full shrink-0 border-b border-border bg-card px-6 pt-4 pb-6 flex items-center justify-between gap-4">
           <div>
-            <h2 className="text-lg font-semibold text-foreground mb-1">Лиды</h2>
+            <h2 className="text-lg font-semibold text-foreground mb-1">{t('tabLeads')}</h2>
             <p className="text-sm text-muted-foreground">
-              Контакты участников ваших выставок: зарегистрированные и посетившие. Используйте фильтры и экспорт в CSV.
+              {t('leadsSectionDescription')}
             </p>
           </div>
           <div className="flex items-center gap-3 shrink-0">
             <Button variant="outline" size="sm" onClick={handleDownloadCSV} className="gap-2">
               <Download size={16} />
-              Скачать CSV
-            </Button>
-            <Button size="sm" className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground">
-              <Plus size={16} />
-              Добавить в список
+              {t('downloadCsv')}
             </Button>
           </div>
         </div>
@@ -1217,14 +1421,14 @@ export function ExhibitorProfileSection() {
             <Sidebar
               filters={filters}
               setFilters={setFilters}
-              exhibitorExhibitions={exhibitorExhibitions.map((e) => ({ id: e.id, title: e.title }))}
+              exhibitorExhibitions={exhibitorExhibitions.map((e) => ({ id: e.id, title: getContentTitle(e, lang) }))}
               onApply={handleApplyFilters}
             />
           </div>
 
           <div className="flex-1 min-h-0 overflow-auto bg-card rounded-lg shadow-sm">
             {loading ? (
-              <div className="flex items-center justify-center py-12 text-muted-foreground">Загрузка…</div>
+              <div className="flex items-center justify-center py-12 text-muted-foreground">{t('loadingEllipsis')}</div>
             ) : (
               <DataTable
                 data={sortedData}
@@ -1233,6 +1437,7 @@ export function ExhibitorProfileSection() {
                 onSelectRow={handleSelectRow}
                 onSort={handleSort}
                 sortConfig={sortConfig}
+                t={t}
               />
             )}
           </div>
@@ -1243,11 +1448,11 @@ export function ExhibitorProfileSection() {
           <div className="w-72 shrink-0" aria-hidden />
           <div className="flex-1 flex items-center justify-between min-w-0">
             <div>
-              Элементов на странице: <span className="font-medium text-foreground">{leadsData?.items?.length ?? 0}</span>
+              {t('itemsPerPage')}: <span className="font-medium text-foreground">{leadsData?.items?.length ?? 0}</span>
             </div>
             <div>
-              Страница: <span className="font-medium text-foreground">{leadsData?.page ?? 1} из {leadsData?.totalPages || 1}</span>
-              {leadsData != null && <span className="ml-2">(всего {leadsData.total})</span>}
+              {t('pageLabel')}: <span className="font-medium text-foreground">{leadsData?.page ?? 1} {t('of')} {leadsData?.totalPages || 1}</span>
+              {leadsData != null && <span className="ml-2">({t('totalLabel')} {leadsData.total})</span>}
             </div>
           </div>
         </div>
@@ -1255,21 +1460,31 @@ export function ExhibitorProfileSection() {
       )}
 
       {profileSectionTab === 'exhibitions' && (
-        <ExhibitionsTabContent exhibitions={exhibitorExhibitions} />
+        user?.role === 'admin' ? (
+          <ExhibitionsTabContent
+            exhibitions={adminMyExhibitions}
+            registeredExhibitions={adminRegisteredExhibitions}
+            registrationsForRegistered={adminRegistrations}
+          />
+        ) : (
+          <ExhibitionsTabContent exhibitions={exhibitorExhibitions} />
+        )
       )}
 
       {profileSectionTab === 'university' && (
-        <div className="flex-1 min-h-0 overflow-auto flex flex-col p-4 md:p-6">
-          {user ? (
+        user?.role === 'admin' ? (
+          <UniversitiesTabContent exhibitions={allExhibitions ?? []} />
+        ) : user ? (
+          <div className="flex-1 min-h-0 overflow-auto flex flex-col p-4 md:p-6">
             <div className="max-w-4xl mx-auto w-full">
               <div className="bg-card rounded-lg border border-border shadow-sm p-6 md:p-8">
                 <UniversityProfileSection user={user} />
               </div>
             </div>
-          ) : (
-            <div className="flex items-center justify-center py-12 text-muted-foreground">Загрузка…</div>
-          )}
-        </div>
+          </div>
+        ) : (
+          <div className="flex items-center justify-center py-12 text-muted-foreground">{t('loadingEllipsis')}</div>
+        )
       )}
 
       {profileSectionTab === 'myExhibitions' && (

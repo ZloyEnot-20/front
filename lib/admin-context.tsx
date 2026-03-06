@@ -5,11 +5,17 @@ import { Exhibition, News, User, ExhibitionRegistration } from './types'
 import { exhibitionsApi, newsApi, usersApi, registrationsApi, ApiUser } from './api'
 import { useAuth } from './auth-context'
 
-function toExhibition(e: { id: string; title: string; description: string; venue?: string; startDate: string; endDate: string; cities?: { id: string; name: string }[]; participants?: { id: string; name: string; avatar?: string; exhibitorDescription?: string; exhibitorAddress?: string; exhibitorWebsite?: string; exhibitorPhotos?: string[] }[]; image?: string; banner?: string; images?: string[]; status: string; participantCount: number; registrations: number; createdBy: string; createdAt: string; updatedAt: string }): Exhibition {
+function toExhibition(e: { id: string; title: string; description: string; titleUz?: string; titleRu?: string; titleEn?: string; descriptionUz?: string; descriptionRu?: string; descriptionEn?: string; venue?: string; startDate: string; endDate: string; cities?: { id: string; name: string }[]; participants?: { id: string; name: string; avatar?: string; exhibitorDescription?: string; exhibitorAddress?: string; exhibitorWebsite?: string; exhibitorPhotos?: string[] }[]; image?: string; banner?: string; images?: string[]; status: string; participantCount: number; registrations: number; createdBy: string; createdAt: string; updatedAt: string }): Exhibition {
   return {
     id: e.id,
     title: e.title,
     description: e.description,
+    titleUz: e.titleUz,
+    titleRu: e.titleRu,
+    titleEn: e.titleEn,
+    descriptionUz: e.descriptionUz,
+    descriptionRu: e.descriptionRu,
+    descriptionEn: e.descriptionEn,
     venue: e.venue ?? '',
     startDate: new Date(e.startDate),
     endDate: new Date(e.endDate),
@@ -27,12 +33,21 @@ function toExhibition(e: { id: string; title: string; description: string; venue
   }
 }
 
-function toNews(n: { id: string; title: string; content: string; excerpt: string; image?: string; banner?: string; images?: string[]; publishedAt: string; createdBy: string; status: string; createdAt: string; updatedAt: string }): News {
+function toNews(n: { id: string; title: string; content: string; excerpt: string; titleUz?: string; titleRu?: string; titleEn?: string; contentUz?: string; contentRu?: string; contentEn?: string; excerptUz?: string; excerptRu?: string; excerptEn?: string; image?: string; banner?: string; images?: string[]; publishedAt: string; createdBy: string; status: string; createdAt: string; updatedAt: string }): News {
   return {
     id: n.id,
     title: n.title,
     content: n.content,
     excerpt: n.excerpt,
+    titleUz: n.titleUz,
+    titleRu: n.titleRu,
+    titleEn: n.titleEn,
+    contentUz: n.contentUz,
+    contentRu: n.contentRu,
+    contentEn: n.contentEn,
+    excerptUz: n.excerptUz,
+    excerptRu: n.excerptRu,
+    excerptEn: n.excerptEn,
     image: n.banner ?? n.image,
     banner: n.banner,
     images: n.images ?? [],
@@ -44,7 +59,21 @@ function toNews(n: { id: string; title: string; content: string; excerpt: string
   }
 }
 
-function toUser(u: { id: string; email: string; name: string; role: string; status?: string; avatar?: string; phone?: string; createdAt: string; updatedAt: string }): User {
+function toUser(u: {
+  id: string
+  email: string
+  name: string
+  role: string
+  status?: string
+  avatar?: string
+  phone?: string
+  createdAt: string
+  updatedAt: string
+  exhibitorDescription?: string
+  exhibitorAddress?: string
+  exhibitorWebsite?: string
+  exhibitorPhotos?: string[]
+}): User {
   return {
     id: u.id,
     email: u.email,
@@ -53,6 +82,10 @@ function toUser(u: { id: string; email: string; name: string; role: string; stat
     status: u.status as User['status'],
     avatar: u.avatar,
     phone: u.phone,
+    exhibitorDescription: u.exhibitorDescription,
+    exhibitorAddress: u.exhibitorAddress,
+    exhibitorWebsite: u.exhibitorWebsite,
+    exhibitorPhotos: u.exhibitorPhotos,
     createdAt: new Date(u.createdAt),
     updatedAt: new Date(u.updatedAt),
   }

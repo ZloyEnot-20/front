@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import { AlertTriangle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
+import { useLocale } from '@/lib/i18n'
 
 export default function Error({
   error,
@@ -12,6 +13,7 @@ export default function Error({
   error: Error & { digest?: string }
   reset: () => void
 }) {
+  const { t } = useLocale()
   useEffect(() => {
     console.error(error)
   }, [error])
@@ -23,17 +25,17 @@ export default function Error({
           <AlertTriangle className="w-8 h-8 text-destructive" />
         </div>
         <h1 className="text-xl font-semibold text-foreground mb-2">
-          Что-то пошло не так
+          {t('errorSomethingWrong')}
         </h1>
         <p className="text-muted-foreground text-sm leading-relaxed mb-8">
-          Произошла непредвиденная ошибка. Попробуйте обновить страницу или зайти позже.
+          {t('errorUnexpected')}
         </p>
         <div className="flex flex-wrap gap-3 justify-center">
           <Button onClick={reset} variant="default">
-            Попробовать снова
+            {t('tryAgain')}
           </Button>
           <Button asChild variant="outline">
-            <Link href="/">На главную</Link>
+            <Link href="/">{t('toHome')}</Link>
           </Button>
         </div>
       </div>

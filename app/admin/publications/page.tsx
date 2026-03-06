@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { ProtectedRoute } from '@/components/auth/protected-route'
 import { AdminSidebar } from '@/components/admin/admin-sidebar'
 import { useLocale } from '@/lib/i18n'
@@ -24,11 +24,11 @@ import {
 } from '@/components/ui/dialog'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Checkbox } from '@/components/ui/checkbox'
-import { cn } from '@/lib/utils'
+import { cn, getCityName, getDateLocale, getContentTitle, getContentDescription, getNewsContent } from '@/lib/utils'
 import { ChevronDown } from 'lucide-react'
 
 function PublicationsContent() {
-  const { t } = useLocale()
+  const { t, lang } = useLocale()
   const { exhibitions, news, updateExhibition, updateExhibitionFormData, deleteExhibition, deleteNews, updateNews, updateNewsFormData, addExhibition, addExhibitionFormData, addNews, addNewsFormData, isLoading } = useAdmin()
   const { user } = useAuth()
   const [searchQuery, setSearchQuery] = useState('')
@@ -81,13 +81,15 @@ function PublicationsContent() {
     return () => URL.revokeObjectURL(url)
   }, [pendingBannerFile])
 
-  const filteredExhibitions = exhibitions.filter((e) =>
-    e.title.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  const filteredExhibitions = useMemo(() => {
+    const list = exhibitions.filter((e) => e.title.toLowerCase().includes(searchQuery.toLowerCase()))
+    return list.sort((a, b) => (a.status === 'draft' ? 1 : 0) - (b.status === 'draft' ? 1 : 0))
+  }, [exhibitions, searchQuery])
 
-  const filteredNews = news.filter((n) =>
-    n.title.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  const filteredNews = useMemo(() => {
+    const list = news.filter((n) => n.title.toLowerCase().includes(searchQuery.toLowerCase()))
+    return list.sort((a, b) => (a.status === 'draft' ? 1 : 0) - (b.status === 'draft' ? 1 : 0))
+  }, [news, searchQuery])
 
   useEffect(() => {
     if (modalOpen && modalType === 'exhibition') {
@@ -105,7 +107,11 @@ function PublicationsContent() {
   const handleCreateContent = (type: 'news' | 'exhibition') => {
     setModalType(type)
     setEditingItem(null)
-    setFormData(type === 'exhibition' ? { venue: '', cities: [], participants: [], images: [] } : { images: [] })
+    setFormData(
+      type === 'exhibition'
+        ? { venue: '', cities: [], participants: [], images: [], titleUz: '', titleRu: '', titleEn: '', descriptionUz: '', descriptionRu: '', descriptionEn: '' }
+        : { images: [], titleUz: '', titleRu: '', titleEn: '', contentUz: '', contentRu: '', contentEn: '', excerptUz: '', excerptRu: '', excerptEn: '' }
+    )
     setPendingBannerFile(null)
     setPendingImagesFiles([])
     setUploadError(null)
@@ -123,6 +129,19 @@ function PublicationsContent() {
       participants: participantIds,
       banner: item.banner ?? item.image,
       images: item.images ?? [],
+      titleUz: item.titleUz ?? item.title ?? '',
+      titleRu: item.titleRu ?? item.title ?? '',
+      titleEn: item.titleEn ?? item.title ?? '',
+      ...(type === 'exhibition'
+        ? { descriptionUz: item.descriptionUz ?? item.description ?? '', descriptionRu: item.descriptionRu ?? item.description ?? '', descriptionEn: item.descriptionEn ?? item.description ?? '' }
+        : {
+            contentUz: item.contentUz ?? item.content ?? '',
+            contentRu: item.contentRu ?? item.content ?? '',
+            contentEn: item.contentEn ?? item.content ?? '',
+            excerptUz: item.excerptUz ?? item.excerpt ?? '',
+            excerptRu: item.excerptRu ?? item.excerpt ?? '',
+            excerptEn: item.excerptEn ?? item.excerpt ?? '',
+          }),
     })
     setPendingBannerFile(null)
     setPendingImagesFiles([])
@@ -154,15 +173,19 @@ function PublicationsContent() {
     setUploadError(null)
 
     if (modalType === 'exhibition') {
-      const title = (formData.title ?? '').trim()
-      const description = (formData.description ?? '').trim()
+      const titleUz = (formData.titleUz ?? '').trim()
+      const titleRu = (formData.titleRu ?? formData.title ?? '').trim()
+      const titleEn = (formData.titleEn ?? '').trim()
+      const descriptionUz = (formData.descriptionUz ?? '').trim()
+      const descriptionRu = (formData.descriptionRu ?? formData.description ?? '').trim()
+      const descriptionEn = (formData.descriptionEn ?? '').trim()
       const start = formData.startDate ? (formData.startDate instanceof Date ? formData.startDate : new Date(formData.startDate)) : null
       const end = formData.endDate ? (formData.endDate instanceof Date ? formData.endDate : new Date(formData.endDate)) : null
-      if (!title) {
+      if (!titleUz || !titleRu || !titleEn) {
         setUploadError(t('enterExhibitionTitle'))
         return
       }
-      if (!description) {
+      if (!descriptionUz || !descriptionRu || !descriptionEn) {
         setUploadError(t('enterExhibitionDescription'))
         return
       }
@@ -194,14 +217,25 @@ function PublicationsContent() {
         return
       }
     } else {
-      const title = (formData.title ?? '').trim()
-      const content = (formData.content ?? '').trim()
-      if (!title) {
+      const titleUz = (formData.titleUz ?? '').trim()
+      const titleRu = (formData.titleRu ?? formData.title ?? '').trim()
+      const titleEn = (formData.titleEn ?? '').trim()
+      const contentUz = (formData.contentUz ?? '').trim()
+      const contentRu = (formData.contentRu ?? formData.content ?? '').trim()
+      const contentEn = (formData.contentEn ?? '').trim()
+      const excerptUz = (formData.excerptUz ?? '').trim()
+      const excerptRu = (formData.excerptRu ?? formData.excerpt ?? '').trim()
+      const excerptEn = (formData.excerptEn ?? '').trim()
+      if (!titleUz || !titleRu || !titleEn) {
         setUploadError(t('enterNewsTitle'))
         return
       }
-      if (!content) {
+      if (!contentUz || !contentRu || !contentEn) {
         setUploadError(t('enterNewsContent'))
+        return
+      }
+      if (!excerptUz || !excerptRu || !excerptEn) {
+        setUploadError(t('fillExcerptAllLangs'))
         return
       }
       if (!formData.banner && !pendingBannerFile) {
@@ -216,9 +250,13 @@ function PublicationsContent() {
 
       if (useFormData) {
         const fd = new FormData()
-        fd.append('title', formData.title)
         if (modalType === 'exhibition') {
-          fd.append('description', formData.description ?? '')
+          fd.append('titleUz', (formData.titleUz ?? '').trim())
+          fd.append('titleRu', (formData.titleRu ?? formData.title ?? '').trim())
+          fd.append('titleEn', (formData.titleEn ?? '').trim())
+          fd.append('descriptionUz', (formData.descriptionUz ?? '').trim())
+          fd.append('descriptionRu', (formData.descriptionRu ?? formData.description ?? '').trim())
+          fd.append('descriptionEn', (formData.descriptionEn ?? '').trim())
           fd.append('venue', (formData.venue ?? '').trim())
           fd.append('cities', JSON.stringify(formData.cities ?? []))
           fd.append('participants', JSON.stringify(formData.participants ?? []))
@@ -228,8 +266,15 @@ function PublicationsContent() {
           fd.append('endDate', end.toISOString())
           fd.append('status', formData.status ?? 'draft')
         } else {
-          fd.append('content', formData.content ?? '')
-          fd.append('excerpt', (formData.content ?? '').replace(/<[^>]*>/g, '').trim().slice(0, 300))
+          fd.append('titleUz', (formData.titleUz ?? '').trim())
+          fd.append('titleRu', (formData.titleRu ?? formData.title ?? '').trim())
+          fd.append('titleEn', (formData.titleEn ?? '').trim())
+          fd.append('contentUz', (formData.contentUz ?? '').trim())
+          fd.append('contentRu', (formData.contentRu ?? formData.content ?? '').trim())
+          fd.append('contentEn', (formData.contentEn ?? '').trim())
+          fd.append('excerptUz', (formData.excerptUz ?? '').trim())
+          fd.append('excerptRu', (formData.excerptRu ?? formData.excerpt ?? '').trim())
+          fd.append('excerptEn', (formData.excerptEn ?? '').trim())
           const pub = formData.publishedAt ? (formData.publishedAt instanceof Date ? formData.publishedAt : new Date(formData.publishedAt)) : new Date()
           fd.append('publishedAt', pub.toISOString())
           fd.append('status', formData.status ?? 'draft')
@@ -262,12 +307,21 @@ function PublicationsContent() {
         const banner = dataToSave.banner ?? dataToSave.image
         if (editingItem) {
           if (modalType === 'exhibition') {
-            await updateExhibition(editingItem.id, { ...dataToSave, venue: (dataToSave.venue ?? '').trim(), cities: dataToSave.cities ?? [], participants: dataToSave.participants ?? [], banner, images: dataToSave.images ?? [] })
+            await updateExhibition(editingItem.id, { ...dataToSave, venue: (dataToSave.venue ?? '').trim(), cities: dataToSave.cities ?? [], participants: dataToSave.participants ?? [], banner, images: dataToSave.images ?? [], titleUz: dataToSave.titleUz, titleRu: dataToSave.titleRu, titleEn: dataToSave.titleEn, descriptionUz: dataToSave.descriptionUz, descriptionRu: dataToSave.descriptionRu, descriptionEn: dataToSave.descriptionEn })
           } else {
             const newsPayload = {
-              title: dataToSave.title,
-              content: dataToSave.content ?? '',
-              excerpt: (dataToSave.content ?? '').replace(/<[^>]*>/g, '').trim().slice(0, 300),
+              title: dataToSave.titleRu ?? dataToSave.title,
+              titleUz: dataToSave.titleUz,
+              titleRu: dataToSave.titleRu,
+              titleEn: dataToSave.titleEn,
+              content: dataToSave.contentRu ?? dataToSave.content ?? '',
+              contentUz: dataToSave.contentUz,
+              contentRu: dataToSave.contentRu,
+              contentEn: dataToSave.contentEn,
+              excerpt: dataToSave.excerptRu ?? dataToSave.excerpt ?? '',
+              excerptUz: dataToSave.excerptUz,
+              excerptRu: dataToSave.excerptRu,
+              excerptEn: dataToSave.excerptEn,
               image: banner,
               banner,
               images: dataToSave.images ?? [],
@@ -280,8 +334,14 @@ function PublicationsContent() {
           if (modalType === 'exhibition') {
             const newExhibition = {
               id: `exp-${Date.now()}`,
-              title: dataToSave.title,
-              description: dataToSave.description ?? '',
+              title: dataToSave.titleRu ?? dataToSave.title,
+              titleUz: dataToSave.titleUz,
+              titleRu: dataToSave.titleRu,
+              titleEn: dataToSave.titleEn,
+              description: dataToSave.descriptionRu ?? dataToSave.description ?? '',
+              descriptionUz: dataToSave.descriptionUz,
+              descriptionRu: dataToSave.descriptionRu,
+              descriptionEn: dataToSave.descriptionEn,
               venue: (dataToSave.venue ?? '').trim(),
               startDate: dataToSave.startDate ?? new Date(),
               endDate: dataToSave.endDate ?? new Date(),
@@ -301,9 +361,18 @@ function PublicationsContent() {
           } else {
             const newNews = {
               id: `news-${Date.now()}`,
-              title: dataToSave.title,
-              content: dataToSave.content ?? '',
-              excerpt: (dataToSave.content ?? '').replace(/<[^>]*>/g, '').trim().slice(0, 300),
+              title: dataToSave.titleRu ?? dataToSave.title,
+              titleUz: dataToSave.titleUz,
+              titleRu: dataToSave.titleRu,
+              titleEn: dataToSave.titleEn,
+              content: dataToSave.contentRu ?? dataToSave.content ?? '',
+              contentUz: dataToSave.contentUz,
+              contentRu: dataToSave.contentRu,
+              contentEn: dataToSave.contentEn,
+              excerpt: dataToSave.excerptRu ?? dataToSave.excerpt ?? '',
+              excerptUz: dataToSave.excerptUz,
+              excerptRu: dataToSave.excerptRu,
+              excerptEn: dataToSave.excerptEn,
               image: banner,
               banner,
               images: dataToSave.images ?? [],
@@ -396,19 +465,19 @@ function PublicationsContent() {
                     <Card key={exhibition.id} className="group overflow-hidden rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 relative aspect-[2/3] w-full">
                       <Link href={`/exhibitions/${exhibition.id}`} className="absolute inset-0 z-0" target="_blank" rel="noopener noreferrer">
                         {exhibition.image ? (
-                          <img src={getImageUrl(exhibition.image) || "/placeholder.svg"} alt={exhibition.title} className="absolute inset-0 w-full h-full object-cover scale-105 group-hover:scale-110 group-hover:blur-[3px] transition-all duration-500" loading="lazy" />
+                          <img src={getImageUrl(exhibition.image) || "/placeholder.svg"} alt={getContentTitle(exhibition, lang)} className="absolute inset-0 w-full h-full object-cover scale-105 group-hover:scale-110 group-hover:blur-[3px] transition-all duration-500" loading="lazy" />
                         ) : (
                           <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/20 to-secondary/20">
-                            <span className="text-3xl font-bold text-muted-foreground/30">{exhibition.title.charAt(0)}</span>
+                            <span className="text-3xl font-bold text-muted-foreground/30">{(getContentTitle(exhibition, lang) || '?').charAt(0)}</span>
                           </div>
                         )}
                       </Link>
                       <div className="absolute inset-0 bg-gradient-to-t from-black/85 from-30% via-black/20 to-transparent pointer-events-none z-10" />
                       <div className="absolute inset-0 z-20 flex flex-col justify-end p-3 pointer-events-none">
-                        <h3 className="font-bold text-white text-sm drop-shadow-md line-clamp-1">{exhibition.title}</h3>
-                        <p className="text-white/90 text-xs mt-0.5 line-clamp-1">{exhibition.description}</p>
+                        <h3 className="font-bold text-white text-sm drop-shadow-md line-clamp-1">{getContentTitle(exhibition, lang)}</h3>
+                        <p className="text-white/90 text-xs mt-0.5 line-clamp-1">{getContentDescription(exhibition, lang)}</p>
                         <div className="flex gap-3 mt-1 text-white/80 text-[10px]">
-                          <span>{new Date(exhibition.startDate).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })}</span>
+                          <span>{new Date(exhibition.startDate).toLocaleDateString(getDateLocale(lang), { day: 'numeric', month: 'short' })}</span>
                           <span>{exhibition.registrations} чел.</span>
                         </div>
                         <div className="flex items-center gap-1.5 mt-2 pt-2 border-t border-white/20 pointer-events-auto min-w-0 flex-wrap">
@@ -482,19 +551,19 @@ function PublicationsContent() {
                     <Card key={news.id} className="group overflow-hidden rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 relative aspect-[2/3] w-full">
                       <a href={`/news/${news.id}`} target="_blank" rel="noopener noreferrer" className="absolute inset-0 z-0">
                         {news.image ? (
-                          <img src={getImageUrl(news.image) || "/placeholder.svg"} alt={news.title} className="absolute inset-0 w-full h-full object-cover scale-105 group-hover:scale-110 group-hover:blur-[3px] transition-all duration-500" loading="lazy" />
+                          <img src={getImageUrl(news.image) || "/placeholder.svg"} alt={getContentTitle(news, lang)} className="absolute inset-0 w-full h-full object-cover scale-105 group-hover:scale-110 group-hover:blur-[3px] transition-all duration-500" loading="lazy" />
                         ) : (
                           <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-accent/20 to-primary/20">
-                            <span className="text-3xl font-bold text-muted-foreground/30">{news.title.charAt(0)}</span>
+                            <span className="text-3xl font-bold text-muted-foreground/30">{(getContentTitle(news, lang) || '?').charAt(0)}</span>
                           </div>
                         )}
                       </a>
                       <div className="absolute inset-0 bg-gradient-to-t from-black/85 from-30% via-black/20 to-transparent pointer-events-none z-10" />
                       <div className="absolute inset-0 z-20 flex flex-col justify-end p-3 pointer-events-none">
-                        <h3 className="font-bold text-white text-sm drop-shadow-md line-clamp-1">{news.title}</h3>
-                        <p className="text-white/90 text-xs mt-0.5 line-clamp-2">{(news.content ?? '').replace(/<[^>]*>/g, '').slice(0, 100)}</p>
+                        <h3 className="font-bold text-white text-sm drop-shadow-md line-clamp-1">{getContentTitle(news, lang)}</h3>
+                        <p className="text-white/90 text-xs mt-0.5 line-clamp-2">{(getNewsContent(news, lang) ?? '').replace(/<[^>]*>/g, '').slice(0, 100)}</p>
                         <p className="text-white/80 text-[10px] mt-1">
-                          {new Date(news.publishedAt).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric' })}
+                          {new Date(news.publishedAt).toLocaleDateString(getDateLocale(lang), { day: 'numeric', month: 'short', year: 'numeric' })}
                         </p>
                         <div className="flex items-center gap-1.5 mt-2 pt-2 border-t border-white/20 pointer-events-auto min-w-0 flex-wrap">
                         {togglingStatusNewsId === news.id ? (
@@ -555,277 +624,337 @@ function PublicationsContent() {
                 </DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium">{t('title')}</label>
-                  <Input
-                    value={formData.title || ''}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    placeholder={t('enterTitle')}
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium">{t('image')}</label>
-                  <p className="text-xs text-muted-foreground mt-0.5 mb-1">{t('bannerCardHint')}</p>
-                  <div className="mt-1 flex flex-wrap items-start gap-3">
-                    {(pendingBannerPreviewUrl || formData.banner || formData.image) ? (
-                      <div className="flex flex-col gap-2 w-36">
-                        <img
-                          src={pendingBannerPreviewUrl ?? getImageUrl(formData.banner ?? formData.image)}
-                          alt=""
-                          className="h-36 w-36 rounded-lg object-cover border"
-                          loading="lazy"
-                        />
-                        <Button
-                          type="button"
-                          variant="destructive"
-                          size="sm"
-                          className="w-full min-w-0"
-                          onClick={() => {
-                            setFormData({ ...formData, banner: '', image: '' })
-                            setPendingBannerFile(null)
-                          }}
-                        >
-                          <Trash2 className="w-4 h-4 mr-1.5" />
-                          {t('deleteImage')}
-                        </Button>
-                      </div>
-                    ) : null}
-                    <label className="cursor-pointer">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        disabled={saving}
-                        onChange={(e) => {
-                          const file = e.target.files?.[0]
-                          if (!file) return
-                          setUploadError(null)
-                          if (file.size > MAX_FILE_MB * 1024 * 1024) {
-                            setUploadError(`Файл слишком большой. Максимум ${MAX_FILE_MB} МБ.`)
-                            e.target.value = ''
-                            return
-                          }
-                          setPendingBannerFile(file)
-                          e.target.value = ''
-                        }}
-                      />
-                      <span className="text-sm text-primary hover:underline">{t('chooseFile')}</span>
-                      <span className="text-xs text-muted-foreground ml-1">(макс. {MAX_FILE_MB} МБ)</span>
-                    </label>
-                    {uploadError ? <p className="text-sm text-destructive mt-1">{uploadError}</p> : null}
-                  </div>
-                </div>
-                <div>
-                  <label className="text-sm font-medium">{t('image')} (до {MAX_IMAGES})</label>
-                  <p className="text-xs text-muted-foreground mt-0.5 mb-1">{t('imagesOnPageHint')}</p>
-                  <div className="mt-1 flex flex-wrap gap-2">
-                    {(formData.images ?? []).map((url: string, idx: number) => (
-                      <div key={idx} className="relative group">
-                        <img src={getImageUrl(url)} alt="" className="h-20 w-20 rounded-lg object-cover border" loading="lazy" />
-                        <Button
-                          type="button"
-                          variant="destructive"
-                          size="icon"
-                          className="absolute -top-1 -right-1 h-6 w-6 rounded-full opacity-90 group-hover:opacity-100"
-                          onClick={() => setFormData({ ...formData, images: (formData.images ?? []).filter((_: string, i: number) => i !== idx) })}
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    ))}
-                    {pendingImagesFiles.map((file, idx) => (
-                      <div key={`pending-${idx}`} className="relative group">
-                        <img src={URL.createObjectURL(file)} alt="" className="h-20 w-20 rounded-lg object-cover border" />
-                        <Button
-                          type="button"
-                          variant="destructive"
-                          size="icon"
-                          className="absolute -top-1 -right-1 h-6 w-6 rounded-full opacity-90"
-                          onClick={() => setPendingImagesFiles((prev) => prev.filter((_, i) => i !== idx))}
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    ))}
-                    {(formData.images ?? []).length + pendingImagesFiles.length < MAX_IMAGES && (
-                      <label className="h-20 w-20 flex items-center justify-center rounded-lg border border-dashed border-muted-foreground/40 hover:border-primary/50 cursor-pointer text-muted-foreground text-xs">
-                        <input
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          multiple
-                          disabled={saving}
-                          onChange={(e) => {
-                            const files = Array.from(e.target.files ?? [])
-                            e.target.value = ''
-                            setUploadError(null)
-                            const added: File[] = []
-                            for (const file of files) {
+                <Tabs defaultValue="main" className="w-full">
+                  <TabsList className="grid w-full grid-cols-4">
+                    <TabsTrigger value="main">{t('tabMain')}</TabsTrigger>
+                    <TabsTrigger value="ru">{t('tabLangRu')}</TabsTrigger>
+                    <TabsTrigger value="uz">{t('tabLangUz')}</TabsTrigger>
+                    <TabsTrigger value="en">{t('tabLangEn')}</TabsTrigger>
+                  </TabsList>
+
+                  {/* Вкладка «Основное»: картинки, даты, место, города, участники */}
+                  <TabsContent value="main" className="space-y-4 mt-4">
+                    <div>
+                      <label className="text-sm font-medium">{t('image')}</label>
+                      <p className="text-xs text-muted-foreground mt-0.5 mb-1">{t('bannerCardHint')}</p>
+                      <div className="mt-1 flex flex-wrap items-start gap-3">
+                        {(pendingBannerPreviewUrl || formData.banner || formData.image) ? (
+                          <div className="flex flex-col gap-2 w-36">
+                            <img
+                              src={pendingBannerPreviewUrl ?? getImageUrl(formData.banner ?? formData.image)}
+                              alt=""
+                              className="h-36 w-36 rounded-lg object-cover border"
+                              loading="lazy"
+                            />
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="sm"
+                              className="w-full min-w-0"
+                              onClick={() => {
+                                setFormData({ ...formData, banner: '', image: '' })
+                                setPendingBannerFile(null)
+                              }}
+                            >
+                              <Trash2 className="w-4 h-4 mr-1.5" />
+                              {t('deleteImage')}
+                            </Button>
+                          </div>
+                        ) : null}
+                        <label className="cursor-pointer">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            disabled={saving}
+                            onChange={(e) => {
+                              const file = e.target.files?.[0]
+                              if (!file) return
+                              setUploadError(null)
                               if (file.size > MAX_FILE_MB * 1024 * 1024) {
-                                setUploadError(`Файл ${file.name} слишком большой. Максимум ${MAX_FILE_MB} МБ.`)
-                                continue
+                                setUploadError(`${t('fileTooLargeMax')} ${MAX_FILE_MB} ${t('mb')}`)
+                                e.target.value = ''
+                                return
                               }
-                              added.push(file)
-                            }
-                            setPendingImagesFiles((prev) => prev.concat(added).slice(0, MAX_IMAGES))
-                          }}
+                              setPendingBannerFile(file)
+                              e.target.value = ''
+                            }}
+                          />
+                          <span className="text-sm text-primary hover:underline">{t('chooseFile')}</span>
+                          <span className="text-xs text-muted-foreground ml-1">(макс. {MAX_FILE_MB} МБ)</span>
+                        </label>
+                        {uploadError ? <p className="text-sm text-destructive mt-1">{uploadError}</p> : null}
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium">{t('image')} (до {MAX_IMAGES})</label>
+                      <p className="text-xs text-muted-foreground mt-0.5 mb-1">{t('imagesOnPageHint')}</p>
+                      <div className="mt-1 flex flex-wrap gap-2">
+                        {(formData.images ?? []).map((url: string, idx: number) => (
+                          <div key={idx} className="relative group">
+                            <img src={getImageUrl(url)} alt="" className="h-20 w-20 rounded-lg object-cover border" loading="lazy" />
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="icon"
+                              className="absolute -top-1 -right-1 h-6 w-6 rounded-full opacity-90 group-hover:opacity-100"
+                              onClick={() => setFormData({ ...formData, images: (formData.images ?? []).filter((_: string, i: number) => i !== idx) })}
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        ))}
+                        {pendingImagesFiles.map((file, idx) => (
+                          <div key={`pending-${idx}`} className="relative group">
+                            <img src={URL.createObjectURL(file)} alt="" className="h-20 w-20 rounded-lg object-cover border" />
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="icon"
+                              className="absolute -top-1 -right-1 h-6 w-6 rounded-full opacity-90"
+                              onClick={() => setPendingImagesFiles((prev) => prev.filter((_, i) => i !== idx))}
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        ))}
+                        {(formData.images ?? []).length + pendingImagesFiles.length < MAX_IMAGES && (
+                          <label className="h-20 w-20 flex items-center justify-center rounded-lg border border-dashed border-muted-foreground/40 hover:border-primary/50 cursor-pointer text-muted-foreground text-xs">
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              multiple
+                              disabled={saving}
+                              onChange={(e) => {
+                                const files = Array.from(e.target.files ?? [])
+                                e.target.value = ''
+                                setUploadError(null)
+                                const added: File[] = []
+                                for (const file of files) {
+                                  if (file.size > MAX_FILE_MB * 1024 * 1024) {
+                                    setUploadError(`${file.name}: ${t('fileTooLargeMax')} ${MAX_FILE_MB} ${t('mb')}`)
+                                    continue
+                                  }
+                                  added.push(file)
+                                }
+                                setPendingImagesFiles((prev) => prev.concat(added).slice(0, MAX_IMAGES))
+                              }}
+                            />
+                            + {t('addImage')}
+                          </label>
+                        )}
+                      </div>
+                    </div>
+                    {modalType === 'exhibition' ? (
+                      <>
+                        <div>
+                          <label className="text-sm font-medium">{t('location')} *</label>
+                          <Input
+                            value={formData.venue || ''}
+                            onChange={(e) => setFormData({ ...formData, venue: e.target.value })}
+                            placeholder={t('enterVenue')}
+                          />
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium">{t('cities')}</label>
+                          <p className="text-xs text-muted-foreground mt-0.5 mb-1">{t('citiesMultiHint')}</p>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button variant="outline" className="w-full justify-between font-normal" disabled={citiesListLoading}>
+                                {citiesListLoading ? t('loading') : (formData.cities ?? []).length ? `${t('selectedCount')}: ${(formData.cities ?? []).length}` : t('selectCities')}
+                                <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-full min-w-[var(--radix-popover-trigger-width)] max-h-60 overflow-y-auto p-2" align="start">
+                              {citiesList.length === 0 ? (
+                                <p className="text-sm text-muted-foreground py-2">{t('noCitiesHint')}</p>
+                              ) : (
+                                <div className="space-y-1">
+                                  {citiesList.map((city) => (
+                                    <label
+                                      key={city.id}
+                                      className={cn(
+                                        'flex items-center gap-2 py-1.5 px-2 rounded-md cursor-pointer',
+                                        (formData.cities ?? []).includes(city.id) ? 'bg-primary/20 text-primary' : 'hover:bg-accent'
+                                      )}
+                                    >
+                                      <Checkbox
+                                        checked={(formData.cities ?? []).includes(city.id)}
+                                        onCheckedChange={() => toggleCity(city.id)}
+                                      />
+                                      <span className="text-sm">{getCityName(city, lang)}</span>
+                                    </label>
+                                  ))}
+                                </div>
+                              )}
+                            </PopoverContent>
+                          </Popover>
+                          <div className="flex flex-wrap gap-1.5 mt-2">
+                            {(formData.cities ?? []).map((id: string) => {
+                              const city = citiesList.find((c) => c.id === id)
+                              const name = city ? getCityName(city, lang) : id
+                              return (
+                                <Badge key={id} variant="default" className="cursor-pointer hover:bg-primary/90" onClick={() => removeCity(id)}>
+                                  {name} ×
+                                </Badge>
+                              )
+                            })}
+                          </div>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium">{t('selectParticipants')}</label>
+                          <p className="text-xs text-muted-foreground mt-0.5 mb-1">{t('participantsMultiHint')}</p>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button variant="outline" className="w-full justify-between font-normal" disabled={exhibitorsListLoading}>
+                                {exhibitorsListLoading ? t('loading') : (formData.participants ?? []).length ? `${t('selectedCount')}: ${(formData.participants ?? []).length}` : t('selectParticipants')}
+                                <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-full min-w-[var(--radix-popover-trigger-width)] max-h-60 overflow-y-auto p-2" align="start">
+                              {exhibitorsList.length === 0 ? (
+                                <p className="text-sm text-muted-foreground py-2">{t('noExhibitorsHint')}</p>
+                              ) : (
+                                <div className="space-y-1">
+                                  {exhibitorsList.map((exh) => (
+                                    <label
+                                      key={exh.id}
+                                      className={cn(
+                                        'flex items-center gap-2 py-1.5 px-2 rounded-md cursor-pointer',
+                                        (formData.participants ?? []).includes(exh.id) ? 'bg-primary/20 text-primary' : 'hover:bg-accent'
+                                      )}
+                                    >
+                                      <Checkbox
+                                        checked={(formData.participants ?? []).includes(exh.id)}
+                                        onCheckedChange={() => toggleParticipant(exh.id)}
+                                      />
+                                      <span className="text-sm">{exh.name}</span>
+                                    </label>
+                                  ))}
+                                </div>
+                              )}
+                            </PopoverContent>
+                          </Popover>
+                          <div className="flex flex-wrap gap-1.5 mt-2">
+                            {(formData.participants ?? []).map((id: string) => {
+                              const exh = exhibitorsList.find((e) => e.id === id)
+                              const name = exh?.name ?? id
+                              return (
+                                <Badge key={id} variant="default" className="cursor-pointer hover:bg-primary/90" onClick={() => removeParticipant(id)}>
+                                  {name} ×
+                                </Badge>
+                              )
+                            })}
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-sm font-medium">{t('startDate')}</label>
+                            <Input
+                              type="date"
+                              value={formData.startDate ? new Date(formData.startDate).toISOString().split('T')[0] : ''}
+                              onChange={(e) => setFormData({ ...formData, startDate: new Date(e.target.value) })}
+                            />
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium">{t('endDate')}</label>
+                            <Input
+                              type="date"
+                              value={formData.endDate ? new Date(formData.endDate).toISOString().split('T')[0] : ''}
+                              onChange={(e) => setFormData({ ...formData, endDate: new Date(e.target.value) })}
+                            />
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      <div>
+                        <label className="text-sm font-medium">{t('publicationDate')}</label>
+                        <Input
+                          type="date"
+                          value={formData.publishedAt ? new Date(formData.publishedAt).toISOString().split('T')[0] : ''}
+                          onChange={(e) => setFormData({ ...formData, publishedAt: new Date(e.target.value) })}
                         />
-                        + {t('addImage')}
-                      </label>
+                      </div>
                     )}
-                  </div>
-                </div>
-                {modalType === 'exhibition' ? (
-                  <>
+                  </TabsContent>
+
+                  {/* Вкладка RU: название, описание/контент, краткое описание */}
+                  <TabsContent value="ru" className="space-y-4 mt-4">
                     <div>
-                      <label className="text-sm font-medium">{t('description')}</label>
-                      <Textarea
-                        value={formData.description || ''}
-                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                        placeholder={t('enterExhibitionDescription')}
-                        rows={4}
-                      />
+                      <label className="text-sm font-medium">{t('title')} (RU) *</label>
+                      <Input value={formData.titleRu ?? formData.title ?? ''} onChange={(e) => setFormData({ ...formData, titleRu: e.target.value })} placeholder={t('enterTitle')} />
                     </div>
-                    <div>
-                      <label className="text-sm font-medium">{t('location')} *</label>
-                      <Input
-                        value={formData.venue || ''}
-                        onChange={(e) => setFormData({ ...formData, venue: e.target.value })}
-                        placeholder={t('enterVenue')}
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium">{t('cities')}</label>
-                      <p className="text-xs text-muted-foreground mt-0.5 mb-1">{t('citiesMultiHint')}</p>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button variant="outline" className="w-full justify-between font-normal" disabled={citiesListLoading}>
-                            {citiesListLoading ? t('loading') : (formData.cities ?? []).length ? `${t('selectedCount')}: ${(formData.cities ?? []).length}` : t('selectCities')}
-                            <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-full min-w-[var(--radix-popover-trigger-width)] max-h-60 overflow-y-auto p-2" align="start">
-                          {citiesList.length === 0 ? (
-                            <p className="text-sm text-muted-foreground py-2">{t('noCitiesHint')}</p>
-                          ) : (
-                            <div className="space-y-1">
-                              {citiesList.map((city) => (
-                                <label
-                                  key={city.id}
-                                  className={cn(
-                                    'flex items-center gap-2 py-1.5 px-2 rounded-md cursor-pointer',
-                                    (formData.cities ?? []).includes(city.id) ? 'bg-primary/20 text-primary' : 'hover:bg-accent'
-                                  )}
-                                >
-                                  <Checkbox
-                                    checked={(formData.cities ?? []).includes(city.id)}
-                                    onCheckedChange={() => toggleCity(city.id)}
-                                  />
-                                  <span className="text-sm">{city.name}</span>
-                                </label>
-                              ))}
-                            </div>
-                          )}
-                        </PopoverContent>
-                      </Popover>
-                      <div className="flex flex-wrap gap-1.5 mt-2">
-                        {(formData.cities ?? []).map((id: string) => {
-                          const city = citiesList.find((c) => c.id === id)
-                          const name = city?.name ?? id
-                          return (
-                            <Badge key={id} variant="default" className="cursor-pointer hover:bg-primary/90" onClick={() => removeCity(id)}>
-                              {name} ×
-                            </Badge>
-                          )
-                        })}
-                      </div>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium">{t('selectParticipants')}</label>
-                      <p className="text-xs text-muted-foreground mt-0.5 mb-1">{t('participantsMultiHint')}</p>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button variant="outline" className="w-full justify-between font-normal" disabled={exhibitorsListLoading}>
-                            {exhibitorsListLoading ? t('loading') : (formData.participants ?? []).length ? `${t('selectedCount')}: ${(formData.participants ?? []).length}` : t('selectParticipants')}
-                            <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-full min-w-[var(--radix-popover-trigger-width)] max-h-60 overflow-y-auto p-2" align="start">
-                          {exhibitorsList.length === 0 ? (
-                            <p className="text-sm text-muted-foreground py-2">{t('noExhibitorsHint')}</p>
-                          ) : (
-                            <div className="space-y-1">
-                              {exhibitorsList.map((exh) => (
-                                <label
-                                  key={exh.id}
-                                  className={cn(
-                                    'flex items-center gap-2 py-1.5 px-2 rounded-md cursor-pointer',
-                                    (formData.participants ?? []).includes(exh.id) ? 'bg-primary/20 text-primary' : 'hover:bg-accent'
-                                  )}
-                                >
-                                  <Checkbox
-                                    checked={(formData.participants ?? []).includes(exh.id)}
-                                    onCheckedChange={() => toggleParticipant(exh.id)}
-                                  />
-                                  <span className="text-sm">{exh.name}</span>
-                                </label>
-                              ))}
-                      </div>
-                          )}
-                        </PopoverContent>
-                      </Popover>
-                      <div className="flex flex-wrap gap-1.5 mt-2">
-                        {(formData.participants ?? []).map((id: string) => {
-                          const exh = exhibitorsList.find((e) => e.id === id)
-                          const name = exh?.name ?? id
-                          return (
-                            <Badge key={id} variant="default" className="cursor-pointer hover:bg-primary/90" onClick={() => removeParticipant(id)}>
-                              {name} ×
-                          </Badge>
-                          )
-                        })}
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
+                    {modalType === 'exhibition' ? (
                       <div>
-                        <label className="text-sm font-medium">{t('startDate')}</label>
-                        <Input
-                          type="date"
-                          value={formData.startDate ? new Date(formData.startDate).toISOString().split('T')[0] : ''}
-                          onChange={(e) => setFormData({ ...formData, startDate: new Date(e.target.value) })}
-                        />
+                        <label className="text-sm font-medium">{t('description')} (RU) *</label>
+                        <Textarea value={formData.descriptionRu ?? formData.description ?? ''} onChange={(e) => setFormData({ ...formData, descriptionRu: e.target.value })} placeholder={t('enterExhibitionDescription')} rows={4} />
                       </div>
+                    ) : (
+                      <>
+                        <div>
+                          <label className="text-sm font-medium">{t('fullText')} (RU) *</label>
+                          <Textarea value={formData.contentRu ?? formData.content ?? ''} onChange={(e) => setFormData({ ...formData, contentRu: e.target.value })} placeholder={t('enterNewsContent')} rows={4} />
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium">{t('excerptRu')}</label>
+                          <Textarea value={formData.excerptRu ?? formData.excerpt ?? ''} onChange={(e) => setFormData({ ...formData, excerptRu: e.target.value })} placeholder={t('excerptPlaceholder')} rows={2} />
+                        </div>
+                      </>
+                    )}
+                  </TabsContent>
+
+                  {/* Вкладка UZ */}
+                  <TabsContent value="uz" className="space-y-4 mt-4">
+                    <div>
+                      <label className="text-sm font-medium">{t('title')} (UZ) *</label>
+                      <Input value={formData.titleUz ?? ''} onChange={(e) => setFormData({ ...formData, titleUz: e.target.value })} placeholder={t('enterTitle')} />
+                    </div>
+                    {modalType === 'exhibition' ? (
                       <div>
-                        <label className="text-sm font-medium">{t('endDate')}</label>
-                        <Input
-                          type="date"
-                          value={formData.endDate ? new Date(formData.endDate).toISOString().split('T')[0] : ''}
-                          onChange={(e) => setFormData({ ...formData, endDate: new Date(e.target.value) })}
-                        />
+                        <label className="text-sm font-medium">{t('description')} (UZ) *</label>
+                        <Textarea value={formData.descriptionUz ?? ''} onChange={(e) => setFormData({ ...formData, descriptionUz: e.target.value })} placeholder={t('enterExhibitionDescription')} rows={4} />
                       </div>
-                    </div>
-                  </>
-                ) : (
-                  <>
+                    ) : (
+                      <>
+                        <div>
+                          <label className="text-sm font-medium">{t('fullText')} (UZ) *</label>
+                          <Textarea value={formData.contentUz ?? ''} onChange={(e) => setFormData({ ...formData, contentUz: e.target.value })} placeholder={t('enterNewsContent')} rows={4} />
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium">{t('excerptUz')}</label>
+                          <Textarea value={formData.excerptUz ?? ''} onChange={(e) => setFormData({ ...formData, excerptUz: e.target.value })} placeholder={t('excerptPlaceholder')} rows={2} />
+                        </div>
+                      </>
+                    )}
+                  </TabsContent>
+
+                  {/* Вкладка EN */}
+                  <TabsContent value="en" className="space-y-4 mt-4">
                     <div>
-                      <label className="text-sm font-medium">{t('fullText')}</label>
-                      <Textarea
-                        value={formData.content || ''}
-                        onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                        placeholder={t('enterNewsContent')}
-                        rows={6}
-                      />
+                      <label className="text-sm font-medium">{t('title')} (EN) *</label>
+                      <Input value={formData.titleEn ?? ''} onChange={(e) => setFormData({ ...formData, titleEn: e.target.value })} placeholder={t('enterTitle')} />
                     </div>
-                    <div>
-                      <label className="text-sm font-medium">{t('publicationDate')}</label>
-                      <Input
-                        type="date"
-                        value={formData.publishedAt ? new Date(formData.publishedAt).toISOString().split('T')[0] : ''}
-                        onChange={(e) => setFormData({ ...formData, publishedAt: new Date(e.target.value) })}
-                      />
-                    </div>
-                  </>
-                )}
+                    {modalType === 'exhibition' ? (
+                      <div>
+                        <label className="text-sm font-medium">{t('description')} (EN) *</label>
+                        <Textarea value={formData.descriptionEn ?? ''} onChange={(e) => setFormData({ ...formData, descriptionEn: e.target.value })} placeholder={t('enterExhibitionDescription')} rows={4} />
+                      </div>
+                    ) : (
+                      <>
+                        <div>
+                          <label className="text-sm font-medium">{t('fullText')} (EN) *</label>
+                          <Textarea value={formData.contentEn ?? ''} onChange={(e) => setFormData({ ...formData, contentEn: e.target.value })} placeholder={t('enterNewsContent')} rows={4} />
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium">{t('excerptEn')}</label>
+                          <Textarea value={formData.excerptEn ?? ''} onChange={(e) => setFormData({ ...formData, excerptEn: e.target.value })} placeholder={t('excerptPlaceholder')} rows={2} />
+                        </div>
+                      </>
+                    )}
+                  </TabsContent>
+                </Tabs>
+
                 <div className="flex gap-2">
                   <Button variant="outline" className="flex-1 bg-transparent" onClick={() => setModalOpen(false)} disabled={saving}>
                     {t('cancel')}

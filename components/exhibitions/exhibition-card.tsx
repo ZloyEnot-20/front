@@ -13,6 +13,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { MapPin, Calendar, Users, CheckCircle2 } from 'lucide-react'
 import { OptimizedImage } from '@/components/ui/optimized-image'
+import { getCityName, getDateLocale, getContentTitle, getContentDescription } from '@/lib/utils'
 
 interface ExhibitionCardProps {
   exhibition: Exhibition
@@ -26,12 +27,12 @@ export function ExhibitionCard({ exhibition }: ExhibitionCardProps) {
   const userRegistrations = user ? getRegistrationsByUser(user.id) : []
   const isRegistered = userRegistrations.some((r) => r.exhibitionId === exhibition.id && r.status === 'registered')
   const canRegister = !user || user.role === 'admin' || user.role === 'visitor'
-  const locale = lang === 'uz' ? 'uz-UZ' : lang === 'en' ? 'en-US' : 'ru-RU'
-  const startDate = new Date(exhibition.startDate).toLocaleDateString(locale, {
+  const dateLocale = getDateLocale(lang)
+  const startDate = new Date(exhibition.startDate).toLocaleDateString(dateLocale, {
     month: 'short',
     day: 'numeric',
   })
-  const endDate = new Date(exhibition.endDate).toLocaleDateString(locale, {
+  const endDate = new Date(exhibition.endDate).toLocaleDateString(dateLocale, {
     month: 'short',
     day: 'numeric',
   })
@@ -49,7 +50,7 @@ export function ExhibitionCard({ exhibition }: ExhibitionCardProps) {
         {exhibition.image && (
           <OptimizedImage
             src={getImageUrl(exhibition.image) || "/placeholder.svg"}
-            alt={exhibition.title}
+            alt={getContentTitle(exhibition, lang)}
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
@@ -60,8 +61,8 @@ export function ExhibitionCard({ exhibition }: ExhibitionCardProps) {
       </div>
 
       <CardHeader className="flex-1">
-        <CardTitle className="line-clamp-2">{exhibition.title}</CardTitle>
-        <CardDescription className="line-clamp-2">{exhibition.description}</CardDescription>
+        <CardTitle className="line-clamp-2">{getContentTitle(exhibition, lang)}</CardTitle>
+        <CardDescription className="line-clamp-2">{getContentDescription(exhibition, lang)}</CardDescription>
       </CardHeader>
 
       <CardContent className="space-y-4">
@@ -70,16 +71,18 @@ export function ExhibitionCard({ exhibition }: ExhibitionCardProps) {
             <Calendar className="w-4 h-4" />
             {startDate} - {endDate}
           </div>
-          {(exhibition.venue || exhibition.cities?.length) ? (
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <MapPin className="w-4 h-4" />
-              {[exhibition.venue, exhibition.cities?.map((c) => c.name).join(', ')].filter(Boolean).join(' · ')}
-            </div>
-          ) : null}
           <div className="flex items-center gap-2 text-muted-foreground">
-            <Users className="w-4 h-4" />
-            {exhibition.registrations} {t('registeredCount')}
+            <MapPin className="w-4 h-4 flex-shrink-0" />
+            <span className="truncate">
+              {[exhibition.venue, exhibition.cities?.map((c) => getCityName(c, lang)).join(', ')].filter(Boolean).join(' · ') || '—'}
+            </span>
           </div>
+          {user?.role !== 'visitor' && user?.role !== 'exhibitor' && (
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Users className="w-4 h-4" />
+              {exhibition.registrations} {t('registeredCount')}
+            </div>
+          )}
         </div>
 
         <div className="flex flex-col gap-2">
@@ -104,8 +107,8 @@ export function ExhibitionCard({ exhibition }: ExhibitionCardProps) {
           isOpen={registrationOpen}
           onOpenChange={setRegistrationOpen}
           exhibitionId={exhibition.id}
-          exhibitionTitle={exhibition.title}
-          cities={exhibition.cities?.map((c) => c.name) ?? []}
+          exhibitionTitle={getContentTitle(exhibition, lang)}
+          cities={exhibition.cities?.map((c) => getCityName(c, lang)) ?? []}
         />
       </CardContent>
     </Card>

@@ -1,7 +1,8 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import { cn } from '@/lib/utils'
 import { useAuth } from '@/lib/auth-context'
 import { authApi } from '@/lib/api'
 import { useLocale } from '@/lib/i18n'
@@ -126,7 +127,7 @@ const t: Record<Lang, Record<string, string>> = {
     errPhoneInvalid: 'Введите корректный узбекский номер: +998 XX XXX XX XX',
   },
   en: {
-    title: 'Registration',
+    title: 'Sign up',
     subtitle: 'Create an account as Visitor',
     langStep: 'Choose language',
     firstName: 'First name',
@@ -161,11 +162,11 @@ const t: Record<Lang, Record<string, string>> = {
     consent: 'I agree to the processing of personal data',
     password: 'Password',
     confirmPassword: 'Confirm password',
-    submit: 'Register',
+    submit: 'Sign up',
     nextStep: 'Next',
     confirmTitle: 'Confirm email',
     confirmDesc: 'Enter the code from the email we sent you',
-    confirmSubmit: 'Register',
+    confirmSubmit: 'Sign up',
     back: 'Back',
     haveAccount: 'Already have an account?',
     login: 'Log in',
@@ -194,6 +195,8 @@ export function VisitorSignupForm() {
   const [emailCodeSent, setEmailCodeSent] = useState(false)
   const [sendingCode, setSendingCode] = useState(false)
   const [countdown, setCountdown] = useState(0)
+  const [fieldError, setFieldError] = useState<string | null>(null)
+  const errorRef = useRef<HTMLDivElement>(null)
 
   const COOLDOWN_SEC = 120
   useEffect(() => {
@@ -244,31 +247,66 @@ export function VisitorSignupForm() {
     }
   }
 
-  const handleFormNext = (e: React.FormEvent) => {
+  const scrollToError = () => {
+    setTimeout(() => {
+      errorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 100)
+  }
+
+  const handleFormNext = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+    setFieldError(null)
     const phoneDigits = formData.phone.replace(/\D/g, '')
     const validPhone = (phoneDigits.length === 12 && phoneDigits.startsWith('998')) || (phoneDigits.length === 9 && !phoneDigits.startsWith('0'))
     if (!validPhone) {
       setError(T.errPhoneInvalid)
+      setFieldError('phone')
+      scrollToError()
       return
     }
     if (formData.password !== formData.confirmPassword) {
       setError(T.errPasswordMatch)
+      setFieldError('confirmPassword')
+      scrollToError()
       return
     }
     if (!formData.consentGiven) {
       setError(T.errConsent)
+      setFieldError('consentGiven')
+      scrollToError()
       return
     }
-    setStep('confirm')
+    const email = formData.email.trim()
+    if (!email) {
+      setError(T.errRequired)
+      setFieldError('email')
+      scrollToError()
+      return
+    }
+    setSendingCode(true)
+    try {
+      await authApi.sendEmailCode(email)
+      setEmailCodeSent(true)
+      setCountdown(COOLDOWN_SEC)
+      setStep('confirm')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Ошибка отправки кода')
+      setFieldError('email')
+      scrollToError()
+    } finally {
+      setSendingCode(false)
+    }
   }
 
   const handleConfirmSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+    setFieldError(null)
     if (!formData.emailCode.trim()) {
       setError(T.errEmailCode)
+      setFieldError('emailCode')
+      scrollToError()
       return
     }
     try {
@@ -291,6 +329,7 @@ export function VisitorSignupForm() {
       router.push('/')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Ошибка регистрации')
+      scrollToError()
     }
   }
 
@@ -332,11 +371,13 @@ export function VisitorSignupForm() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleConfirmSubmit} className="space-y-6">
-            {error && (
-              <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
+            <div ref={errorRef}>
+              {error && (
+                <Alert variant="destructive">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+            </div>
             <div className="space-y-2">
               <Label htmlFor="confirm-email">{T.email}</Label>
               <div className="flex gap-2">
@@ -373,9 +414,9 @@ export function VisitorSignupForm() {
               <InputOTP
                 maxLength={6}
                 value={formData.emailCode}
-                onChange={(v) => setFormData((prev) => ({ ...prev, emailCode: v }))}
+                onChange={(v) => { setFormData((prev) => ({ ...prev, emailCode: v })); setFieldError(null) }}
               >
-                <InputOTPGroup className="gap-1">
+                <InputOTPGroup className={cn('gap-1', fieldError === 'emailCode' && 'rounded-md border-2 border-destructive ring-2 ring-destructive/20 p-2')}>
                   {[0, 1, 2, 3, 4, 5].map((i) => (
                     <InputOTPSlot key={i} index={i} />
                   ))}
@@ -411,11 +452,13 @@ export function VisitorSignupForm() {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleFormNext} className="space-y-4">
-          {error && (
-            <Alert variant="destructive">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
+          <div ref={errorRef}>
+            {error && (
+              <Alert variant="destructive">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+          </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -448,10 +491,11 @@ export function VisitorSignupForm() {
               id="phone"
               type="tel"
               value={formData.phone}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              onChange={(e) => { setFormData({ ...formData, phone: e.target.value }); setFieldError(null) }}
               placeholder="+998 90 123 45 67"
               required
               disabled={isLoading}
+              className={cn(fieldError === 'phone' && 'border-destructive ring-2 ring-destructive/20')}
             />
           </div>
 
@@ -461,10 +505,11 @@ export function VisitorSignupForm() {
               id="email"
               type="email"
               value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              onChange={(e) => { setFormData({ ...formData, email: e.target.value }); setFieldError(null) }}
               placeholder="example@mail.com"
               required
               disabled={isLoading}
+              className={cn(fieldError === 'email' && 'border-destructive ring-2 ring-destructive/20')}
             />
           </div>
 
@@ -581,17 +626,18 @@ export function VisitorSignupForm() {
               id="confirmPassword"
               type="password"
               value={formData.confirmPassword}
-              onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+              onChange={(e) => { setFormData({ ...formData, confirmPassword: e.target.value }); setFieldError(null) }}
               required
               disabled={isLoading}
+              className={cn(fieldError === 'confirmPassword' && 'border-destructive ring-2 ring-destructive/20')}
             />
           </div>
 
-          <div className="flex items-start gap-2">
+          <div className={cn('flex items-start gap-2 rounded-md border p-3', fieldError === 'consentGiven' && 'border-destructive ring-2 ring-destructive/20')}>
             <Checkbox
               id="consent"
               checked={formData.consentGiven}
-              onCheckedChange={(v) => setFormData({ ...formData, consentGiven: v === true })}
+              onCheckedChange={(v) => { setFormData({ ...formData, consentGiven: v === true }); setFieldError(null) }}
               disabled={isLoading}
             />
             <label htmlFor="consent" className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
@@ -599,8 +645,15 @@ export function VisitorSignupForm() {
             </label>
           </div>
 
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {T.nextStep}
+          <Button type="submit" className="w-full" disabled={isLoading || sendingCode}>
+            {sendingCode ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                {T.sendingCode}
+              </>
+            ) : (
+              T.nextStep
+            )}
           </Button>
         </form>
 
