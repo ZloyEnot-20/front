@@ -297,7 +297,7 @@ const ru = {
   applyFilter: 'Применить фильтр',
   clearFilters: 'Очистить',
   exportToExcel: 'Выгрузить в Excel',
-  statusRegistered: 'Зарегистрирован на выставку',
+  statusRegistered: 'Зарегистрирован',
   statusVisited: 'Посетил выставку',
   exhibitionColumn: 'Выставка',
   nameColumn: 'Имя',

@@ -326,19 +326,20 @@ function PublicationsContent() {
     <div className="flex min-h-screen bg-background">
       <AdminSidebar />
 
-      <main className="flex-1 pt-14 lg:pt-0 ml-0 lg:ml-64 min-h-screen min-w-0">
-        {/* Header */}
-        <div className="border-b border-border/40 bg-white/50 backdrop-blur">
-          <div className="px-4 sm:px-6 lg:px-8 py-4 lg:py-6">
+      <main className="flex-1 pt-14 lg:pt-0 ml-0 lg:ml-64 min-h-screen min-w-0 px-[10%]">
+        <div className="max-w-[1400px] mx-auto w-full">
+          {/* Header */}
+          <div className="border-b border-border/40 bg-white/50 backdrop-blur">
+            <div className="py-4 lg:py-6">
             <h1 className="text-2xl lg:text-3xl font-bold">{t('publications')}</h1>
             <p className="text-muted-foreground mt-1">{t('publicationManagement')}</p>
           </div>
         </div>
 
         {/* Content */}
-        <div className="p-4 sm:p-6 lg:p-8">
+        <div className="py-4 sm:py-6 lg:py-8">
           <Tabs defaultValue="exhibitions" className="space-y-0">
-            <div className="-mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
+            <div>
               <TabsList className="h-auto w-full sm:w-fit rounded-none bg-transparent p-0 gap-6 sm:gap-8 shadow-none min-h-0 pb-0">
                 <TabsTrigger
                   value="exhibitions"
@@ -358,7 +359,7 @@ function PublicationsContent() {
                     <span className="block w-full h-[3px] rounded-full bg-primary opacity-0 group-data-[state=active]:opacity-100 mt-0 shrink-0" aria-hidden />
                   </span>
                 </TabsTrigger>
-              </TabsList>
+            </TabsList>
               <div className="h-[3px] -mt-[3px] flex items-end">
                 <div className="w-[30%] h-px bg-border rounded-full" aria-hidden />
               </div>
@@ -376,13 +377,13 @@ function PublicationsContent() {
                 <Button onClick={() => handleCreateContent('exhibition')}>+ {t('newExhibition')}</Button>
               </div>
 
-              {isLoading ? (
+                {isLoading ? (
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-6 gap-3">
                   {Array.from({ length: 6 }).map((_, i) => (
                     <PublicationCardSkeleton key={i} />
                   ))}
                 </div>
-              ) : filteredExhibitions.length > 0 ? (
+                ) : filteredExhibitions.length > 0 ? (
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-3">
                   {filteredExhibitions.map((exhibition) => (
                     <Card key={exhibition.id} className="group overflow-hidden rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 relative aspect-[2/3] w-full">
@@ -404,7 +405,7 @@ function PublicationsContent() {
                           <span>{exhibition.registrations} чел.</span>
                         </div>
                         <div className="flex items-center gap-1.5 mt-2 pt-2 border-t border-white/20 pointer-events-auto min-w-0 flex-wrap">
-                          {togglingStatusExhibitionId === exhibition.id ? (
+                        {togglingStatusExhibitionId === exhibition.id ? (
                             <Button variant="default" size="sm" className="flex-1 min-w-0 h-8 text-xs rounded-md shadow-lg shrink-0" disabled>
                               <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" />
                               <span className="truncate">{t('saving')}</span>
@@ -462,13 +463,13 @@ function PublicationsContent() {
                 <Button onClick={() => handleCreateContent('news')}>+ {t('newNews')}</Button>
               </div>
 
-              {isLoading ? (
+                {isLoading ? (
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-6 gap-3">
                   {Array.from({ length: 6 }).map((_, i) => (
                     <PublicationCardSkeleton key={i} />
                   ))}
                 </div>
-              ) : filteredNews.length > 0 ? (
+                ) : filteredNews.length > 0 ? (
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-3">
                   {filteredNews.map((news) => (
                     <Card key={news.id} className="group overflow-hidden rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 relative aspect-[2/3] w-full">
@@ -489,7 +490,7 @@ function PublicationsContent() {
                           {new Date(news.publishedAt).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric' })}
                         </p>
                         <div className="flex items-center gap-1.5 mt-2 pt-2 border-t border-white/20 pointer-events-auto min-w-0 flex-wrap">
-                          {togglingStatusNewsId === news.id ? (
+                        {togglingStatusNewsId === news.id ? (
                             <Button variant="default" size="sm" className="flex-1 min-w-0 h-8 text-xs rounded-md shadow-lg shrink-0" disabled>
                               <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" />
                               <span className="truncate">{t('saving')}</span>
@@ -754,7 +755,7 @@ function PublicationsContent() {
                                   <span className="text-sm">{exh.name}</span>
                                 </label>
                               ))}
-                            </div>
+                      </div>
                           )}
                         </PopoverContent>
                       </Popover>
@@ -765,7 +766,7 @@ function PublicationsContent() {
                           return (
                             <Badge key={id} variant="default" className="cursor-pointer hover:bg-primary/90" onClick={() => removeParticipant(id)}>
                               {name} ×
-                            </Badge>
+                          </Badge>
                           )
                         })}
                       </div>
@@ -828,6 +829,7 @@ function PublicationsContent() {
               </div>
             </DialogContent>
           </Dialog>
+        </div>
         </div>
       </main>
     </div>

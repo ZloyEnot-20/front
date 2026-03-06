@@ -53,7 +53,7 @@ export default function NewsDetailPage({ params }: NewsPageProps) {
     <div className="min-h-screen bg-background">
       <Header />
 
-      {/* Hero — баннер */}
+      {/* Hero — баннер без кнопки назад */}
       <section className="relative w-full h-96 bg-muted">
         {(news.banner ?? news.image) && (
           <OptimizedImage
@@ -65,11 +65,6 @@ export default function NewsDetailPage({ params }: NewsPageProps) {
           />
         )}
         <div className="absolute inset-0 bg-black/40" />
-        <div className="absolute top-0 left-0 z-10 p-4 md:p-6">
-          <Link href="/news" aria-label="Назад к новостям" className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors">
-            <ArrowLeft className="w-5 h-5" />
-          </Link>
-        </div>
         <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
           <div className="container mx-auto px-4">
             <h1 className="text-4xl md:text-5xl font-bold mb-4">{news.title}</h1>
@@ -77,6 +72,16 @@ export default function NewsDetailPage({ params }: NewsPageProps) {
           </div>
         </div>
       </section>
+
+      {/* Под беджем: кнопка назад */}
+      <div className="container mx-auto px-4 pt-4">
+        <Button variant="ghost" size="sm" className="gap-2 -ml-2" asChild>
+          <Link href="/news">
+            <ArrowLeft className="w-4 h-4" />
+            Назад
+          </Link>
+        </Button>
+      </div>
 
       {/* Content */}
       <section className="py-12">

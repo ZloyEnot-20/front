@@ -1,4 +1,4 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "https://api.myfair.tw1.ru"
 
 function getToken(): string | null {
   if (typeof window === 'undefined') return null
@@ -154,7 +154,16 @@ export interface ApiLeadsResponse {
 }
 
 export const leadsApi = {
-  list: (params: { page?: number; rowsPerPage?: number; exhibitionIds?: string[]; status?: string; search?: string }) =>
+  list: (params: {
+    page?: number
+    rowsPerPage?: number
+    exhibitionIds?: string[]
+    status?: string
+    search?: string
+    interest?: string[]
+    countryOfInterest?: string[]
+    admissionPlan?: string[]
+  }) =>
     api<ApiLeadsResponse>('/api/leads', {
       params: {
         ...(params.page != null && { page: String(params.page) }),
@@ -162,6 +171,9 @@ export const leadsApi = {
         ...(params.exhibitionIds?.length && { exhibitionIds: params.exhibitionIds.join(',') }),
         ...(params.status && { status: params.status }),
         ...(params.search && { search: params.search }),
+        ...(params.interest?.length && { interest: params.interest.join(',') }),
+        ...(params.countryOfInterest?.length && { countryOfInterest: params.countryOfInterest.join(',') }),
+        ...(params.admissionPlan?.length && { admissionPlan: params.admissionPlan.join(',') }),
       },
     }),
 }

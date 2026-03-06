@@ -87,7 +87,7 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
     <div className="min-h-screen bg-background">
       <Header />
 
-      {/* Hero — баннер */}
+      {/* Hero — баннер без кнопки назад */}
       <section className="relative w-full h-96 bg-muted">
         {(exhibition.banner ?? exhibition.image) && (
           <OptimizedImage
@@ -99,11 +99,6 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
           />
         )}
         <div className="absolute inset-0 bg-black/40" />
-        <div className="absolute top-0 left-0 z-10 p-4 md:p-6">
-          <Link href="/exhibitions" aria-label="Назад" className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors">
-            <ArrowLeft className="w-5 h-5" />
-          </Link>
-        </div>
         <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
           <div className="container mx-auto px-4">
             <h1 className="text-4xl md:text-5xl font-bold mb-4">{exhibition.title}</h1>
@@ -111,6 +106,16 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
           </div>
         </div>
       </section>
+
+      {/* Под беджем: кнопка назад */}
+      <div className="container mx-auto px-4 pt-4">
+        <Button variant="ghost" size="sm" className="gap-2 -ml-2" asChild>
+          <Link href="/exhibitions">
+            <ArrowLeft className="w-4 h-4" />
+            Назад
+          </Link>
+        </Button>
+      </div>
 
       {/* Main Content */}
       <section className="py-12">
@@ -167,12 +172,12 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
                   </div>
 
                   {(exhibition.cities?.length ?? 0) > 0 && (
-                    <div className="flex items-start gap-4">
-                      <MapPin className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                      <div>
+                  <div className="flex items-start gap-4">
+                    <MapPin className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+                    <div>
                         <p className="font-medium">Города</p>
                         <p className="text-sm text-muted-foreground">{exhibition.cities?.map((c) => c.name).join(', ') ?? ''}</p>
-                      </div>
+                  </div>
                     </div>
                   )}
 
@@ -216,7 +221,7 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
                             {p.exhibitorDescription && (
                               <p className="text-sm text-muted-foreground line-clamp-2 mt-0.5">{p.exhibitorDescription}</p>
                             )}
-                          </div>
+                        </div>
                         </button>
                       ))}
                     </div>
@@ -230,23 +235,23 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
               const canRegister = !user || user.role === 'admin' || user.role === 'visitor'
               if (!canRegister) return null
               return (
-                <div className="lg:col-span-1">
-                  <Card className="sticky top-24">
-                    <CardHeader>
-                      <CardTitle>Регистрация</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <p className="text-sm text-muted-foreground">
-                        {user
-                          ? 'Выберите город для посещения выставки.'
-                          : 'Войдите в аккаунт для регистрации на выставку.'}
-                      </p>
-                      <Button className="w-full" onClick={() => setRegistrationOpen(true)}>
-                        {user ? 'Зарегистрироваться' : 'Войти и зарегистрироваться'}
-                      </Button>
-                    </CardContent>
-                  </Card>
-                </div>
+              <div className="lg:col-span-1">
+                <Card className="sticky top-24">
+                  <CardHeader>
+                    <CardTitle>Регистрация</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <p className="text-sm text-muted-foreground">
+                      {user
+                        ? 'Выберите город для посещения выставки.'
+                        : 'Войдите в аккаунт для регистрации на выставку.'}
+                    </p>
+                    <Button className="w-full" onClick={() => setRegistrationOpen(true)}>
+                      {user ? 'Зарегистрироваться' : 'Войти и зарегистрироваться'}
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
               )
             })()}
             {isRegistered && (
