@@ -5,11 +5,12 @@ import { Exhibition, News, User, ExhibitionRegistration } from './types'
 import { exhibitionsApi, newsApi, usersApi, registrationsApi, ApiUser } from './api'
 import { useAuth } from './auth-context'
 
-function toExhibition(e: { id: string; title: string; description: string; startDate: string; endDate: string; cities?: { id: string; name: string }[]; participants?: { id: string; name: string; avatar?: string; exhibitorDescription?: string; exhibitorAddress?: string; exhibitorWebsite?: string; exhibitorPhotos?: string[] }[]; image?: string; banner?: string; images?: string[]; status: string; participantCount: number; registrations: number; createdBy: string; createdAt: string; updatedAt: string }): Exhibition {
+function toExhibition(e: { id: string; title: string; description: string; venue?: string; startDate: string; endDate: string; cities?: { id: string; name: string }[]; participants?: { id: string; name: string; avatar?: string; exhibitorDescription?: string; exhibitorAddress?: string; exhibitorWebsite?: string; exhibitorPhotos?: string[] }[]; image?: string; banner?: string; images?: string[]; status: string; participantCount: number; registrations: number; createdBy: string; createdAt: string; updatedAt: string }): Exhibition {
   return {
     id: e.id,
     title: e.title,
     description: e.description,
+    venue: e.venue ?? '',
     startDate: new Date(e.startDate),
     endDate: new Date(e.endDate),
     cities: e.cities ?? [],

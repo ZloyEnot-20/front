@@ -53,6 +53,8 @@ export interface Exhibition {
   id: string
   title: string
   description: string
+  /** Место проведения */
+  venue?: string
   startDate: Date
   endDate: Date
   /** Города из справочника (множественный выбор) */

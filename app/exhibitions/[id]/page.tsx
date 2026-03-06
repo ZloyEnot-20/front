@@ -171,13 +171,15 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
                     </div>
                   </div>
 
-                  {(exhibition.cities?.length ?? 0) > 0 && (
-                  <div className="flex items-start gap-4">
-                    <MapPin className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                    <div>
-                        <p className="font-medium">Города</p>
-                        <p className="text-sm text-muted-foreground">{exhibition.cities?.map((c) => c.name).join(', ') ?? ''}</p>
-                  </div>
+                  {(exhibition.venue || (exhibition.cities?.length ?? 0) > 0) && (
+                    <div className="flex items-start gap-4">
+                      <MapPin className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+                      <div>
+                        <p className="font-medium">Место проведения</p>
+                        <p className="text-sm text-muted-foreground">
+                          {[exhibition.venue, exhibition.cities?.map((c) => c.name).join(', ')].filter(Boolean).join(' · ')}
+                        </p>
+                      </div>
                     </div>
                   )}
 

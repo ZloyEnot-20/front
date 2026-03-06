@@ -70,10 +70,12 @@ export function ExhibitionCard({ exhibition }: ExhibitionCardProps) {
             <Calendar className="w-4 h-4" />
             {startDate} - {endDate}
           </div>
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <MapPin className="w-4 h-4" />
-            {exhibition.cities?.length ? exhibition.cities.map((c) => c.name).join(', ') : ''}
-          </div>
+          {(exhibition.venue || exhibition.cities?.length) ? (
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <MapPin className="w-4 h-4" />
+              {[exhibition.venue, exhibition.cities?.map((c) => c.name).join(', ')].filter(Boolean).join(' · ')}
+            </div>
+          ) : null}
           <div className="flex items-center gap-2 text-muted-foreground">
             <Users className="w-4 h-4" />
             {exhibition.registrations} {t('registeredCount')}

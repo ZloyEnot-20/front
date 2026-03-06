@@ -105,7 +105,7 @@ function PublicationsContent() {
   const handleCreateContent = (type: 'news' | 'exhibition') => {
     setModalType(type)
     setEditingItem(null)
-    setFormData(type === 'exhibition' ? { cities: [], participants: [], images: [] } : { images: [] })
+    setFormData(type === 'exhibition' ? { venue: '', cities: [], participants: [], images: [] } : { images: [] })
     setPendingBannerFile(null)
     setPendingImagesFiles([])
     setUploadError(null)
@@ -166,6 +166,11 @@ function PublicationsContent() {
         setUploadError(t('enterExhibitionDescription'))
         return
       }
+      const venue = (formData.venue ?? '').trim()
+      if (!venue) {
+        setUploadError(t('enterVenue'))
+        return
+      }
       if (!start || !end) {
         setUploadError(t('enterDates'))
         return
@@ -214,6 +219,7 @@ function PublicationsContent() {
         fd.append('title', formData.title)
         if (modalType === 'exhibition') {
           fd.append('description', formData.description ?? '')
+          fd.append('venue', (formData.venue ?? '').trim())
           fd.append('cities', JSON.stringify(formData.cities ?? []))
           fd.append('participants', JSON.stringify(formData.participants ?? []))
           const start = formData.startDate ? (formData.startDate instanceof Date ? formData.startDate : new Date(formData.startDate)) : new Date()
@@ -256,7 +262,7 @@ function PublicationsContent() {
         const banner = dataToSave.banner ?? dataToSave.image
         if (editingItem) {
           if (modalType === 'exhibition') {
-            await updateExhibition(editingItem.id, { ...dataToSave, cities: dataToSave.cities ?? [], participants: dataToSave.participants ?? [], banner, images: dataToSave.images ?? [] })
+            await updateExhibition(editingItem.id, { ...dataToSave, venue: (dataToSave.venue ?? '').trim(), cities: dataToSave.cities ?? [], participants: dataToSave.participants ?? [], banner, images: dataToSave.images ?? [] })
           } else {
             const newsPayload = {
               title: dataToSave.title,
@@ -276,6 +282,7 @@ function PublicationsContent() {
               id: `exp-${Date.now()}`,
               title: dataToSave.title,
               description: dataToSave.description ?? '',
+              venue: (dataToSave.venue ?? '').trim(),
               startDate: dataToSave.startDate ?? new Date(),
               endDate: dataToSave.endDate ?? new Date(),
               cities: dataToSave.cities ?? [],
@@ -677,6 +684,14 @@ function PublicationsContent() {
                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                         placeholder={t('enterExhibitionDescription')}
                         rows={4}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium">{t('location')} *</label>
+                      <Input
+                        value={formData.venue || ''}
+                        onChange={(e) => setFormData({ ...formData, venue: e.target.value })}
+                        placeholder={t('enterVenue')}
                       />
                     </div>
                     <div>

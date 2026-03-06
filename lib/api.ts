@@ -289,6 +289,7 @@ export interface ApiExhibition {
   id: string
   title: string
   description: string
+  venue?: string
   startDate: string
   endDate: string
   cities?: { id: string; name: string }[]

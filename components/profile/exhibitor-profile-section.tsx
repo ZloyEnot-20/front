@@ -17,9 +17,11 @@ import {
 import { useAuth } from '@/lib/auth-context';
 import { useAdmin } from '@/lib/admin-context';
 import { useLocale } from '@/lib/i18n';
-import { leadsApi, type ApiLeadRow } from '@/lib/api';
+import { leadsApi, registrationsApi, exhibitionsApi, type ApiLeadRow, type ApiRegistration } from '@/lib/api';
 import { PersonalInfoSection } from '@/components/profile/personal-info-section';
+import { UniversityProfileSection } from '@/components/profile/university-profile-section';
 import { SecuritySection } from '@/components/profile/security-section';
+import { Skeleton } from '@/components/ui/skeleton';
 import type { Exhibition } from '@/lib/types';
 
 function formatExhibitionDate(d: Date | string) {
@@ -736,7 +738,7 @@ function ExhibitionsTabContent({ exhibitions }: { exhibitions: Exhibition[] }) {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 items-stretch">
           {filteredExhibitions.map((ex) => {
             const cityNames = (ex.cities ?? []).map((c) => (typeof c === 'object' && c !== null && 'name' in c ? c.name : String(c)));
-            const citiesLine = cityNames.length ? cityNames.join(' | ') : '—';
+            const locationLine = [ex.venue, cityNames.length ? cityNames.join(' | ') : ''].filter(Boolean).join(' · ') || '—';
             return (
               <div
                 key={ex.id}
@@ -759,8 +761,8 @@ function ExhibitionsTabContent({ exhibitions }: { exhibitions: Exhibition[] }) {
                 <div className="mb-4 pb-4 border-b border-border flex-shrink-0 min-w-0">
                   <div className="flex items-start gap-2">
                     <MapPin size={16} className="text-primary mt-0.5 flex-shrink-0" />
-                    <p className="text-sm font-medium text-foreground truncate" title={citiesLine}>
-                      {citiesLine}
+                    <p className="text-sm font-medium text-foreground truncate" title={locationLine}>
+                      {locationLine}
                     </p>
                   </div>
                 </div>
@@ -790,20 +792,133 @@ function ExhibitionsTabContent({ exhibitions }: { exhibitions: Exhibition[] }) {
   );
 }
 
-const PROFILE_TABS = [
+const EXHIBITOR_ADMIN_TABS = [
   { id: 'leads', label: 'Лиды' },
   { id: 'exhibitions', label: 'Выставки' },
   { id: 'university', label: 'Профиль Университета' },
   { id: 'mail', label: 'Почта и Пароль' },
 ] as const;
 
-// Header Component: слева лого, по центру навигация (Главная + вкладки), справа языки и профиль
+const VISITOR_TABS = [
+  { id: 'myExhibitions', label: 'Мои выставки' },
+  { id: 'profile', label: 'Личные данные' },
+  { id: 'mail', label: 'Почта и Пароль' },
+] as const;
+
+function getProfileTabs(role: string | undefined, t: (key: string) => string): { id: string; label: string }[] {
+  if (role === 'exhibitor' || role === 'admin') {
+    return EXHIBITOR_ADMIN_TABS.map((tab) => ({ id: tab.id, label: tab.label }));
+  }
+  return VISITOR_TABS.map((tab) => ({
+    id: tab.id,
+    label: tab.id === 'profile' ? 'Личные данные' : tab.id === 'myExhibitions' ? t('myExhibitions') : tab.label,
+  }));
+}
+
+// Скелетон для «Мои выставки»
+function MyExhibitionsSkeleton() {
+  return (
+    <div className="flex-1 overflow-auto p-4 px-[15%]">
+      <div className="max-w-[1400px] mx-auto space-y-6">
+        <div>
+          <Skeleton className="h-9 w-64 mb-2" />
+          <Skeleton className="h-5 w-full max-w-md" />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="rounded-xl border bg-card p-6 flex flex-col">
+              <Skeleton className="h-6 w-48 mb-2" />
+              <Skeleton className="h-4 w-24 mb-4" />
+              <Skeleton className="h-4 w-full mb-4" />
+              <Skeleton className="w-44 h-44 mx-auto rounded-lg mb-4" />
+              <Skeleton className="h-10 w-full rounded-md mt-auto" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Контент «Мои выставки» для посетителя: регистрации с QR-кодом (данные приходят из родителя, загрузка только при первом входе)
+function MyExhibitionsTabContent({
+  registrations,
+  exhibitions,
+  loading,
+}: {
+  registrations: ApiRegistration[];
+  exhibitions: Exhibition[];
+  loading: boolean;
+}) {
+  if (loading) {
+    return <MyExhibitionsSkeleton />;
+  }
+
+  const activeRegs = registrations.filter((r) => r.status === 'registered' || !r.cancelledAt);
+
+  return (
+    <div className="flex-1 overflow-auto p-4 px-[15%]">
+      <div className="max-w-[1400px] mx-auto space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">Мои выставки</h1>
+          <p className="text-muted-foreground mt-1">Выставки, на которые вы зарегистрированы. QR-код для входа ниже.</p>
+        </div>
+        {activeRegs.length === 0 ? (
+          <div className="rounded-lg border bg-card p-12 text-center">
+            <p className="text-muted-foreground mb-4">Вы ещё не зарегистрированы ни на одну выставку</p>
+            <Button asChild>
+              <Link href="/exhibitions">Смотреть выставки</Link>
+            </Button>
+          </div>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {activeRegs.map((reg) => {
+              const ex = exhibitions.find((e) => e.id === reg.exhibitionId);
+              const startDate = ex?.startDate ? formatExhibitionDate(ex.startDate) : null;
+              const endDate = ex?.endDate ? formatExhibitionDate(ex.endDate) : null;
+              return (
+                <div key={reg.id} className="rounded-xl border bg-card p-6 flex flex-col">
+                  <div className="mb-3">
+                    <h3 className="text-lg font-semibold">{ex?.title ?? 'Выставка'}</h3>
+                    <p className="text-sm text-muted-foreground mt-1">{reg.city}</p>
+                  </div>
+                  {(startDate || endDate) && (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
+                      <Calendar size={16} />
+                      {startDate && endDate ? `${startDate} — ${endDate}` : startDate || endDate}
+                    </div>
+                  )}
+                  {reg.qrCode && (
+                    <div className="rounded-lg border bg-muted/30 p-4 mb-4 flex flex-col items-center gap-2">
+                      <img src={reg.qrCode} alt="QR-код для входа" className="w-44 h-44 object-contain" loading="lazy" />
+                      <span className="text-xs text-muted-foreground flex items-center gap-1">
+                        <MapPin size={12} />
+                        Покажите QR-код на входе
+                      </span>
+                    </div>
+                  )}
+                  <Button variant="outline" className="w-full mt-auto" asChild>
+                    <Link href={`/exhibitions/${reg.exhibitionId}`}>Подробнее о выставке</Link>
+                  </Button>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// Header Component: слева лого, по центру вкладки профиля, справа языки и профиль
 function Header({
+  tabs,
   profileSectionTab,
   onProfileSectionTab,
 }: {
-  profileSectionTab: (typeof PROFILE_TABS)[number]['id'];
-  onProfileSectionTab: (id: (typeof PROFILE_TABS)[number]['id']) => void;
+  tabs: { id: string; label: string }[];
+  profileSectionTab: string;
+  onProfileSectionTab: (id: string) => void;
 }) {
   const { user, logout } = useAuth();
   const { t, lang, setLang } = useLocale();
@@ -817,7 +932,6 @@ function Header({
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        {/* Слева: логотип */}
         <div className="flex items-center shrink-0">
           <Link href="/" className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-white font-bold shrink-0">
@@ -827,15 +941,8 @@ function Header({
           </Link>
         </div>
 
-        {/* По центру: Главная + вкладки профиля; под активной вкладкой — черточка */}
         <nav className="hidden md:flex items-center gap-6 absolute left-1/2 -translate-x-1/2 h-full">
-          <Link
-            href="/"
-            className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors flex items-center h-full"
-          >
-            {t('home')}
-          </Link>
-          {PROFILE_TABS.map(({ id, label }) => (
+          {tabs.map(({ id, label }) => (
             <button
               key={id}
               type="button"
@@ -852,7 +959,6 @@ function Header({
           ))}
         </nav>
 
-        {/* Справа: языки и блок профиля */}
         <div className="flex items-center gap-3 border-l border-border/60 pl-4 shrink-0">
           <div className="flex gap-1 text-xs text-muted-foreground">
             {(['uz', 'ru', 'en'] as const).map((l) => (
@@ -880,12 +986,17 @@ function Header({
                 <DropdownMenuContent align="end">
                   <DropdownMenuLabel>{user.email}</DropdownMenuLabel>
                   <DropdownMenuLabel className="text-xs font-normal text-muted-foreground capitalize">
-                    {user.role === 'exhibitor' ? t('roleExhibitor') : user.role}
+                    {user.role === 'exhibitor' ? t('roleExhibitor') : user.role === 'admin' ? 'Админ' : user.role}
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
                     <Link href="/profile">{t('profile')}</Link>
                   </DropdownMenuItem>
+                  {user.role === 'admin' && (
+                    <DropdownMenuItem asChild>
+                      <Link href="/admin">{t('adminPanel')}</Link>
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout} className="text-destructive">
                     {t('logout')}
@@ -912,8 +1023,20 @@ function Header({
 // Main Page Component
 export function ExhibitorProfileSection() {
   const { user } = useAuth();
+  const { t } = useLocale();
   const { exhibitions: allExhibitions } = useAdmin();
-  const [profileSectionTab, setProfileSectionTab] = useState<(typeof PROFILE_TABS)[number]['id']>('leads');
+  const profileTabs = useMemo(() => getProfileTabs(user?.role, t), [user?.role, t]);
+  const initialTab = user?.role === 'exhibitor' || user?.role === 'admin' ? 'leads' : 'myExhibitions';
+  const [profileSectionTab, setProfileSectionTab] = useState(initialTab);
+
+  // Синхронизировать вкладку при смене роли (например после логина)
+  useEffect(() => {
+    const expected = user?.role === 'exhibitor' || user?.role === 'admin' ? 'leads' : 'myExhibitions';
+    const validIds = profileTabs.map((tab) => tab.id);
+    if (!validIds.includes(profileSectionTab)) {
+      setProfileSectionTab(validIds[0] ?? expected);
+    }
+  }, [user?.role, profileTabs, profileSectionTab]);
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [leadsData, setLeadsData] = useState<{ items: ApiLeadRow[]; total: number; page: number; rowsPerPage: number; totalPages: number } | null>(null);
@@ -936,6 +1059,35 @@ export function ExhibitorProfileSection() {
     countryOfInterest: [] as string[],
     admissionPlan: [] as string[],
   });
+
+  // «Мои выставки»: загрузка только при первом входе на вкладку или перезагрузке страницы
+  const [myExhibitionsRegistrations, setMyExhibitionsRegistrations] = useState<ApiRegistration[]>([]);
+  const [myExhibitionsExhibitions, setMyExhibitionsExhibitions] = useState<Exhibition[]>([]);
+  const [myExhibitionsLoading, setMyExhibitionsLoading] = useState(false);
+  const [myExhibitionsHasFetched, setMyExhibitionsHasFetched] = useState(false);
+
+  useEffect(() => {
+    if (profileSectionTab !== 'myExhibitions' || myExhibitionsHasFetched) return;
+    let cancelled = false;
+    setMyExhibitionsLoading(true);
+    Promise.all([registrationsApi.list(), exhibitionsApi.list()])
+      .then(([regs, exList]) => {
+        if (cancelled) return;
+        setMyExhibitionsRegistrations(regs);
+        setMyExhibitionsExhibitions((exList ?? []) as unknown as Exhibition[]);
+        setMyExhibitionsHasFetched(true);
+      })
+      .catch(() => {
+        if (!cancelled) setMyExhibitionsRegistrations([]);
+        if (!cancelled) setMyExhibitionsHasFetched(true);
+      })
+      .finally(() => {
+        if (!cancelled) setMyExhibitionsLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [profileSectionTab, myExhibitionsHasFetched]);
 
   const exhibitorExhibitionIds =
     allExhibitions?.filter((e) => (e.participants ?? []).some((p) => (typeof p === 'object' ? p.id : p) === user?.id)).map((e) => e.id) ?? [];
@@ -1035,7 +1187,7 @@ export function ExhibitorProfileSection() {
 
   return (
     <div className="flex flex-col h-screen bg-muted/40">
-      <Header profileSectionTab={profileSectionTab} onProfileSectionTab={setProfileSectionTab} />
+      <Header tabs={profileTabs} profileSectionTab={profileSectionTab} onProfileSectionTab={setProfileSectionTab} />
 
       {profileSectionTab === 'leads' && (
       <>
@@ -1107,14 +1259,34 @@ export function ExhibitorProfileSection() {
       )}
 
       {profileSectionTab === 'university' && (
-        <div className="flex-1 min-h-0 overflow-auto flex flex-col p-4">
+        <div className="flex-1 min-h-0 overflow-auto flex flex-col p-4 md:p-6">
           {user ? (
-            <div className="max-w-[1400px] mx-auto">
-              <PersonalInfoSection user={user} />
+            <div className="max-w-4xl mx-auto w-full">
+              <div className="bg-card rounded-lg border border-border shadow-sm p-6 md:p-8">
+                <UniversityProfileSection user={user} />
+              </div>
             </div>
           ) : (
             <div className="flex items-center justify-center py-12 text-muted-foreground">Загрузка…</div>
           )}
+        </div>
+      )}
+
+      {profileSectionTab === 'myExhibitions' && (
+        <MyExhibitionsTabContent
+          registrations={myExhibitionsRegistrations}
+          exhibitions={myExhibitionsExhibitions}
+          loading={myExhibitionsLoading}
+        />
+      )}
+
+      {profileSectionTab === 'profile' && user && (
+        <div className="flex-1 min-h-0 overflow-auto flex flex-col p-4 md:p-6">
+          <div className="max-w-4xl mx-auto w-full">
+            <div className="bg-card rounded-lg border border-border shadow-sm p-6 md:p-8">
+              <PersonalInfoSection user={user} />
+            </div>
+          </div>
         </div>
       )}
 
