@@ -24,12 +24,11 @@ import { UniversityProfileSection } from '@/components/profile/university-profil
 import { SecuritySection } from '@/components/profile/security-section';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ExhibitorModal } from '@/components/exhibitions/exhibitor-modal';
-import { getCityName, getContentTitle, getContentDescription } from '@/lib/utils';
+import { getCityName, getContentTitle, getContentDescription, getDateLocale } from '@/lib/utils';
 import type { Exhibition, ExhibitorInfo, ExhibitionRegistration } from '@/lib/types';
 
 function formatExhibitionDate(d: Date | string, lang: 'uz' | 'ru' | 'en' = 'ru') {
-  const locale = lang === 'uz' ? 'uz-UZ' : lang === 'en' ? 'en-US' : 'ru-RU';
-  return new Date(d).toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' });
+  return new Date(d).toLocaleDateString(getDateLocale(lang), { day: 'numeric', month: 'long', year: 'numeric' });
 }
 
 // Data Table Component — лиды: данные из профиля + статус + выставка
@@ -83,11 +82,11 @@ function DataTable({ data, selectedIds, onSelectAll, onSelectRow, onSort, sortCo
   const textCls = 'block truncate text-foreground';
 
   return (
-    <div className="w-full overflow-auto">
+    <div className="w-full">
       <table className="w-full border-collapse border border-border">
-        <thead className="sticky top-0 z-10 bg-card shadow-[0_1px_0_0_hsl(var(--border))]">
+        <thead className="sticky top-0 z-10 bg-muted/80 backdrop-blur-sm shadow-[0_1px_0_0_hsl(var(--border))]">
           <tr className="border-b border-border">
-            <th className="px-4 py-2 text-left border border-border bg-card">
+            <th className="px-4 py-2 text-left border border-border bg-muted/80">
               <input
                 type="checkbox"
                 checked={allSelected}
@@ -95,31 +94,31 @@ function DataTable({ data, selectedIds, onSelectAll, onSelectRow, onSort, sortCo
                 className="rounded cursor-pointer w-4 h-4"
               />
             </th>
-            <th className="px-4 py-2 text-left border border-border bg-card">
+            <th className="px-4 py-2 text-left border border-border bg-muted/80 w-40 max-w-40">
               <SortHeader column="name" label={t('nameLabel')} />
             </th>
-            <th className="px-4 py-2 text-left border border-border bg-card">
+            <th className="px-4 py-2 text-left border border-border bg-muted/80">
               <SortHeader column="email" label={t('emailLabel')} />
             </th>
-            <th className="px-4 py-2 text-left border border-border bg-card">
+            <th className="px-4 py-2 text-left border border-border bg-muted/80">
               <SortHeader column="phone" label={t('phoneLabelShort')} />
             </th>
-            <th className="px-4 py-2 text-left border border-border bg-card w-28 max-w-28">
+            <th className="px-4 py-2 text-left border border-border bg-muted/80 w-28 max-w-28">
               <SortHeader column="city" label={t('cityColumn')} />
             </th>
-            <th className="px-4 py-2 text-left border border-border bg-card">
+            <th className="px-4 py-2 text-left border border-border bg-muted/80">
               <SortHeader column="status" label={t('status')} />
             </th>
-            <th className="px-4 py-2 text-left border border-border bg-card w-36 max-w-36">
+            <th className="px-4 py-2 text-left border border-border bg-muted/80 w-36 max-w-36">
               <SortHeader column="exhibitionTitle" label={t('exhibitionFallback')} />
             </th>
-            <th className="px-4 py-2 text-left border border-border bg-card">
+            <th className="px-4 py-2 text-left border border-border bg-muted/80">
               <SortHeader column="interest" label={t('interestColumn')} />
             </th>
-            <th className="px-4 py-2 text-left border border-border bg-card">
+            <th className="px-4 py-2 text-left border border-border bg-muted/80 w-28 max-w-28">
               <SortHeader column="countryOfInterest" label={t('countryOfInterestColumn')} />
             </th>
-            <th className="px-4 py-2 text-left border border-border bg-card">
+            <th className="px-4 py-2 text-left border border-border bg-muted/80">
               <SortHeader column="admissionPlan" label={t('admissionPlanColumn')} />
             </th>
           </tr>
@@ -135,12 +134,12 @@ function DataTable({ data, selectedIds, onSelectAll, onSelectRow, onSort, sortCo
                   className="rounded cursor-pointer w-4 h-4"
                 />
               </td>
-              <td className={cellCls}>
-                <div className="flex items-center gap-3 min-w-0">
+              <td className={`${cellCls} w-40 max-w-40`}>
+                <div className="flex items-center gap-2 min-w-0">
                   <div
-                    className={`w-10 h-10 rounded-full ${getAvatarColor(
+                    className={`w-8 h-8 rounded-full ${getAvatarColor(
                       row.name
-                    )} flex items-center justify-center text-white font-medium text-sm flex-shrink-0`}
+                    )} flex items-center justify-center text-white font-medium text-xs flex-shrink-0`}
                   >
                     {getInitials(row.name)}
                   </div>
@@ -161,10 +160,65 @@ function DataTable({ data, selectedIds, onSelectAll, onSelectRow, onSort, sortCo
                   {getStatusLabel(row.status)}
                 </Badge>
               </td>
-              <td className={`${cellCls} w-36 max-w-36`}><span className={textCls}>{row.exhibitionTitle || '—'}</span></td>
+              <td className={`${cellCls} w-36 max-w-36`}>
+                {row.exhibitionId ? (
+                  <Link href={`/exhibitions/${row.exhibitionId}`} target="_blank" rel="noopener noreferrer" className={`${textCls} text-yellow-600 hover:text-yellow-700 hover:underline focus:outline-none focus:underline`}>
+                    {row.exhibitionTitle || '—'}
+                  </Link>
+                ) : (
+                  <span className={textCls}>{row.exhibitionTitle || '—'}</span>
+                )}
+              </td>
               <td className={cellCls}><span className={textCls}>{getInterestLabel(row.interest ?? '') || '—'}</span></td>
-              <td className={cellCls}><span className={textCls}>{row.countryOfInterest || '—'}</span></td>
+              <td className={`${cellCls} w-28 max-w-28`}><span className={textCls}>{row.countryOfInterest || '—'}</span></td>
               <td className={cellCls}><span className={textCls}>{row.admissionPlan || '—'}</span></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+const cellClsSkel = 'px-4 py-2 border border-border';
+
+function LeadsTableSkeleton() {
+  return (
+    <div className="w-full">
+      <table className="w-full border-collapse border border-border">
+        <thead className="sticky top-0 z-10 bg-muted/80 backdrop-blur-sm shadow-[0_1px_0_0_hsl(var(--border))]">
+          <tr className="border-b border-border">
+            <th className={`${cellClsSkel} bg-muted/80`}><Skeleton className="h-4 w-4 rounded" /></th>
+            <th className={`${cellClsSkel} bg-muted/80 w-40 max-w-40`}><Skeleton className="h-4 w-16" /></th>
+            <th className={`${cellClsSkel} bg-muted/80`}><Skeleton className="h-4 w-20" /></th>
+            <th className={`${cellClsSkel} bg-muted/80`}><Skeleton className="h-4 w-24" /></th>
+            <th className={`${cellClsSkel} w-28 max-w-28 bg-muted/80`}><Skeleton className="h-4 w-14" /></th>
+            <th className={`${cellClsSkel} bg-muted/80`}><Skeleton className="h-4 w-16" /></th>
+            <th className={`${cellClsSkel} w-36 max-w-36 bg-muted/80`}><Skeleton className="h-4 w-20" /></th>
+            <th className={`${cellClsSkel} bg-muted/80`}><Skeleton className="h-4 w-18" /></th>
+            <th className={`${cellClsSkel} bg-muted/80`}><Skeleton className="h-4 w-14" /></th>
+            <th className={`${cellClsSkel} w-28 max-w-28 bg-muted/80`}><Skeleton className="h-4 w-20" /></th>
+            <th className={`${cellClsSkel} bg-muted/80`}><Skeleton className="h-4 w-20" /></th>
+          </tr>
+        </thead>
+        <tbody>
+          {Array.from({ length: 12 }).map((_, i) => (
+            <tr key={i} className="border-b border-border">
+              <td className={cellClsSkel}><Skeleton className="h-4 w-4 rounded" /></td>
+              <td className={`${cellClsSkel} w-40 max-w-40`}>
+                <div className="flex items-center gap-2">
+                  <Skeleton className="h-8 w-8 rounded-full flex-shrink-0" />
+                  <Skeleton className="h-4 w-24" />
+                </div>
+              </td>
+              <td className={cellClsSkel}><Skeleton className="h-4 w-32" /></td>
+              <td className={cellClsSkel}><Skeleton className="h-4 w-24" /></td>
+              <td className={`${cellClsSkel} w-28 max-w-28`}><Skeleton className="h-4 w-16" /></td>
+              <td className={cellClsSkel}><Skeleton className="h-6 w-20 rounded" /></td>
+              <td className={`${cellClsSkel} w-36 max-w-36`}><Skeleton className="h-4 w-28" /></td>
+              <td className={cellClsSkel}><Skeleton className="h-4 w-20" /></td>
+              <td className={`${cellClsSkel} w-28 max-w-28`}><Skeleton className="h-4 w-20" /></td>
+              <td className={cellClsSkel}><Skeleton className="h-4 w-16" /></td>
             </tr>
           ))}
         </tbody>
@@ -1217,7 +1271,7 @@ export function ExhibitorProfileSection() {
   const [leadsData, setLeadsData] = useState<{ items: ApiLeadRow[]; total: number; page: number; rowsPerPage: number; totalPages: number } | null>(null);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
-  const [rowsPerPage] = useState(19);
+  const [rowsPerPage] = useState(100);
   const [filters, setFilters] = useState({
     name: '',
     exhibitionIds: [] as string[],
@@ -1286,12 +1340,12 @@ export function ExhibitorProfileSection() {
     const isExhibitor = user?.role === 'exhibitor';
     const isAdmin = user?.role === 'admin';
     if (!isExhibitor && !isAdmin) {
-      setLeadsData({ items: [], total: 0, page: 1, rowsPerPage: 19, totalPages: 0 });
+      setLeadsData({ items: [], total: 0, page: 1, rowsPerPage: 100, totalPages: 0 });
       setLoading(false);
       return;
     }
     if (isExhibitor && exhibitorExhibitionIds.length === 0) {
-      setLeadsData({ items: [], total: 0, page: 1, rowsPerPage: 19, totalPages: 0 });
+      setLeadsData({ items: [], total: 0, page: 1, rowsPerPage: 100, totalPages: 0 });
       setLoading(false);
       return;
     }
@@ -1309,7 +1363,7 @@ export function ExhibitorProfileSection() {
       });
       setLeadsData(res);
     } catch {
-      setLeadsData({ items: [], total: 0, page: 1, rowsPerPage: 19, totalPages: 0 });
+      setLeadsData({ items: [], total: 0, page: 1, rowsPerPage: 100, totalPages: 0 });
     } finally {
       setLoading(false);
     }
@@ -1414,34 +1468,62 @@ export function ExhibitorProfileSection() {
             />
           </div>
 
-          <div className="flex-1 min-h-0 overflow-auto bg-card rounded-lg shadow-sm">
+          <div className="flex-1 min-h-0 flex flex-col overflow-hidden bg-card rounded-lg shadow-sm">
             {loading ? (
-              <div className="flex items-center justify-center py-12 text-muted-foreground">{t('loadingEllipsis')}</div>
+              <div className="flex-1 min-h-0 overflow-auto">
+                <LeadsTableSkeleton />
+              </div>
             ) : (
-              <DataTable
-                data={sortedData}
-                selectedIds={selectedIds}
-                onSelectAll={handleSelectAll}
-                onSelectRow={handleSelectRow}
-                onSort={handleSort}
-                sortConfig={sortConfig}
-                t={t}
-              />
+              <>
+                <div className="flex-1 min-h-0 overflow-auto">
+                  <DataTable
+                    data={sortedData}
+                    selectedIds={selectedIds}
+                    onSelectAll={handleSelectAll}
+                    onSelectRow={handleSelectRow}
+                    onSort={handleSort}
+                    sortConfig={sortConfig}
+                    t={t}
+                  />
+                </div>
+                <div className="shrink-0 border-t border-border bg-muted/40 px-4 py-3 flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 text-sm text-muted-foreground">
+                  <span>
+                    {leadsData != null && leadsData.total > 0
+                      ? (() => {
+                          const start = (leadsData.page - 1) * leadsData.rowsPerPage + 1;
+                          const end = Math.min(leadsData.page * leadsData.rowsPerPage, leadsData.total);
+                          return `${t('showing')} ${start}–${end} ${t('of')} ${leadsData.total}`;
+                        })()
+                      : (leadsData?.total === 0 ? t('noRecords') : '')}
+                  </span>
+                  {leadsData != null && leadsData.totalPages > 1 && (
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="bg-white hover:bg-gray-100 border-border text-foreground"
+                        onClick={() => setPage((p) => Math.max(1, p - 1))}
+                        disabled={leadsData.page <= 1}
+                      >
+                        {t('back')}
+                      </Button>
+                      <span className="text-sm px-2">
+                        {leadsData.page} / {leadsData.totalPages}
+                      </span>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="bg-white hover:bg-gray-100 border-border text-foreground"
+                        onClick={() => setPage((p) => Math.min(leadsData.totalPages, p + 1))}
+                        disabled={leadsData.page >= leadsData.totalPages}
+                      >
+                        {t('forward')}
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </>
             )}
-          </div>
-        </div>
-
-        {/* Нижняя панель: пагинация — без границ, цвет как у фона */}
-        <div className="w-full shrink-0 bg-muted/40 px-4 py-4 flex items-center justify-between gap-4 text-sm text-muted-foreground">
-          <div className="w-72 shrink-0" aria-hidden />
-          <div className="flex-1 flex items-center justify-between min-w-0">
-            <div>
-              {t('itemsPerPage')}: <span className="font-medium text-foreground">{leadsData?.items?.length ?? 0}</span>
-            </div>
-            <div>
-              {t('pageLabel')}: <span className="font-medium text-foreground">{leadsData?.page ?? 1} {t('of')} {leadsData?.totalPages || 1}</span>
-              {leadsData != null && <span className="ml-2">({t('totalLabel')} {leadsData.total})</span>}
-            </div>
           </div>
         </div>
       </>

@@ -15,9 +15,9 @@ export function getCityName(
   return (city[key as keyof typeof city] as string)?.trim() || city.name || ''
 }
 
-/** Локаль для дат по языку интерфейса */
+/** Локаль для дат по языку интерфейса. Для uz используем ru-RU, т.к. uz-UZ в ряде сред даёт "M03" вместо "мар." */
 export function getDateLocale(lang: 'uz' | 'ru' | 'en'): string {
-  return lang === 'uz' ? 'uz-UZ' : lang === 'en' ? 'en-US' : 'ru-RU'
+  return lang === 'en' ? 'en-US' : 'ru-RU'
 }
 
 function langKey(lang: 'uz' | 'ru' | 'en'): 'Uz' | 'Ru' | 'En' {

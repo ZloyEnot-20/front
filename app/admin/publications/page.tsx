@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { ProtectedRoute } from '@/components/auth/protected-route'
 import { AdminSidebar } from '@/components/admin/admin-sidebar'
 import { useLocale } from '@/lib/i18n'
@@ -22,7 +22,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Checkbox } from '@/components/ui/checkbox'
 import { cn, getCityName, getDateLocale, getContentTitle, getContentDescription, getNewsContent } from '@/lib/utils'
 import { ChevronDown } from 'lucide-react'
@@ -48,6 +47,10 @@ function PublicationsContent() {
   const [citiesListLoading, setCitiesListLoading] = useState(false)
   const [exhibitorsList, setExhibitorsList] = useState<ApiUser[]>([])
   const [exhibitorsListLoading, setExhibitorsListLoading] = useState(false)
+  const [citiesDropdownOpen, setCitiesDropdownOpen] = useState(false)
+  const [participantsDropdownOpen, setParticipantsDropdownOpen] = useState(false)
+  const citiesDropdownRef = useRef<HTMLDivElement>(null)
+  const participantsDropdownRef = useRef<HTMLDivElement>(null)
   const MAX_FILE_MB = 10
 
   const handleToggleExhibitionStatus = async (id: string, currentStatus: string) => {
@@ -168,6 +171,17 @@ function PublicationsContent() {
   const removeParticipant = (userId: string) => {
     setFormData({ ...formData, participants: (formData.participants ?? []).filter((id:string) => id !== userId) })
   }
+
+  useEffect(() => {
+    const closeOnOutside = (e: MouseEvent) => {
+      if (citiesDropdownRef.current && !citiesDropdownRef.current.contains(e.target as Node)) setCitiesDropdownOpen(false)
+      if (participantsDropdownRef.current && !participantsDropdownRef.current.contains(e.target as Node)) setParticipantsDropdownOpen(false)
+    }
+    if (citiesDropdownOpen || participantsDropdownOpen) {
+      document.addEventListener('mousedown', closeOnOutside)
+      return () => document.removeEventListener('mousedown', closeOnOutside)
+    }
+  }, [citiesDropdownOpen, participantsDropdownOpen])
 
   const handleSaveContent = async () => {
     setUploadError(null)
@@ -796,37 +810,45 @@ function PublicationsContent() {
                         <div>
                           <label className="text-sm font-medium">{t('cities')}</label>
                           <p className="text-xs text-muted-foreground mt-0.5 mb-1">{t('citiesMultiHint')}</p>
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <Button variant="outline" className="w-full justify-between font-normal" disabled={citiesListLoading}>
-                                {citiesListLoading ? t('loading') : (formData.cities ?? []).length ? `${t('selectedCount')}: ${(formData.cities ?? []).length}` : t('selectCities')}
-                                <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
-                              </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-full min-w-[var(--radix-popover-trigger-width)] max-h-60 overflow-y-auto p-2" align="start">
-                              {citiesList.length === 0 ? (
-                                <p className="text-sm text-muted-foreground py-2">{t('noCitiesHint')}</p>
-                              ) : (
-                                <div className="space-y-1">
-                                  {citiesList.map((city) => (
-                                    <label
-                                      key={city.id}
-                                      className={cn(
-                                        'flex items-center gap-2 py-1.5 px-2 rounded-md cursor-pointer',
-                                        (formData.cities ?? []).includes(city.id) ? 'bg-primary/20 text-primary' : 'hover:bg-accent'
-                                      )}
-                                    >
-                                      <Checkbox
-                                        checked={(formData.cities ?? []).includes(city.id)}
-                                        onCheckedChange={() => toggleCity(city.id)}
-                                      />
-                                      <span className="text-sm">{getCityName(city, lang)}</span>
-                                    </label>
-                                  ))}
+                          <div className="relative" ref={citiesDropdownRef}>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              className="w-full justify-between font-normal"
+                              disabled={citiesListLoading}
+                              onClick={() => setCitiesDropdownOpen((v) => !v)}
+                            >
+                              {citiesListLoading ? t('loading') : (formData.cities ?? []).length ? `${t('selectedCount')}: ${(formData.cities ?? []).length}` : t('selectCities')}
+                              <ChevronDown className={cn('ml-2 h-4 w-4 opacity-50 transition-transform', citiesDropdownOpen && 'rotate-180')} />
+                            </Button>
+                            {citiesDropdownOpen && (
+                              <div className="absolute left-0 right-0 top-full z-50 mt-1 rounded-md border bg-popover p-2 shadow-md">
+                                <div className="max-h-60 overflow-y-auto overflow-x-hidden">
+                                  {citiesList.length === 0 ? (
+                                    <p className="text-sm text-muted-foreground py-2">{t('noCitiesHint')}</p>
+                                  ) : (
+                                    <div className="space-y-1">
+                                      {citiesList.map((city) => (
+                                        <label
+                                          key={city.id}
+                                          className={cn(
+                                            'flex items-center gap-2 py-1.5 px-2 rounded-md cursor-pointer',
+                                            (formData.cities ?? []).includes(city.id) ? 'bg-primary/20 text-primary' : 'hover:bg-accent'
+                                          )}
+                                        >
+                                          <Checkbox
+                                            checked={(formData.cities ?? []).includes(city.id)}
+                                            onCheckedChange={() => toggleCity(city.id)}
+                                          />
+                                          <span className="text-sm">{getCityName(city, lang)}</span>
+                                        </label>
+                                      ))}
+                                    </div>
+                                  )}
                                 </div>
-                              )}
-                            </PopoverContent>
-                          </Popover>
+                              </div>
+                            )}
+                          </div>
                           <div className="flex flex-wrap gap-1.5 mt-2">
                             {(formData.cities ?? []).map((id: string) => {
                               const city = citiesList.find((c) => c.id === id)
@@ -842,37 +864,45 @@ function PublicationsContent() {
                         <div>
                           <label className="text-sm font-medium">{t('selectParticipants')}</label>
                           <p className="text-xs text-muted-foreground mt-0.5 mb-1">{t('participantsMultiHint')}</p>
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <Button variant="outline" className="w-full justify-between font-normal" disabled={exhibitorsListLoading}>
-                                {exhibitorsListLoading ? t('loading') : (formData.participants ?? []).length ? `${t('selectedCount')}: ${(formData.participants ?? []).length}` : t('selectParticipants')}
-                                <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
-                              </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-full min-w-[var(--radix-popover-trigger-width)] max-h-60 overflow-y-auto p-2" align="start">
-                              {exhibitorsList.length === 0 ? (
-                                <p className="text-sm text-muted-foreground py-2">{t('noExhibitorsHint')}</p>
-                              ) : (
-                                <div className="space-y-1">
-                                  {exhibitorsList.map((exh) => (
-                                    <label
-                                      key={exh.id}
-                                      className={cn(
-                                        'flex items-center gap-2 py-1.5 px-2 rounded-md cursor-pointer',
-                                        (formData.participants ?? []).includes(exh.id) ? 'bg-primary/20 text-primary' : 'hover:bg-accent'
-                                      )}
-                                    >
-                                      <Checkbox
-                                        checked={(formData.participants ?? []).includes(exh.id)}
-                                        onCheckedChange={() => toggleParticipant(exh.id)}
-                                      />
-                                      <span className="text-sm">{exh.name}</span>
-                                    </label>
-                                  ))}
+                          <div className="relative" ref={participantsDropdownRef}>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              className="w-full justify-between font-normal"
+                              disabled={exhibitorsListLoading}
+                              onClick={() => setParticipantsDropdownOpen((v) => !v)}
+                            >
+                              {exhibitorsListLoading ? t('loading') : (formData.participants ?? []).length ? `${t('selectedCount')}: ${(formData.participants ?? []).length}` : t('selectParticipants')}
+                              <ChevronDown className={cn('ml-2 h-4 w-4 opacity-50 transition-transform', participantsDropdownOpen && 'rotate-180')} />
+                            </Button>
+                            {participantsDropdownOpen && (
+                              <div className="absolute left-0 right-0 top-full z-50 mt-1 rounded-md border bg-popover p-2 shadow-md">
+                                <div className="max-h-60 overflow-y-auto overflow-x-hidden">
+                                  {exhibitorsList.length === 0 ? (
+                                    <p className="text-sm text-muted-foreground py-2">{t('noExhibitorsHint')}</p>
+                                  ) : (
+                                    <div className="space-y-1">
+                                      {exhibitorsList.map((exh) => (
+                                        <label
+                                          key={exh.id}
+                                          className={cn(
+                                            'flex items-center gap-2 py-1.5 px-2 rounded-md cursor-pointer',
+                                            (formData.participants ?? []).includes(exh.id) ? 'bg-primary/20 text-primary' : 'hover:bg-accent'
+                                          )}
+                                        >
+                                          <Checkbox
+                                            checked={(formData.participants ?? []).includes(exh.id)}
+                                            onCheckedChange={() => toggleParticipant(exh.id)}
+                                          />
+                                          <span className="text-sm">{exh.name}</span>
+                                        </label>
+                                      ))}
+                                    </div>
+                                  )}
                                 </div>
-                              )}
-                            </PopoverContent>
-                          </Popover>
+                              </div>
+                            )}
+                          </div>
                           <div className="flex flex-wrap gap-1.5 mt-2">
                             {(formData.participants ?? []).map((id: string) => {
                               const exh = exhibitorsList.find((e) => e.id === id)
