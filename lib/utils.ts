@@ -15,9 +15,50 @@ export function getCityName(
   return (city[key as keyof typeof city] as string)?.trim() || city.name || ''
 }
 
-/** Локаль для дат по языку интерфейса. Для uz используем ru-RU, т.к. uz-UZ в ряде сред даёт "M03" вместо "мар." */
+/** Локаль для дат по языку интерфейса. Для uz не используем uz-UZ (даёт "M03"), используем formatDateLocalized. */
 export function getDateLocale(lang: 'uz' | 'ru' | 'en'): string {
   return lang === 'en' ? 'en-US' : 'ru-RU'
+}
+
+/** Короткие названия месяцев по-узбекски (латиница), для дат публикаций */
+const UZ_MONTH_SHORT = ['yan', 'fev', 'mart', 'apr', 'may', 'iyun', 'iyul', 'avg', 'sen', 'okt', 'noy', 'dek']
+/** Полные названия месяцев по-узбекски (латиница) */
+const UZ_MONTH_LONG = ['Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'Iyun', 'Iyul', 'Avgust', 'Sentabr', 'Oktabr', 'Noyabr', 'Dekabr']
+
+export type DateFormatStyle = 'short' | 'long' | 'full'
+
+/**
+ * Форматирует дату под выбранный язык. Для узбекского использует ручные названия месяцев (uz-UZ в браузере даёт "M03").
+ * @param date — дата (Date, ISO-строка или timestamp)
+ * @param lang — язык интерфейса
+ * @param style — short: "6 mart" / "6 мар." / "Mar 6"; long: "6 mart 2025" / "6 марта 2025"; full: с днём недели (для uz как long)
+ */
+export function formatDateLocalized(
+  date: Date | string | number,
+  lang: 'uz' | 'ru' | 'en',
+  style: DateFormatStyle = 'long'
+): string {
+  const d = new Date(date)
+  if (Number.isNaN(d.getTime())) return ''
+
+  if (lang === 'uz') {
+    const day = d.getDate()
+    const month = d.getMonth()
+    const year = d.getFullYear()
+    if (style === 'short') {
+      return `${day} ${UZ_MONTH_SHORT[month]}`
+    }
+    return `${day} ${UZ_MONTH_LONG[month]} ${year}`
+  }
+
+  const locale = getDateLocale(lang)
+  if (style === 'short') {
+    return d.toLocaleDateString(locale, { day: 'numeric', month: 'short' })
+  }
+  if (style === 'full') {
+    return d.toLocaleDateString(locale, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+  }
+  return d.toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' })
 }
 
 function langKey(lang: 'uz' | 'ru' | 'en'): 'Uz' | 'Ru' | 'En' {

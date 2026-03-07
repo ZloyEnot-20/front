@@ -13,7 +13,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { MapPin, Calendar, Users, CheckCircle2 } from 'lucide-react'
 import { OptimizedImage } from '@/components/ui/optimized-image'
-import { getCityName, getDateLocale, getContentTitle, getContentDescription } from '@/lib/utils'
+import { getCityName, formatDateLocalized, getContentTitle, getContentDescription } from '@/lib/utils'
 
 interface ExhibitionCardProps {
   exhibition: Exhibition
@@ -27,15 +27,8 @@ export function ExhibitionCard({ exhibition }: ExhibitionCardProps) {
   const userRegistrations = user ? getRegistrationsByUser(user.id) : []
   const isRegistered = userRegistrations.some((r) => r.exhibitionId === exhibition.id && r.status === 'registered')
   const canRegister = !user || user.role === 'admin' || user.role === 'visitor'
-  const dateLocale = getDateLocale(lang)
-  const startDate = new Date(exhibition.startDate).toLocaleDateString(dateLocale, {
-    month: 'short',
-    day: 'numeric',
-  })
-  const endDate = new Date(exhibition.endDate).toLocaleDateString(dateLocale, {
-    month: 'short',
-    day: 'numeric',
-  })
+  const startDate = formatDateLocalized(exhibition.startDate, lang, 'short')
+  const endDate = formatDateLocalized(exhibition.endDate, lang, 'short')
 
   const statusLabel = {
     draft: t('draft'),

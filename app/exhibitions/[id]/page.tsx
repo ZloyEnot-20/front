@@ -6,7 +6,7 @@ import { useAdmin } from '@/lib/admin-context'
 import { getImageUrl } from '@/lib/api'
 import { useAuth } from '@/lib/auth-context'
 import { useLocale } from '@/lib/i18n'
-import { getCityName, getDateLocale, getContentTitle, getContentDescription } from '@/lib/utils'
+import { getCityName, formatDateLocalized, getContentTitle, getContentDescription } from '@/lib/utils'
 import { RegistrationModal } from '@/components/exhibitions/registration-modal'
 import { ChangeCityModal } from '@/components/exhibitions/change-city-modal'
 import { Button } from '@/components/ui/button'
@@ -73,20 +73,8 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
     )
   }
 
-  const dateLocale = getDateLocale(lang)
-  const startDate = new Date(exhibition.startDate).toLocaleDateString(dateLocale, {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  })
-
-  const endDate = new Date(exhibition.endDate).toLocaleDateString(dateLocale, {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  })
+  const startDate = formatDateLocalized(exhibition.startDate, lang, 'full')
+  const endDate = formatDateLocalized(exhibition.endDate, lang, 'full')
 
   return (
     <div className="min-h-screen bg-background">

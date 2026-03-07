@@ -23,7 +23,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Checkbox } from '@/components/ui/checkbox'
-import { cn, getCityName, getDateLocale, getContentTitle, getContentDescription, getNewsContent } from '@/lib/utils'
+import { cn, getCityName, formatDateLocalized, getContentTitle, getContentDescription, getNewsContent } from '@/lib/utils'
 import { ChevronDown } from 'lucide-react'
 
 function PublicationsContent() {
@@ -491,7 +491,7 @@ function PublicationsContent() {
                         <h3 className="font-bold text-white text-sm drop-shadow-md line-clamp-1">{getContentTitle(exhibition, lang)}</h3>
                         <p className="text-white/90 text-xs mt-0.5 line-clamp-1">{getContentDescription(exhibition, lang)}</p>
                         <div className="flex gap-3 mt-1 text-white/80 text-[10px]">
-                          <span>{new Date(exhibition.startDate).toLocaleDateString(getDateLocale(lang), { day: 'numeric', month: 'short' })}</span>
+                          <span>{formatDateLocalized(exhibition.startDate, lang, 'short')}</span>
                           <span>{exhibition.registrations} чел.</span>
                         </div>
                         <div className="flex items-center gap-1.5 mt-2 pt-2 border-t border-white/20 pointer-events-auto min-w-0 flex-wrap">
@@ -577,7 +577,7 @@ function PublicationsContent() {
                         <h3 className="font-bold text-white text-sm drop-shadow-md line-clamp-1">{getContentTitle(news, lang)}</h3>
                         <p className="text-white/90 text-xs mt-0.5 line-clamp-2">{(getNewsContent(news, lang) ?? '').replace(/<[^>]*>/g, '').slice(0, 100)}</p>
                         <p className="text-white/80 text-[10px] mt-1">
-                          {new Date(news.publishedAt).toLocaleDateString(getDateLocale(lang), { day: 'numeric', month: 'short', year: 'numeric' })}
+                          {formatDateLocalized(news.publishedAt, lang, 'long')}
                         </p>
                         <div className="flex items-center gap-1.5 mt-2 pt-2 border-t border-white/20 pointer-events-auto min-w-0 flex-wrap">
                         {togglingStatusNewsId === news.id ? (

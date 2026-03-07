@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useAuth } from '@/lib/auth-context'
 import { useAdmin } from '@/lib/admin-context'
 import { useLocale } from '@/lib/i18n'
-import { getCityName, getDateLocale, getContentTitle } from '@/lib/utils'
+import { getCityName, formatDateLocalized, getContentTitle } from '@/lib/utils'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -16,8 +16,7 @@ import type { ExhibitionRegistration } from '@/lib/types'
 export function ExhibitionsSection() {
   const { user } = useAuth()
   const { lang, t } = useLocale()
-  const dateLocale = getDateLocale(lang)
-  const formatDate = (d: Date | string) => new Date(d).toLocaleDateString(dateLocale, { day: 'numeric', month: 'short', year: 'numeric' })
+  const formatDate = (d: Date | string) => formatDateLocalized(d, lang, 'long')
   const { exhibitions, getRegistrationsByUser, refresh } = useAdmin()
   const [changeCityReg, setChangeCityReg] = useState<ExhibitionRegistration | null>(null)
 

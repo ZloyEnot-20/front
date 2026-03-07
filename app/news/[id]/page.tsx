@@ -5,7 +5,7 @@ import { Header } from '@/components/layout/header'
 import { useAdmin } from '@/lib/admin-context'
 import { useLocale } from '@/lib/i18n'
 import { getImageUrl } from '@/lib/api'
-import { getDateLocale, getContentTitle, getNewsContent } from '@/lib/utils'
+import { formatDateLocalized, getContentTitle, getNewsContent } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -24,7 +24,6 @@ export default function NewsDetailPage({ params }: NewsPageProps) {
   const { news: newsList, isLoading } = useAdmin()
   const news = newsList.find((n) => n.id === id)
   const otherNews = newsList.filter((n) => n.id !== id && n.status === 'published').slice(0, 3)
-  const dateLocale = getDateLocale(lang)
 
   if (isLoading) {
     return <NewsDetailSkeleton />
@@ -46,12 +45,7 @@ export default function NewsDetailPage({ params }: NewsPageProps) {
     )
   }
 
-  const publishedDate = new Date(news.publishedAt).toLocaleDateString(dateLocale, {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  })
+  const publishedDate = formatDateLocalized(news.publishedAt, lang, 'full')
 
   return (
     <div className="min-h-screen bg-background">
@@ -156,10 +150,7 @@ export default function NewsDetailPage({ params }: NewsPageProps) {
                           {n.title}
                         </h3>
                         <p className="text-xs text-muted-foreground mt-2">
-                          {new Date(n.publishedAt).toLocaleDateString(dateLocale, {
-                            month: 'short',
-                            day: 'numeric',
-                          })}
+                          {formatDateLocalized(n.publishedAt, lang, 'short')}
                         </p>
                       </Link>
                     ))}

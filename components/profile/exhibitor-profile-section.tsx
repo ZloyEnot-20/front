@@ -24,11 +24,11 @@ import { UniversityProfileSection } from '@/components/profile/university-profil
 import { SecuritySection } from '@/components/profile/security-section';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ExhibitorModal } from '@/components/exhibitions/exhibitor-modal';
-import { getCityName, getContentTitle, getContentDescription, getDateLocale } from '@/lib/utils';
+import { getCityName, getContentTitle, getContentDescription, formatDateLocalized } from '@/lib/utils';
 import type { Exhibition, ExhibitorInfo, ExhibitionRegistration } from '@/lib/types';
 
 function formatExhibitionDate(d: Date | string, lang: 'uz' | 'ru' | 'en' = 'ru') {
-  return new Date(d).toLocaleDateString(getDateLocale(lang), { day: 'numeric', month: 'long', year: 'numeric' });
+  return formatDateLocalized(d, lang, 'long');
 }
 
 // Data Table Component — лиды: данные из профиля + статус + выставка

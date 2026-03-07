@@ -1,7 +1,7 @@
 import { News } from '@/lib/types'
 import { getImageUrl } from '@/lib/api'
 import { useLocale } from '@/lib/i18n'
-import { getDateLocale, getContentTitle, getNewsContent } from '@/lib/utils'
+import { formatDateLocalized, getContentTitle, getNewsContent } from '@/lib/utils'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
@@ -16,11 +16,7 @@ interface NewsCardProps {
 
 export function NewsCard({ news, featured = false, priority = false }: NewsCardProps) {
   const { lang } = useLocale()
-  const publishedDate = new Date(news.publishedAt).toLocaleDateString(getDateLocale(lang), {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  })
+  const publishedDate = formatDateLocalized(news.publishedAt, lang, 'long')
 
   if (featured) {
     return (
