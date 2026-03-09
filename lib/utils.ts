@@ -15,6 +15,16 @@ export function getCityName(
   return (city[key as keyof typeof city] as string)?.trim() || city.name || ''
 }
 
+/** Место проведения выставки по языку (UZ/RU/EN) */
+export function getVenue(
+  item: { venue?: string; venueUz?: string; venueRu?: string; venueEn?: string },
+  lang: 'uz' | 'ru' | 'en'
+): string {
+  if (!item) return ''
+  const key = lang === 'uz' ? 'venueUz' : lang === 'en' ? 'venueEn' : 'venueRu'
+  return (item[key as keyof typeof item] as string)?.trim() || item.venue || ''
+}
+
 /** Локаль для дат по языку интерфейса. Для uz не используем uz-UZ (даёт "M03"), используем formatDateLocalized. */
 export function getDateLocale(lang: 'uz' | 'ru' | 'en'): string {
   return lang === 'en' ? 'en-US' : 'ru-RU'

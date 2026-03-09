@@ -59,8 +59,11 @@ export interface Exhibition {
   descriptionUz?: string
   descriptionRu?: string
   descriptionEn?: string
-  /** Место проведения */
+  /** Место проведения (fallback) */
   venue?: string
+  venueUz?: string
+  venueRu?: string
+  venueEn?: string
   startDate: Date
   endDate: Date
   /** Города из справочника (множественный выбор) */

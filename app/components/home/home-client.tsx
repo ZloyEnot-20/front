@@ -41,7 +41,7 @@ export function HomeClient() {
             <>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
                 {publishedExhibitions.slice(0, HOME_EXHIBITIONS_LIMIT).map((exhibition) => (
-                  <ExhibitionCard key={exhibition.id} exhibition={exhibition} />
+                  <ExhibitionCard key={exhibition.id} exhibition={exhibition} showExhibitionBadge />
                 ))}
               </div>
               <div className="text-center">

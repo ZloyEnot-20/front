@@ -24,7 +24,7 @@ import { UniversityProfileSection } from '@/components/profile/university-profil
 import { SecuritySection } from '@/components/profile/security-section';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ExhibitorModal } from '@/components/exhibitions/exhibitor-modal';
-import { getCityName, getContentTitle, getContentDescription, formatDateLocalized } from '@/lib/utils';
+import { getCityName, getVenue, getContentTitle, getContentDescription, formatDateLocalized } from '@/lib/utils';
 import type { Exhibition, ExhibitorInfo, ExhibitionRegistration } from '@/lib/types';
 
 function formatExhibitionDate(d: Date | string, lang: 'uz' | 'ru' | 'en' = 'ru') {
@@ -786,7 +786,7 @@ function ExhibitionsTabContent({
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 items-stretch">
           {filteredExhibitions.map((ex) => {
             const cityNames = (ex.cities ?? []).map((c) => (typeof c === 'object' && c !== null ? getCityName(c, lang) : String(c)));
-            const locationLine = [ex.venue, cityNames.length ? cityNames.join(' | ') : ''].filter(Boolean).join(' · ') || '—';
+            const locationLine = [getVenue(ex, lang), cityNames.length ? cityNames.join(' | ') : ''].filter(Boolean).join(' · ') || '—';
             return (
               <div
                 key={ex.id}

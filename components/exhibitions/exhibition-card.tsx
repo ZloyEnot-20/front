@@ -13,13 +13,15 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { MapPin, Calendar, Users, CheckCircle2 } from 'lucide-react'
 import { OptimizedImage } from '@/components/ui/optimized-image'
-import { getCityName, formatDateLocalized, getContentTitle, getContentDescription } from '@/lib/utils'
+import { getCityName, getVenue, formatDateLocalized, getContentTitle, getContentDescription } from '@/lib/utils'
 
 interface ExhibitionCardProps {
   exhibition: Exhibition
+  /** На главной показывать бейдж «Выставка» вместо «Опубликовано» */
+  showExhibitionBadge?: boolean
 }
 
-export function ExhibitionCard({ exhibition }: ExhibitionCardProps) {
+export function ExhibitionCard({ exhibition, showExhibitionBadge = false }: ExhibitionCardProps) {
   const { t, lang } = useLocale()
   const [registrationOpen, setRegistrationOpen] = useState(false)
   const { user } = useAuth()
@@ -36,6 +38,7 @@ export function ExhibitionCard({ exhibition }: ExhibitionCardProps) {
     archived: t('archived'),
     cancelled: t('cancelled'),
   }
+  const badgeText = showExhibitionBadge && exhibition.status === 'published' ? t('exhibitionBadge') : statusLabel[exhibition.status]
 
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow h-full flex flex-col">
@@ -49,7 +52,7 @@ export function ExhibitionCard({ exhibition }: ExhibitionCardProps) {
           />
         )}
         <Badge className="absolute top-4 left-4" variant={exhibition.status === 'published' ? 'default' : 'secondary'}>
-          {statusLabel[exhibition.status]}
+          {badgeText}
         </Badge>
       </div>
 
@@ -67,7 +70,7 @@ export function ExhibitionCard({ exhibition }: ExhibitionCardProps) {
           <div className="flex items-center gap-2 text-muted-foreground">
             <MapPin className="w-4 h-4 flex-shrink-0" />
             <span className="truncate">
-              {[exhibition.venue, exhibition.cities?.map((c) => getCityName(c, lang)).join(', ')].filter(Boolean).join(' · ') || '—'}
+              {[getVenue(exhibition, lang), exhibition.cities?.map((c) => getCityName(c, lang)).join(', ')].filter(Boolean).join(' · ') || '—'}
             </span>
           </div>
           {user?.role !== 'visitor' && user?.role !== 'exhibitor' && (

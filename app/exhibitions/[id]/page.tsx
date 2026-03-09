@@ -6,7 +6,7 @@ import { useAdmin } from '@/lib/admin-context'
 import { getImageUrl } from '@/lib/api'
 import { useAuth } from '@/lib/auth-context'
 import { useLocale } from '@/lib/i18n'
-import { getCityName, formatDateLocalized, getContentTitle, getContentDescription } from '@/lib/utils'
+import { getCityName, getVenue, formatDateLocalized, getContentTitle, getContentDescription } from '@/lib/utils'
 import { RegistrationModal } from '@/components/exhibitions/registration-modal'
 import { ChangeCityModal } from '@/components/exhibitions/change-city-modal'
 import { Button } from '@/components/ui/button'
@@ -164,13 +164,13 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
                     </div>
                   </div>
 
-                  {(exhibition.venue || (exhibition.cities?.length ?? 0) > 0) && (
+                  {(getVenue(exhibition, lang) || (exhibition.cities?.length ?? 0) > 0) && (
                     <div className="flex items-start gap-4">
                       <MapPin className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
                       <div>
                         <p className="font-medium">{t('venueLabel')}</p>
                         <p className="text-sm text-muted-foreground">
-                          {[exhibition.venue, exhibition.cities?.map((c) => getCityName(c, lang)).join(', ')].filter(Boolean).join(' · ')}
+                          {[getVenue(exhibition, lang), exhibition.cities?.map((c) => getCityName(c, lang)).join(', ')].filter(Boolean).join(' · ')}
                         </p>
                       </div>
                     </div>

@@ -112,7 +112,7 @@ function PublicationsContent() {
     setEditingItem(null)
     setFormData(
       type === 'exhibition'
-        ? { venue: '', cities: [], participants: [], images: [], titleUz: '', titleRu: '', titleEn: '', descriptionUz: '', descriptionRu: '', descriptionEn: '' }
+        ? { venueRu: '', venueUz: '', venueEn: '', cities: [], participants: [], images: [], titleUz: '', titleRu: '', titleEn: '', descriptionUz: '', descriptionRu: '', descriptionEn: '' }
         : { images: [], titleUz: '', titleRu: '', titleEn: '', contentUz: '', contentRu: '', contentEn: '', excerptUz: '', excerptRu: '', excerptEn: '' }
     )
     setPendingBannerFile(null)
@@ -136,7 +136,14 @@ function PublicationsContent() {
       titleRu: item.titleRu ?? item.title ?? '',
       titleEn: item.titleEn ?? item.title ?? '',
       ...(type === 'exhibition'
-        ? { descriptionUz: item.descriptionUz ?? item.description ?? '', descriptionRu: item.descriptionRu ?? item.description ?? '', descriptionEn: item.descriptionEn ?? item.description ?? '' }
+        ? {
+            descriptionUz: item.descriptionUz ?? item.description ?? '',
+            descriptionRu: item.descriptionRu ?? item.description ?? '',
+            descriptionEn: item.descriptionEn ?? item.description ?? '',
+            venueRu: item.venueRu ?? item.venue ?? '',
+            venueUz: item.venueUz ?? item.venue ?? '',
+            venueEn: item.venueEn ?? item.venue ?? '',
+          }
         : {
             contentUz: item.contentUz ?? item.content ?? '',
             contentRu: item.contentRu ?? item.content ?? '',
@@ -203,8 +210,10 @@ function PublicationsContent() {
         setUploadError(t('enterExhibitionDescription'))
         return
       }
-      const venue = (formData.venue ?? '').trim()
-      if (!venue) {
+      const venueRu = (formData.venueRu ?? '').trim()
+      const venueUz = (formData.venueUz ?? '').trim()
+      const venueEn = (formData.venueEn ?? '').trim()
+      if (!venueRu && !venueUz && !venueEn) {
         setUploadError(t('enterVenue'))
         return
       }
@@ -271,7 +280,13 @@ function PublicationsContent() {
           fd.append('descriptionUz', (formData.descriptionUz ?? '').trim())
           fd.append('descriptionRu', (formData.descriptionRu ?? formData.description ?? '').trim())
           fd.append('descriptionEn', (formData.descriptionEn ?? '').trim())
-          fd.append('venue', (formData.venue ?? '').trim())
+          const vRu = (formData.venueRu ?? '').trim()
+          const vUz = (formData.venueUz ?? '').trim()
+          const vEn = (formData.venueEn ?? '').trim()
+          fd.append('venueRu', vRu)
+          fd.append('venueUz', vUz)
+          fd.append('venueEn', vEn)
+          fd.append('venue', vRu || vEn || vUz)
           fd.append('cities', JSON.stringify(formData.cities ?? []))
           fd.append('participants', JSON.stringify(formData.participants ?? []))
           const start = formData.startDate ? (formData.startDate instanceof Date ? formData.startDate : new Date(formData.startDate)) : new Date()
@@ -321,7 +336,10 @@ function PublicationsContent() {
         const banner = dataToSave.banner ?? dataToSave.image
         if (editingItem) {
           if (modalType === 'exhibition') {
-            await updateExhibition(editingItem.id, { ...dataToSave, venue: (dataToSave.venue ?? '').trim(), cities: dataToSave.cities ?? [], participants: dataToSave.participants ?? [], banner, images: dataToSave.images ?? [], titleUz: dataToSave.titleUz, titleRu: dataToSave.titleRu, titleEn: dataToSave.titleEn, descriptionUz: dataToSave.descriptionUz, descriptionRu: dataToSave.descriptionRu, descriptionEn: dataToSave.descriptionEn })
+            const vRu = (dataToSave.venueRu ?? '').trim()
+            const vUz = (dataToSave.venueUz ?? '').trim()
+            const vEn = (dataToSave.venueEn ?? '').trim()
+            await updateExhibition(editingItem.id, { ...dataToSave, venue: vRu || vEn || vUz, venueRu: vRu || undefined, venueUz: vUz || undefined, venueEn: vEn || undefined, cities: dataToSave.cities ?? [], participants: dataToSave.participants ?? [], banner, images: dataToSave.images ?? [], titleUz: dataToSave.titleUz, titleRu: dataToSave.titleRu, titleEn: dataToSave.titleEn, descriptionUz: dataToSave.descriptionUz, descriptionRu: dataToSave.descriptionRu, descriptionEn: dataToSave.descriptionEn })
           } else {
             const newsPayload = {
               title: dataToSave.titleRu ?? dataToSave.title,
@@ -356,7 +374,10 @@ function PublicationsContent() {
               descriptionUz: dataToSave.descriptionUz,
               descriptionRu: dataToSave.descriptionRu,
               descriptionEn: dataToSave.descriptionEn,
-              venue: (dataToSave.venue ?? '').trim(),
+              venue: (dataToSave.venueRu ?? dataToSave.venueUz ?? dataToSave.venueEn ?? '').trim() || (dataToSave.venue ?? '').trim(),
+              venueRu: (dataToSave.venueRu ?? '').trim() || undefined,
+              venueUz: (dataToSave.venueUz ?? '').trim() || undefined,
+              venueEn: (dataToSave.venueEn ?? '').trim() || undefined,
               startDate: dataToSave.startDate ?? new Date(),
               endDate: dataToSave.endDate ?? new Date(),
               cities: dataToSave.cities ?? [],
@@ -800,14 +821,6 @@ function PublicationsContent() {
                     {modalType === 'exhibition' ? (
                       <>
                         <div>
-                          <label className="text-sm font-medium">{t('location')} *</label>
-                          <Input
-                            value={formData.venue || ''}
-                            onChange={(e) => setFormData({ ...formData, venue: e.target.value })}
-                            placeholder={t('enterVenue')}
-                          />
-                        </div>
-                        <div>
                           <label className="text-sm font-medium">{t('cities')}</label>
                           <p className="text-xs text-muted-foreground mt-0.5 mb-1">{t('citiesMultiHint')}</p>
                           <div className="relative" ref={citiesDropdownRef}>
@@ -953,10 +966,16 @@ function PublicationsContent() {
                       <Input value={formData.titleRu ?? formData.title ?? ''} onChange={(e) => setFormData({ ...formData, titleRu: e.target.value })} placeholder={t('enterTitle')} />
                     </div>
                     {modalType === 'exhibition' ? (
-                      <div>
-                        <label className="text-sm font-medium">{t('description')} (RU) *</label>
-                        <Textarea value={formData.descriptionRu ?? formData.description ?? ''} onChange={(e) => setFormData({ ...formData, descriptionRu: e.target.value })} placeholder={t('enterExhibitionDescription')} rows={4} />
-                      </div>
+                      <>
+                        <div>
+                          <label className="text-sm font-medium">{t('description')} (RU) *</label>
+                          <Textarea value={formData.descriptionRu ?? formData.description ?? ''} onChange={(e) => setFormData({ ...formData, descriptionRu: e.target.value })} placeholder={t('enterExhibitionDescription')} rows={4} />
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium">{t('venueLabel')} (RU)</label>
+                          <Input value={formData.venueRu ?? ''} onChange={(e) => setFormData({ ...formData, venueRu: e.target.value })} placeholder={t('enterVenue')} />
+                        </div>
+                      </>
                     ) : (
                       <>
                         <div>
@@ -978,10 +997,16 @@ function PublicationsContent() {
                       <Input value={formData.titleUz ?? ''} onChange={(e) => setFormData({ ...formData, titleUz: e.target.value })} placeholder={t('enterTitle')} />
                     </div>
                     {modalType === 'exhibition' ? (
-                      <div>
-                        <label className="text-sm font-medium">{t('description')} (UZ) *</label>
-                        <Textarea value={formData.descriptionUz ?? ''} onChange={(e) => setFormData({ ...formData, descriptionUz: e.target.value })} placeholder={t('enterExhibitionDescription')} rows={4} />
-                      </div>
+                      <>
+                        <div>
+                          <label className="text-sm font-medium">{t('description')} (UZ) *</label>
+                          <Textarea value={formData.descriptionUz ?? ''} onChange={(e) => setFormData({ ...formData, descriptionUz: e.target.value })} placeholder={t('enterExhibitionDescription')} rows={4} />
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium">{t('venueLabel')} (UZ)</label>
+                          <Input value={formData.venueUz ?? ''} onChange={(e) => setFormData({ ...formData, venueUz: e.target.value })} placeholder={t('enterVenue')} />
+                        </div>
+                      </>
                     ) : (
                       <>
                         <div>
@@ -1003,10 +1028,16 @@ function PublicationsContent() {
                       <Input value={formData.titleEn ?? ''} onChange={(e) => setFormData({ ...formData, titleEn: e.target.value })} placeholder={t('enterTitle')} />
                     </div>
                     {modalType === 'exhibition' ? (
-                      <div>
-                        <label className="text-sm font-medium">{t('description')} (EN) *</label>
-                        <Textarea value={formData.descriptionEn ?? ''} onChange={(e) => setFormData({ ...formData, descriptionEn: e.target.value })} placeholder={t('enterExhibitionDescription')} rows={4} />
-                      </div>
+                      <>
+                        <div>
+                          <label className="text-sm font-medium">{t('description')} (EN) *</label>
+                          <Textarea value={formData.descriptionEn ?? ''} onChange={(e) => setFormData({ ...formData, descriptionEn: e.target.value })} placeholder={t('enterExhibitionDescription')} rows={4} />
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium">{t('venueLabel')} (EN)</label>
+                          <Input value={formData.venueEn ?? ''} onChange={(e) => setFormData({ ...formData, venueEn: e.target.value })} placeholder={t('enterVenue')} />
+                        </div>
+                      </>
                     ) : (
                       <>
                         <div>

@@ -296,6 +296,9 @@ export interface ApiExhibition {
   descriptionRu?: string
   descriptionEn?: string
   venue?: string
+  venueUz?: string
+  venueRu?: string
+  venueEn?: string
   startDate: string
   endDate: string
   cities?: { id: string; name: string }[]
