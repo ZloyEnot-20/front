@@ -377,6 +377,9 @@ const ru = {
   newsBadge: 'Новость',
   otherNews: 'Другие новости',
   newsSubtitle: 'Будьте в курсе последних событий в мире выставок',
+  readNews: 'Читать',
+  readNewsFull: 'Читать полностью',
+  allNews: 'Все новости',
 
   // Participant cabinet
   participantCabinet: 'Кабинет участника',
@@ -865,6 +868,9 @@ const en: Record<string, string> = {
   newsBadge: 'News',
   otherNews: 'Other news',
   newsSubtitle: 'Stay up to date with the latest in the exhibition world',
+  readNews: 'Read',
+  readNewsFull: 'Read full',
+  allNews: 'All news',
 
   participantCabinet: 'Participant cabinet',
   manageParticipation: 'Manage your exhibition participation',
@@ -1345,6 +1351,9 @@ const uz: Record<string, string> = {
   newsBadge: 'Yangilik',
   otherNews: "Boshqa yangiliklar",
   newsSubtitle: "Ko'rgazmalar dunyosidagi so'nggi voqealar bilan tanishing",
+  readNews: "O'qish",
+  readNewsFull: "To'liq o'qish",
+  allNews: "Barcha yangiliklar",
 
   participantCabinet: "Ishtirokchi kabineti",
   manageParticipation: "Ko'rgazmalarda ishtirokni boshqaring",

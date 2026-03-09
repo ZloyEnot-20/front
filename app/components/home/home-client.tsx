@@ -89,7 +89,7 @@ export function HomeClient() {
               <div className="text-center">
                 <Button variant="outline" asChild>
                   <Link href="/news">
-                    Все новости
+                    {t('allNews')}
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Link>
                 </Button>

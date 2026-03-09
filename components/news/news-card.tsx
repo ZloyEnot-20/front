@@ -15,7 +15,7 @@ interface NewsCardProps {
 }
 
 export function NewsCard({ news, featured = false, priority = false }: NewsCardProps) {
-  const { lang } = useLocale()
+  const { t, lang } = useLocale()
   const publishedDate = formatDateLocalized(news.publishedAt, lang, 'long')
 
   if (featured) {
@@ -41,7 +41,7 @@ export function NewsCard({ news, featured = false, priority = false }: NewsCardP
               {publishedDate}
             </div>
             <Button asChild className="w-fit">
-              <Link href={`/news/${news.id}`}>Читать полностью</Link>
+              <Link href={`/news/${news.id}`}>{t('readNewsFull')}</Link>
             </Button>
           </div>
         </div>
@@ -74,7 +74,7 @@ export function NewsCard({ news, featured = false, priority = false }: NewsCardP
         </div>
 
         <Button asChild className="w-full bg-transparent" variant="outline">
-          <Link href={`/news/${news.id}`}>Читать</Link>
+          <Link href={`/news/${news.id}`}>{t('readNews')}</Link>
         </Button>
       </CardContent>
     </Card>
