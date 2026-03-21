@@ -42,7 +42,7 @@ export function RegistrationModal({
   exhibitionTitle,
   cities: exhibitionCities = [],
 }: RegistrationModalProps) {
-  const { t } = useLocale()
+  const { t, lang } = useLocale()
   const { user } = useAuth()
   const { addRegistration, incrementExhibitionRegistrations } = useAdmin()
   const [step, setStep] = useState<'city' | 'success'>('city')
@@ -128,7 +128,7 @@ export function RegistrationModal({
               <AlertDescription>{t('signInToRegister')}</AlertDescription>
             </Alert>
             <Button asChild>
-              <Link href="/auth/login">{t('login')}</Link>
+              <Link href={`/${lang}/auth/login`}>{t('login')}</Link>
             </Button>
           </>
         ) : step === 'city' ? (

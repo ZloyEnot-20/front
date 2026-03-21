@@ -176,7 +176,7 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
                     </div>
                   )}
 
-                  {user?.role !== 'visitor' && user?.role !== 'exhibitor' && (
+                  {user?.role === 'admin' && (
                     <div className="flex items-start gap-4">
                       <Users className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
                       <div>

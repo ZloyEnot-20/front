@@ -15,7 +15,7 @@ const HOME_EXHIBITIONS_LIMIT = 6
 const HOME_NEWS_LIMIT = 6
 
 export function HomeClient() {
-  const { t } = useLocale()
+  const { t, lang } = useLocale()
   const { user } = useAuth()
   const { exhibitions, news, isLoading } = useAdmin()
   const publishedExhibitions = exhibitions.filter((e) => e.status === 'published')
@@ -58,7 +58,7 @@ export function HomeClient() {
               <p className="text-muted-foreground mb-4">{t('noExhibitionsNow')}</p>
               {!user && (
                 <Button asChild>
-                  <Link href="/auth/signup">{t('stayTuned')}</Link>
+                  <Link href={`/${lang}/auth/signup`}>{t('stayTuned')}</Link>
                 </Button>
               )}
             </div>
@@ -110,7 +110,7 @@ export function HomeClient() {
               {t('ctaSubtitle')}
             </p>
             <Button size="lg" asChild>
-              <Link href="/auth/signup">{t('registerNowCta')}</Link>
+              <Link href={`/${lang}/auth/signup`}>{t('registerNowCta')}</Link>
             </Button>
           </div>
         </section>
@@ -128,10 +128,10 @@ export function HomeClient() {
               </div>
             </div>
             <div className="flex gap-8 text-sm text-muted-foreground">
-              <Link href="/" className="hover:text-foreground transition-colors">
+              <Link href="/main" className="hover:text-foreground transition-colors">
                 {t('aboutUs')}
               </Link>
-              <Link href="/" className="hover:text-foreground transition-colors">
+              <Link href="/main" className="hover:text-foreground transition-colors">
                 {t('contacts')}
               </Link>
               <Link href="/privacy" className="hover:text-foreground transition-colors">

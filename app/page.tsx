@@ -1,13 +1,5 @@
-import { Header } from '@/components/layout/header'
-import { Hero } from './components/home/hero'
-import { HomeClient } from './components/home/home-client'
+import { redirect } from 'next/navigation'
 
-export default function Home() {
-  return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      <Hero />
-      <HomeClient />
-    </div>
-  )
+export default function RootPage() {
+  redirect('/uz')
 }

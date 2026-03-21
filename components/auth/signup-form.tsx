@@ -5,6 +5,7 @@ import React from "react"
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
+import { useLocale } from '@/lib/i18n'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -14,6 +15,7 @@ import { UserRole } from '@/lib/types'
 
 export function SignupForm() {
   const router = useRouter()
+  const { lang } = useLocale()
   const { signup, isLoading } = useAuth()
   const [error, setError] = useState('')
   const [formData, setFormData] = useState({
@@ -43,7 +45,7 @@ export function SignupForm() {
 
     try {
       await signup(formData.email, formData.name, formData.password, 'visitor')
-      router.push('/')
+      router.push('/main')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Ошибка регистрации')
     }
@@ -128,7 +130,7 @@ export function SignupForm() {
 
         <div className="mt-4 text-center text-sm text-muted-foreground">
           Уже есть учетная запись?{' '}
-          <a href="/auth/login" className="text-primary hover:underline">
+          <a href={`/${lang}/auth/login`} className="text-primary hover:underline">
             Войти
           </a>
         </div>

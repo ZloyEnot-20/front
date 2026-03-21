@@ -21,9 +21,7 @@ import {
 } from '@/components/ui/select'
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp'
 import { Loader2 } from 'lucide-react'
-
-const LANG = ['uz', 'ru', 'en'] as const
-type Lang = (typeof LANG)[number]
+import type { Lang } from '@/lib/i18n/translations'
 
 const t: Record<Lang, Record<string, string>> = {
   uz: {
@@ -68,7 +66,7 @@ const t: Record<Lang, Record<string, string>> = {
     confirmDesc: "Pochtangizga yuborilgan kodni kiriting",
     confirmSubmit: "Ro'yxatdan o'tish",
     back: 'Orqaga',
-    haveAccount: 'Hisobingiz bormi?',
+    haveAccount: 'Profilingiz bormi?',
     login: 'Kirish',
     errRequired: "To'ldiring",
     errEmailCode: 'Emailni tasdiqlang: kodni kiriting',
@@ -181,16 +179,17 @@ const t: Record<Lang, Record<string, string>> = {
 const INTEREST_OPTIONS = ['Bachelor', 'Master', 'MBA', 'Short Courses', 'School'] as const
 const ADMISSION_PLANS = ['0-3', '3-6', '6-12', '12+'] as const
 
-export function VisitorSignupForm() {
+export function VisitorSignupForm({ initialLang }: { initialLang: Lang }) {
   const router = useRouter()
   const { signup, isLoading } = useAuth()
-  const globalLocale = useLocale()
-  const [step, setStep] = useState<'language' | 'form' | 'confirm'>('language')
-  const [lang, setLangState] = useState<Lang>(() => globalLocale.lang)
-  const setLang = (l: Lang) => {
-    setLangState(l)
-    globalLocale.setLang(l)
-  }
+  const { setLang: setGlobalLang } = useLocale()
+  const [step, setStep] = useState<'form' | 'confirm'>('form')
+  const [lang, setLangState] = useState<Lang>(initialLang)
+
+  useEffect(() => {
+    setLangState(initialLang)
+    setGlobalLang(initialLang)
+  }, [initialLang, setGlobalLang])
   const [error, setError] = useState('')
   const [emailCodeSent, setEmailCodeSent] = useState(false)
   const [sendingCode, setSendingCode] = useState(false)
@@ -221,10 +220,6 @@ export function VisitorSignupForm() {
     password: '',
     confirmPassword: '',
   })
-
-  useEffect(() => {
-    if (step === 'language') setLangState(globalLocale.lang)
-  }, [globalLocale.lang, step])
 
   const T = t[lang]
 
@@ -326,39 +321,11 @@ export function VisitorSignupForm() {
         admissionPlan: formData.admissionPlan || undefined,
         consentGiven: true,
       })
-      router.push('/')
+      router.push('/main')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Ошибка регистрации')
       scrollToError()
     }
-  }
-
-  if (step === 'language') {
-    return (
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>{T.title}</CardTitle>
-          <CardDescription>{T.langStep}</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex gap-3 justify-center flex-wrap">
-            {LANG.map((l) => (
-              <Button
-                key={l}
-                type="button"
-                variant={lang === l ? 'default' : 'outline'}
-                onClick={() => setLang(l)}
-              >
-                {l.toUpperCase()}
-              </Button>
-            ))}
-          </div>
-          <Button className="w-full" onClick={() => setStep('form')}>
-            {T.submit}
-          </Button>
-        </CardContent>
-      </Card>
-    )
   }
 
   if (step === 'confirm') {
@@ -659,7 +626,7 @@ export function VisitorSignupForm() {
 
         <div className="mt-4 text-center text-sm text-muted-foreground">
           {T.haveAccount}{' '}
-          <a href="/auth/login" className="text-primary hover:underline">
+          <a href={`/${lang}/auth/login`} className="text-primary hover:underline">
             {T.login}
           </a>
         </div>

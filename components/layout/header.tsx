@@ -70,7 +70,7 @@ export function Header({ profileTabs }: HeaderProps) {
               </SheetHeader>
               <nav className="flex flex-col gap-1 pt-6">
                 <Button variant="ghost" className="justify-start font-medium" asChild>
-                  <Link href="/" onClick={closeMobileMenu}>{t('home')}</Link>
+                  <Link href="/main" onClick={closeMobileMenu}>{t('home')}</Link>
                 </Button>
                 <Button variant="ghost" className="justify-start font-medium" asChild>
                   <Link href="/exhibitions" onClick={closeMobileMenu}>{t('exhibitions')}</Link>
@@ -91,7 +91,7 @@ export function Header({ profileTabs }: HeaderProps) {
               </nav>
             </SheetContent>
           </Sheet>
-          <Link href="/" className="hidden md:flex items-center gap-2">
+          <Link href="/main" className="hidden md:flex items-center gap-2">
             <img src="/logo.png" alt="" className="w-8 h-8 rounded-lg object-contain shrink-0" />
             <span className="font-bold text-lg">{t('appName')}</span>
           </Link>
@@ -207,10 +207,10 @@ export function Header({ profileTabs }: HeaderProps) {
           ) : (
             <>
               <Button variant="ghost" asChild>
-                <Link href="/auth/login">{t('login')}</Link>
+                <Link href={`/${lang}/auth/login`}>{t('login')}</Link>
               </Button>
               <Button asChild>
-                <Link href="/auth/signup">{t('signup')}</Link>
+                <Link href={`/${lang}/auth/signup`}>{t('signup')}</Link>
               </Button>
             </>
           )}

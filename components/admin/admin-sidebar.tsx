@@ -100,7 +100,7 @@ export function AdminSidebar() {
             })}
           </nav>
           <div className="border-t border-slate-800 mt-4 pt-4 space-y-2">
-            <Link href="/" onClick={() => setMobileOpen(false)}>
+            <Link href="/main" onClick={() => setMobileOpen(false)}>
               <Button
                 variant="ghost"
                 className="w-full justify-start gap-3 hover:bg-slate-800"

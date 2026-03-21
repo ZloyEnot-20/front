@@ -5,7 +5,7 @@ import { useLocale } from '@/lib/i18n'
 import { useAuth } from '@/lib/auth-context'
 
 export function Hero() {
-  const { t } = useLocale()
+  const { t, lang } = useLocale()
   const { user } = useAuth()
   const showRegister = !user
   return (
@@ -30,7 +30,7 @@ export function Hero() {
             </a>
             {showRegister && (
               <Link
-                href="/auth/signup"
+                href={`/${lang}/auth/signup`}
                 className="inline-flex items-center justify-center rounded-md text-sm font-medium border border-input bg-background h-11 px-8 hover:bg-accent"
               >
                 {t('registerNow')}

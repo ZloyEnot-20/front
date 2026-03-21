@@ -1,0 +1,47 @@
+import type { Lang } from '@/lib/i18n/translations'
+
+/** Префиксы для ротирующейся строки «в [городе] крупнейшая выставка…» */
+export const LANDING_ROTATING_CITY_PREFIXES: Record<Lang, readonly string[]> = {
+  uz: [
+    'Toshkentdagi',
+    'Samarqanddagi',
+    'Buxorodagi',
+    'Urganchdagi',
+    'Nukusdagi',
+    'Navoiydagi',
+    "Far'gonadagi",
+    'Andijondagi',
+    'Namangandagi',
+    'Jizzaxdagi',
+    'Qarshidagi',
+    'Termizdagi',
+  ],
+  ru: [
+    'В Ташкенте',
+    'В Самарканде',
+    'В Бухаре',
+    'В Ургенче',
+    'В Нукусе',
+    'В Навои',
+    'В Фергане',
+    'В Андижане',
+    'В Намангане',
+    'В Джизаке',
+    'В Карши',
+    'В Термезе',
+  ],
+  en: [
+    'In Tashkent',
+    'In Samarkand',
+    'In Bukhara',
+    'In Urgench',
+    'In Nukus',
+    'In Navoi',
+    'In Fergana',
+    'In Andijan',
+    'In Namangan',
+    'In Jizzakh',
+    'In Karshi',
+    'In Termez',
+  ],
+}

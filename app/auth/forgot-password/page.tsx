@@ -12,7 +12,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "https://api.myfair.tw1.ru/api"
 
 export default function ForgotPasswordPage() {
-  const { t } = useLocale()
+  const { t, lang } = useLocale()
   const [email, setEmail] = useState('')
   const [sent, setSent] = useState(false)
   const [error, setError] = useState('')
@@ -48,7 +48,7 @@ export default function ForgotPasswordPage() {
           </CardHeader>
           <CardContent>
             <Button asChild className="w-full">
-              <Link href="/auth/login">{t('backToLogin')}</Link>
+              <Link href={`/${lang}/auth/login`}>{t('backToLogin')}</Link>
             </Button>
           </CardContent>
         </Card>
@@ -87,7 +87,7 @@ export default function ForgotPasswordPage() {
             </Button>
           </form>
           <div className="mt-4 text-center text-sm text-muted-foreground">
-            <Link href="/auth/login" className="text-primary hover:underline">
+            <Link href={`/${lang}/auth/login`} className="text-primary hover:underline">
               {t('backToLogin')}
             </Link>
           </div>

@@ -73,7 +73,7 @@ export function ExhibitionCard({ exhibition, showExhibitionBadge = false }: Exhi
               {[getVenue(exhibition, lang), exhibition.cities?.map((c) => getCityName(c, lang)).join(', ')].filter(Boolean).join(' · ') || '—'}
             </span>
           </div>
-          {user?.role !== 'visitor' && user?.role !== 'exhibitor' && (
+          {user?.role === 'admin' && (
             <div className="flex items-center gap-2 text-muted-foreground">
               <Users className="w-4 h-4" />
               {exhibition.registrations} {t('registeredCount')}

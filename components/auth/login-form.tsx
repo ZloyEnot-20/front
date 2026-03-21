@@ -6,13 +6,14 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
 import { useLocale } from '@/lib/i18n'
+import type { Lang } from '@/lib/i18n/translations'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 
-export function LoginForm() {
+export function LoginForm({ localePrefix = 'uz' }: { localePrefix?: Lang }) {
   const router = useRouter()
   const { t } = useLocale()
   const { login, isLoading } = useAuth()
@@ -35,7 +36,7 @@ export function LoginForm() {
     e.preventDefault()
     try {
       await login(formData.email, formData.password)
-      router.push('/')
+      router.push('/main')
     } catch (err) {
       setError(err instanceof Error ? err.message : t('loginError'))
     }
@@ -95,7 +96,7 @@ export function LoginForm() {
 
         <div className="mt-4 text-center text-sm text-muted-foreground">
           {t('noAccount')}{' '}
-          <a href="/auth/signup" className="text-primary hover:underline">
+          <a href={`/${localePrefix}/auth/signup`} className="text-primary hover:underline">
             {t('registerLink')}
           </a>
         </div>
