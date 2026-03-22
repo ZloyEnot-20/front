@@ -1,5 +1,6 @@
 'use client'
 
+import { AppDownloadLinks } from '@/components/app-download-links'
 import { ExhibitionCard } from '@/components/exhibitions/exhibition-card'
 import { ExhibitionCardSkeleton } from '@/components/exhibitions/exhibition-card-skeleton'
 import { NewsCard } from '@/components/news/news-card'
@@ -115,6 +116,12 @@ export function HomeClient() {
           </div>
         </section>
       )}
+
+      <section className="border-t border-border/40 bg-muted/30 py-10 md:py-12" aria-label={t('landingAppDownloadTitle')}>
+        <div className="container mx-auto px-4">
+          <AppDownloadLinks titleClassName="text-center text-foreground" />
+        </div>
+      </section>
 
       {/* Footer */}
       <footer className="border-t border-border/40 py-12 bg-muted/40">
