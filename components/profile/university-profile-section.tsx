@@ -163,7 +163,7 @@ export function UniversityProfileSection({ user }: UniversityProfileSectionProps
           <Input
             value={formData.name}
             onChange={(e) => handleChange('name', e.target.value)}
-            placeholder={t('enterUniversityName')}
+            placeholder={t('universityProfileNamePlaceholder')}
             className="h-9"
           />
         </div>

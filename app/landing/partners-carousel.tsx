@@ -9,7 +9,33 @@ import { cn } from '@/lib/utils'
 const slides = chunkPartnerSlides(LANDING_PARTNER_LOGOS)
 
 const navBtnClass =
-  'inline-flex size-10 shrink-0 items-center justify-center rounded-full border-2 border-[#01AEF9] text-[#01AEF9] transition-colors hover:bg-[#01AEF9]/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#01AEF9] disabled:pointer-events-none disabled:opacity-35'
+  'inline-flex size-10 shrink-0 items-center justify-center rounded-full border-2 border-[#01AEF9] bg-white/95 text-[#01AEF9] shadow-sm transition-colors hover:bg-[#01AEF9]/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#01AEF9] disabled:pointer-events-none disabled:opacity-35'
+
+function usePartnerGridCols(): 2 | 3 | 5 {
+  return React.useSyncExternalStore(
+    (onStoreChange) => {
+      if (typeof window === 'undefined') return () => {}
+      const mq768 = window.matchMedia('(min-width: 768px)')
+      const mq640 = window.matchMedia('(min-width: 640px)')
+      const fn = () => {
+        onStoreChange()
+      }
+      mq768.addEventListener('change', fn)
+      mq640.addEventListener('change', fn)
+      return () => {
+        mq768.removeEventListener('change', fn)
+        mq640.removeEventListener('change', fn)
+      }
+    },
+    () => {
+      if (typeof window === 'undefined') return 2
+      if (window.matchMedia('(min-width: 768px)').matches) return 5
+      if (window.matchMedia('(min-width: 640px)').matches) return 3
+      return 2
+    },
+    () => 2,
+  )
+}
 
 export function LandingPartnersCarousel({
   ariaCarousel = 'Participating university logos',
@@ -36,42 +62,64 @@ export function LandingPartnersCarousel({
     }
   }, [api])
 
-  return (
-    <div className="landing-partners-carousel w-full">
-      <div className="flex w-full items-center gap-3 sm:gap-4 md:gap-6">
-        <button
-          type="button"
-          aria-label={ariaPrev}
-          className={navBtnClass}
-          disabled={!api}
-          onClick={() => api?.scrollPrev()}
-        >
-          <ChevronLeft className="size-5" aria-hidden />
-        </button>
+  const cols = usePartnerGridCols()
+  const rowSize = cols
 
-        <div className="min-w-0 flex-1 overflow-hidden">
-          <Carousel
-            opts={{ align: 'start', loop: true }}
-            setApi={setApi}
-            className="w-full"
-            aria-label={ariaCarousel}
-          >
-            <CarouselContent>
-              {slides.map((slide, slideIndex) => (
-                <CarouselItem key={slideIndex}>
-                  <div className="flex flex-col gap-5 py-2 md:gap-6">
-                    {Array.from({ length: Math.ceil(slide.length / 5) }).map((_, rowIdx) => (
+  return (
+    <div className="landing-partners-carousel relative w-full">
+      <button
+        type="button"
+        aria-label={ariaPrev}
+        className={cn(navBtnClass, 'absolute left-0 top-1/2 z-10 -translate-y-1/2')}
+        disabled={!api}
+        onClick={() => api?.scrollPrev()}
+      >
+        <ChevronLeft className="size-5" aria-hidden />
+      </button>
+
+      <button
+        type="button"
+        aria-label={ariaNext}
+        className={cn(navBtnClass, 'absolute right-0 top-1/2 z-10 -translate-y-1/2')}
+        disabled={!api}
+        onClick={() => api?.scrollNext()}
+      >
+        <ChevronRight className="size-5" aria-hidden />
+      </button>
+
+      <div className="min-w-0 overflow-hidden px-12 sm:px-14 md:px-16">
+        <Carousel
+          opts={{ align: 'start', loop: true }}
+          setApi={setApi}
+          className="w-full"
+          aria-label={ariaCarousel}
+        >
+          <CarouselContent>
+            {slides.map((slide, slideIndex) => (
+              <CarouselItem key={slideIndex}>
+                <div className="flex flex-col gap-5 py-2 md:gap-6">
+                  {Array.from({ length: Math.ceil(slide.length / rowSize) }).map((_, rowIdx) => {
+                    const rowPartners = slide.slice(rowIdx * rowSize, rowIdx * rowSize + rowSize)
+                    return (
                       <div
                         key={rowIdx}
-                        className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5 md:gap-4"
+                        className={cn(
+                          'grid gap-3 md:gap-4',
+                          cols === 2 && 'grid-cols-2',
+                          cols === 3 && 'grid-cols-3',
+                          cols === 5 && 'grid-cols-5',
+                        )}
                       >
-                        {slide.slice(rowIdx * 5, rowIdx * 5 + 5).map((p, i) => (
+                        {rowPartners.map((p, i) => (
                           <a
                             key={`${slideIndex}-${rowIdx}-${i}`}
                             href={p.href}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex h-[5.5rem] items-center justify-center rounded-xl border border-gray-100 bg-white p-3 shadow-sm transition-transform duration-200 hover:scale-105 hover:border-[#01AEF9]/40 hover:shadow-md md:h-24"
+                            className={cn(
+                              'flex h-[5.5rem] items-center justify-center rounded-xl border border-gray-100 bg-white p-3 shadow-sm transition-transform duration-200 hover:scale-105 hover:border-[#01AEF9]/40 hover:shadow-md md:h-24',
+                              rowPartners.length === 1 && cols === 2 && 'col-span-2 mx-auto w-full max-w-[min(100%,11rem)]',
+                            )}
                           >
                             <img
                               src={p.image}
@@ -85,23 +133,13 @@ export function LandingPartnersCarousel({
                           </a>
                         ))}
                       </div>
-                    ))}
-                  </div>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-          </Carousel>
-        </div>
-
-        <button
-          type="button"
-          aria-label={ariaNext}
-          className={navBtnClass}
-          disabled={!api}
-          onClick={() => api?.scrollNext()}
-        >
-          <ChevronRight className="size-5" aria-hidden />
-        </button>
+                    )
+                  })}
+                </div>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+        </Carousel>
       </div>
 
       <div className="mt-8 flex flex-wrap justify-center gap-2">

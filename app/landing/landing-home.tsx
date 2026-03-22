@@ -22,6 +22,7 @@ import { LANDING_TELEGRAM_TEASER_CARD_IMAGE } from '@/lib/landing-telegram-tease
 import type { LandingLang } from '@/lib/i18n/landing-lang'
 import { useLocale } from '@/lib/i18n'
 import { LANDING_ROTATING_CITY_PREFIXES } from '@/lib/landing-rotating-cities'
+import { LandingAppDownloadBand } from './landing-app-download-band'
 import { LandingOrganizersCarousel } from './organizers-carousel'
 import { LandingPartnersCarousel } from './partners-carousel'
 
@@ -72,6 +73,40 @@ const LANDING_STEP_ASSETS = [
   { tone: 'teal' as const, src: landingPublicImage('a5391f7ab3c58347c692cd09f57fb747.png'), href: '#contacts' as const },
   { tone: 'blue' as const, src: landingPublicImage('7cf28d221379ed0da52cf80f5445238a.png'), href: '#contacts' as const },
 ] as const
+
+function LandingHeroLangButtons({
+  lang,
+  router,
+}: {
+  lang: string
+  router: { replace: (href: string) => void }
+}) {
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => router.replace('/ru')}
+        className={`landing-lang-btn ${lang === 'ru' ? 'landing-lang-active' : ''}`}
+      >
+        RU
+      </button>
+      <button
+        type="button"
+        onClick={() => router.replace('/en')}
+        className={`landing-lang-btn ${lang === 'en' ? 'landing-lang-active' : ''}`}
+      >
+        EN
+      </button>
+      <button
+        type="button"
+        onClick={() => router.replace('/uz')}
+        className={`landing-lang-btn ${lang === 'uz' ? 'landing-lang-active' : ''}`}
+      >
+        UZ
+      </button>
+    </>
+  )
+}
 
 function RotatingCityHeadline({ cities }: { cities: readonly string[] }) {
   const [index, setIndex] = useState(0)
@@ -236,7 +271,15 @@ export default function LandingPage({ initialLang: _initialLang }: { initialLang
           <div className="landing-hero-bg" aria-hidden />
           <div className="landing-hero-inner">
             <div className="landing-hero-content w-full px-4">
-              <header className="landing-hero-header landing-hero-nav-bar">
+              <header className="landing-hero-header landing-hero-nav-bar landing-hero-nav-bar-lang-only md:hidden">
+                <nav className="flex w-full justify-center" aria-label={t('landingLangSwitchAria')}>
+                  <div className="landing-nav-col-lang flex items-center justify-center gap-2">
+                    <LandingHeroLangButtons lang={lang} router={router} />
+                  </div>
+                </nav>
+              </header>
+
+              <header className="landing-hero-header landing-hero-nav-bar hidden md:block">
                 <div className="landing-nav-grid">
                   <div className="landing-nav-col landing-nav-col-logo">
                     <Link href={`/${landingLang}`} className="landing-nav-logo" aria-label={t('landingLogoAria')}>
@@ -264,30 +307,14 @@ export default function LandingPage({ initialLang: _initialLang }: { initialLang
                     </a>
                   </nav>
                   <div className="landing-nav-col landing-nav-col-lang">
-                    <button
-                      type="button"
-                      onClick={() => router.replace('/ru')}
-                      className={`landing-lang-btn ${lang === 'ru' ? 'landing-lang-active' : ''}`}
-                    >
-                      RU
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => router.replace('/en')}
-                      className={`landing-lang-btn ${lang === 'en' ? 'landing-lang-active' : ''}`}
-                    >
-                      EN
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => router.replace('/uz')}
-                      className={`landing-lang-btn ${lang === 'uz' ? 'landing-lang-active' : ''}`}
-                    >
-                      UZ
-                    </button>
+                    <LandingHeroLangButtons lang={lang} router={router} />
                   </div>
                 </div>
               </header>
+
+              <div className="-mx-4">
+                <LandingAppDownloadBand variant="afterHero" />
+              </div>
 
               <div className="landing-hero-title-wrap relative">
                 <p className="landing-hero-title-line">{t('landingHeroLine1')}</p>
@@ -318,15 +345,21 @@ export default function LandingPage({ initialLang: _initialLang }: { initialLang
                 />
               </div>
 
-              <div className="grid grid-cols-1 gap-4 py-8 md:grid-cols-2 md:py-10">
-                <div className="flex justify-end">
-                  <a href="#review" className="landing-hero-cta-white inline-flex items-center justify-center gap-2">
+              <div className="flex flex-col items-center gap-3 py-8 md:grid md:grid-cols-2 md:items-center md:gap-4 md:py-10">
+                <div className="flex w-full justify-center md:justify-end">
+                  <a
+                    href="#review"
+                    className="landing-hero-cta-white inline-flex w-full max-w-sm items-center justify-center gap-2 md:w-auto md:max-w-none"
+                  >
                     <PlayCircle className="h-4 w-4" aria-hidden />
                     {t('landingCtaWatchVideo')}
                   </a>
                 </div>
-                <div className="flex justify-start">
-                  <a href="#registration" className="landing-hero-cta-white inline-flex items-center justify-center">
+                <div className="flex w-full justify-center md:justify-start">
+                  <a
+                    href="#registration"
+                    className="landing-hero-cta-white inline-flex w-full max-w-sm items-center justify-center md:w-auto md:max-w-none"
+                  >
                     {t('landingCtaFreeTicket')}
                   </a>
                 </div>
@@ -494,6 +527,8 @@ export default function LandingPage({ initialLang: _initialLang }: { initialLang
             </div>
           </div>
         </section>
+
+        <LandingAppDownloadBand variant="middle" />
 
         <section id="schedule" className="landing-schedule-section landing-section-alt py-16 md:py-20">
           <div className="container mx-auto max-w-6xl px-4">
@@ -813,6 +848,8 @@ export default function LandingPage({ initialLang: _initialLang }: { initialLang
             </div>
           </div>
         </section>
+
+        <LandingAppDownloadBand variant="end" />
       </main>
 
       <footer id="contacts" className="landing-footer landing-footer-banner">

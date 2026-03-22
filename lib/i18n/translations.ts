@@ -83,7 +83,6 @@ const ru = {
   // Registration modal (exhibition)
   registrationTitle: 'Регистрация на выставку',
   city: 'Город',
-  addCity: 'Добавить',
   submitRegistration: 'Зарегистрироваться',
   registrationSuccess: 'Регистрация прошла успешно',
   registrationError: 'Ошибка при регистрации. Попробуйте снова.',
@@ -132,7 +131,7 @@ const ru = {
   role: 'Роль',
   status: 'Статус',
   actions: 'Действия',
-  noExhibitions: 'Выставки не найдены',
+  noExhibitions: 'Нет выставок',
   noNews: 'Новости не найдены',
   publicationManagement: 'Организация выставок и новостей',
   createNew: 'Создать новую',
@@ -257,7 +256,6 @@ const ru = {
   exhibitionsCount: 'Выставок',
   publishedExhibitionsCount: 'Опубликовано выставок',
   newsCount: 'Новостей',
-  noExhibitions: 'Нет выставок',
   createNewUser: 'Создать нового пользователя',
   createNewUserDesc: 'Заполните форму для добавления нового пользователя в систему',
   userCreatedSuccess: 'Пользователь создан успешно!',
@@ -487,7 +485,7 @@ const ru = {
   avatarTitle: 'Аватар профиля университета',
   avatarHint: 'Отображается на карточках участников на странице выставки',
   universityName: 'Название университета',
-  enterUniversityName: 'Введите название',
+  universityProfileNamePlaceholder: 'Введите название',
   universityDescription: 'Описание университета',
   universityDescriptionPlaceholder: 'Краткое описание вашего университета',
   address: 'Адрес',
@@ -525,6 +523,7 @@ const ru = {
   landingNavReview: 'Обзор выставки',
   landingNavFaq: 'FAQ',
   landingNavBlog: 'Блог',
+  landingLangSwitchAria: 'Выбор языка',
   landingHeroLine1: 'Будущее начинается здесь!',
   landingHeroLine2: 'Выставка «Образование и карьера»',
   landingStat1Label: 'проведённых выставок',
@@ -636,6 +635,13 @@ const ru = {
   landingCarouselSlide: 'Слайд',
   landingLogoAria: 'Образование и карьера',
   landingTgTeaserSectionAria: 'Материалы Telegram-канала',
+  landingAppDownloadTitle: 'В приложении удобнее!',
+  landingAppDownloadAppStoreAlt: 'Загрузите в App Store',
+  landingAppDownloadGooglePlayAlt: 'Доступно в Google Play',
+  landingAppDownloadIosLine1: 'Загрузите в',
+  landingAppDownloadIosLine2: 'App Store',
+  landingAppDownloadAndroidLine1: 'Доступно в',
+  landingAppDownloadAndroidLine2: 'Google Play',
 }
 
 const en: Record<string, string> = {
@@ -703,7 +709,6 @@ const en: Record<string, string> = {
 
   registrationTitle: 'Exhibition registration',
   city: 'City',
-  addCity: 'Add',
   submitRegistration: 'Register',
   registrationSuccess: 'Registration successful',
   registrationError: 'Registration error. Please try again.',
@@ -1093,7 +1098,7 @@ const en: Record<string, string> = {
   avatarTitle: 'University profile avatar',
   avatarHint: 'Shown on participant cards on the exhibition page',
   universityName: 'University name',
-  enterUniversityName: 'Enter name',
+  universityProfileNamePlaceholder: 'Enter name',
   universityDescription: 'University description',
   universityDescriptionPlaceholder: 'Brief description of your university',
   address: 'Address',
@@ -1128,6 +1133,7 @@ const en: Record<string, string> = {
   landingNavReview: 'Fair overview',
   landingNavFaq: 'FAQ',
   landingNavBlog: 'Blog',
+  landingLangSwitchAria: 'Choose language',
   landingHeroLine1: 'The future starts here!',
   landingHeroLine2: 'Education & Career fair',
   landingStat1Label: 'fairs held',
@@ -1235,6 +1241,13 @@ const en: Record<string, string> = {
   landingCarouselSlide: 'Slide',
   landingLogoAria: 'Education and Career',
   landingTgTeaserSectionAria: 'Telegram channel highlights',
+  landingAppDownloadTitle: "It's more convenient in the app!",
+  landingAppDownloadAppStoreAlt: 'Download on the App Store',
+  landingAppDownloadGooglePlayAlt: 'Get it on Google Play',
+  landingAppDownloadIosLine1: 'Download on the',
+  landingAppDownloadIosLine2: 'App Store',
+  landingAppDownloadAndroidLine1: 'GET IT ON',
+  landingAppDownloadAndroidLine2: 'Google Play',
 }
 
 const uz: Record<string, string> = {
@@ -1302,7 +1315,6 @@ const uz: Record<string, string> = {
 
   registrationTitle: "Ko'rgazmada ro'yxatdan o'tish",
   city: 'Shahar',
-  addCity: "Qo'shish",
   submitRegistration: "Ro'yxatdan o'tish",
   registrationSuccess: "Muvaffaqiyatli ro'yxatdan o'tdingiz",
   registrationError: "Ro'yxatdan o'tishda xato. Qaytadan urinib ko'ring.",
@@ -1692,7 +1704,7 @@ const uz: Record<string, string> = {
   avatarTitle: "Universitet profil avatari",
   avatarHint: "Ko'rgazma sahifasidagi ishtirokchi kartalarida ko'rsatiladi",
   universityName: "Universitet nomi",
-  enterUniversityName: "Nomini kiriting",
+  universityProfileNamePlaceholder: "Nomini kiriting",
   universityDescription: "Universitet tavsifi",
   universityDescriptionPlaceholder: "Universitetingiz qisqacha tavsifi",
   address: 'Manzil',
@@ -1727,6 +1739,7 @@ const uz: Record<string, string> = {
   landingNavReview: "Ko'rgazma sharhi",
   landingNavFaq: 'FAQ',
   landingNavBlog: 'Blog',
+  landingLangSwitchAria: 'Tilni tanlash',
   landingHeroLine1: 'Kelajak shu yerdan boshlanadi!',
   landingHeroLine2: "Ta'lim va Kasb ko'rgazmasi",
   landingStat1Label: "tashkil etilgan ko'rgazmalar",
@@ -1844,6 +1857,13 @@ const uz: Record<string, string> = {
   landingCarouselSlide: 'slayd',
   landingLogoAria: "Ta'lim va Kasb",
   landingTgTeaserSectionAria: 'Telegram kanali materiallari',
+  landingAppDownloadTitle: 'Ilovada qulayroq!',
+  landingAppDownloadAppStoreAlt: 'App Store dan yuklab oling',
+  landingAppDownloadGooglePlayAlt: 'Google Play dan yuklab oling',
+  landingAppDownloadIosLine1: 'App Store',
+  landingAppDownloadIosLine2: 'dan yuklab oling',
+  landingAppDownloadAndroidLine1: 'Google Play',
+  landingAppDownloadAndroidLine2: 'dan yuklab oling',
 }
 
 export const translations = buildMap(ru, en, uz)
