@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { ChevronDown, ChevronLeft, ChevronRight, Facebook, HelpCircle, Info, Instagram, Minus, Play, PlayCircle, Plus, Send, Youtube } from 'lucide-react'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
@@ -77,30 +76,30 @@ const LANDING_STEP_ASSETS = [
 
 function LandingHeroLangButtons({
   lang,
-  router,
+  setLang,
 }: {
   lang: string
-  router: { replace: (href: string) => void }
+  setLang: (lang: 'ru' | 'en' | 'uz') => void
 }) {
   return (
     <>
       <button
         type="button"
-        onClick={() => router.replace('/ru')}
+        onClick={() => setLang('ru')}
         className={`landing-lang-btn ${lang === 'ru' ? 'landing-lang-active' : ''}`}
       >
         RU
       </button>
       <button
         type="button"
-        onClick={() => router.replace('/en')}
+        onClick={() => setLang('en')}
         className={`landing-lang-btn ${lang === 'en' ? 'landing-lang-active' : ''}`}
       >
         EN
       </button>
       <button
         type="button"
-        onClick={() => router.replace('/uz')}
+        onClick={() => setLang('uz')}
         className={`landing-lang-btn ${lang === 'uz' ? 'landing-lang-active' : ''}`}
       >
         UZ
@@ -110,8 +109,7 @@ function LandingHeroLangButtons({
 }
 
 export default function LandingPage({ initialLang: _initialLang }: { initialLang: LandingLang }) {
-  const router = useRouter()
-  const { t, lang } = useLocale()
+  const { t, lang, setLang } = useLocale()
   const landingLang = lang as LandingLang
   const landingCityLabels = LANDING_EXHIBITION_CITY_LABELS[lang]
 
@@ -304,7 +302,7 @@ export default function LandingPage({ initialLang: _initialLang }: { initialLang
               <header className="landing-hero-header landing-hero-nav-bar landing-hero-nav-bar-lang-only md:hidden">
                 <nav className="flex w-full justify-center" aria-label={t('landingLangSwitchAria')}>
                   <div className="landing-nav-col-lang flex items-center justify-center gap-2">
-                    <LandingHeroLangButtons lang={lang} router={router} />
+                    <LandingHeroLangButtons lang={lang} setLang={setLang} />
                   </div>
                 </nav>
               </header>
@@ -312,7 +310,7 @@ export default function LandingPage({ initialLang: _initialLang }: { initialLang
               <header className="landing-hero-header landing-hero-nav-bar hidden md:block">
                 <div className="landing-nav-grid">
                   <div className="landing-nav-col landing-nav-col-logo">
-                    <Link href={`/${landingLang}`} className="landing-nav-logo" aria-label={t('landingLogoAria')}>
+                    <Link href="/" className="landing-nav-logo" aria-label={t('landingLogoAria')}>
                       <Image src="/logo-landing.webp" alt="" width={54} height={54} className="h-[54px] w-auto" />
                     </Link>
                   </div>
@@ -337,7 +335,7 @@ export default function LandingPage({ initialLang: _initialLang }: { initialLang
                     </a>
                   </nav>
                   <div className="landing-nav-col landing-nav-col-lang">
-                    <LandingHeroLangButtons lang={lang} router={router} />
+                    <LandingHeroLangButtons lang={lang} setLang={setLang} />
                   </div>
                 </div>
               </header>
@@ -482,7 +480,7 @@ export default function LandingPage({ initialLang: _initialLang }: { initialLang
                               </p>
                             ) : null}
                             <Link
-                              href={`/${landingLang}/auth/signup`}
+                              href="/auth/signup"
                               className="landing-btn-primary flex h-10 w-full items-center justify-center text-sm font-medium"
                             >
                               {t('landingScheduleFreeTicket')}
@@ -580,7 +578,7 @@ export default function LandingPage({ initialLang: _initialLang }: { initialLang
                                         </p>
                                       ) : null}
                                       <Link
-                                        href={`/${landingLang}/auth/signup`}
+                                        href="/auth/signup"
                                         className="landing-btn-primary flex h-10 w-full items-center justify-center text-sm font-medium"
                                       >
                                         {t('landingScheduleFreeTicket')}
@@ -657,7 +655,7 @@ export default function LandingPage({ initialLang: _initialLang }: { initialLang
             </div>
             <div className="mt-10 flex justify-center">
               <Link
-                href={`/${landingLang}/auth/signup`}
+                href="/auth/signup"
                 className="landing-btn-primary inline-flex h-10 min-w-[200px] items-center justify-center px-7 text-sm font-medium"
               >
                 {t('landingCtaFreeTicket')}
@@ -781,7 +779,7 @@ export default function LandingPage({ initialLang: _initialLang }: { initialLang
                   <p className="landing-text-muted mt-3 text-base leading-relaxed">{t('landingAboutLiveBody')}</p>
                   <div className="mt-6 hidden md:block">
                     <Link
-                      href={`/${landingLang}/auth/signup`}
+                      href="/auth/signup"
                       className="landing-btn-primary inline-flex h-10 min-w-[200px] items-center justify-center px-7 text-sm font-medium"
                     >
                       {t('landingCtaFreeTicket')}
@@ -800,7 +798,7 @@ export default function LandingPage({ initialLang: _initialLang }: { initialLang
                   />
                   <div className="mt-6 md:hidden">
                     <Link
-                      href={`/${landingLang}/auth/signup`}
+                      href="/auth/signup"
                       className="landing-btn-primary inline-flex h-10 w-full max-w-xs items-center justify-center px-7 text-sm font-medium"
                     >
                       {t('landingCtaFreeTicket')}
@@ -963,7 +961,7 @@ export default function LandingPage({ initialLang: _initialLang }: { initialLang
                   {t('landingRegBlockBody')}
                 </p>
                 <Link
-                  href={`/${landingLang}/auth/signup`}
+                  href="/auth/signup"
                   className="landing-btn-primary inline-flex h-10 min-w-[200px] items-center justify-center px-7 text-sm font-medium"
                 >
                   {t('landingRegBlockCta')}

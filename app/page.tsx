@@ -1,5 +1,10 @@
-import { redirect } from 'next/navigation'
+import '@/app/landing/landing.css'
+import LandingHome from '@/app/landing/landing-home'
 
 export default function RootPage() {
-  redirect('/uz')
+  return (
+    <div className="landing-page">
+      <LandingHome initialLang="ru" />
+    </div>
+  )
 }

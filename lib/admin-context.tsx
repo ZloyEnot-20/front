@@ -136,29 +136,34 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       const [ex, nw] = await Promise.all([exhibitionsApi.list(), newsApi.list()])
       setExhibitions(ex.map(toExhibition))
       setNews(nw.map(toNews))
-      try {
-        const us = await usersApi.list()
-        setUsers(us.map(toUser))
-      } catch {
+      if (user?.role === 'admin') {
+        try {
+          const us = await usersApi.list()
+          setUsers(us.map(toUser))
+        } catch {
+          setUsers([])
+        }
+        try {
+          const regs = await registrationsApi.list()
+          setRegistrations(regs.map((r) => ({
+            id: r.id,
+            exhibitionId: r.exhibitionId,
+            userId: r.userId,
+            firstName: r.firstName,
+            lastName: r.lastName,
+            email: r.email,
+            phone: r.phone,
+            city: r.city,
+            qrCode: r.qrCode,
+            status: r.status as 'registered' | 'cancelled',
+            registeredAt: new Date(r.registeredAt),
+            cancelledAt: r.cancelledAt ? new Date(r.cancelledAt) : undefined,
+          })))
+        } catch {
+          setRegistrations([])
+        }
+      } else {
         setUsers([])
-      }
-      try {
-        const regs = await registrationsApi.list()
-        setRegistrations(regs.map((r) => ({
-          id: r.id,
-          exhibitionId: r.exhibitionId,
-          userId: r.userId,
-          firstName: r.firstName,
-          lastName: r.lastName,
-          email: r.email,
-          phone: r.phone,
-          city: r.city,
-          qrCode: r.qrCode,
-          status: r.status as 'registered' | 'cancelled',
-          registeredAt: new Date(r.registeredAt),
-          cancelledAt: r.cancelledAt ? new Date(r.cancelledAt) : undefined,
-        })))
-      } catch {
         setRegistrations([])
       }
     } catch (e) {
@@ -166,7 +171,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setIsLoading(false)
     }
-  }, [])
+  }, [user?.role])
 
   useEffect(() => {
     refresh()
