@@ -211,63 +211,40 @@ export default function LandingPage({ initialLang: _initialLang }: { initialLang
   }, [])
 
   const reviewEmbedSrc = getLandingReviewEmbedSrc(process.env.NEXT_PUBLIC_LANDING_REVIEW_YOUTUBE_VIDEO_ID)
-  const hasScheduleLoop = scheduleExhibitions.length > 1
   const scheduleRenderPages = useMemo(() => {
-    if (!hasScheduleLoop) return scheduleExhibitions
-    return [
-      scheduleExhibitions[scheduleExhibitions.length - 1],
-      ...scheduleExhibitions,
-      scheduleExhibitions[0],
-    ]
-  }, [hasScheduleLoop, scheduleExhibitions])
-  const currentScheduleDot = hasScheduleLoop
-    ? (schedulePage - 1 + scheduleExhibitions.length) % scheduleExhibitions.length
-    : schedulePage
+    const pages: LandingScheduleExhibition[][] = []
+    for (let i = 0; i < scheduleExhibitions.length; i += 3) {
+      pages.push(scheduleExhibitions.slice(i, i + 3))
+    }
+    return pages
+  }, [scheduleExhibitions])
+  const currentScheduleDot = schedulePage
 
   const nextSchedulePage = () => {
-    if (scheduleExhibitions.length <= 1) return
+    if (scheduleRenderPages.length <= 1) return
+    if (schedulePage >= scheduleRenderPages.length - 1) return
     setScheduleTransitionEnabled(true)
     setSchedulePage((p) => p + 1)
   }
 
   const prevSchedulePage = () => {
-    if (scheduleExhibitions.length <= 1) return
+    if (scheduleRenderPages.length <= 1) return
+    if (schedulePage <= 0) return
     setScheduleTransitionEnabled(true)
     setSchedulePage((p) => p - 1)
   }
 
   useEffect(() => {
-    if (scheduleExhibitions.length <= 1) {
+    if (scheduleRenderPages.length <= 1) {
       if (schedulePage !== 0) setSchedulePage(0)
       return
     }
-    if (schedulePage === 0 || schedulePage === scheduleExhibitions.length + 1) return
-    if (schedulePage < 1 || schedulePage > scheduleExhibitions.length) setSchedulePage(1)
-  }, [schedulePage, scheduleExhibitions.length])
-
-  useEffect(() => {
-    if (scheduleExhibitions.length > 1) {
-      setScheduleTransitionEnabled(false)
-      setSchedulePage(1)
-      const id = window.setTimeout(() => setScheduleTransitionEnabled(true), 10)
-      return () => window.clearTimeout(id)
-    }
-    setSchedulePage(0)
-  }, [scheduleExhibitions.length])
+    if (schedulePage < 0) setSchedulePage(0)
+    if (schedulePage > scheduleRenderPages.length - 1) setSchedulePage(scheduleRenderPages.length - 1)
+  }, [schedulePage, scheduleRenderPages.length])
 
   const onScheduleTrackTransitionEnd = () => {
-    if (!hasScheduleLoop) return
-    if (schedulePage === 0) {
-      setScheduleTransitionEnabled(false)
-      setSchedulePage(scheduleExhibitions.length)
-      window.setTimeout(() => setScheduleTransitionEnabled(true), 10)
-      return
-    }
-    if (schedulePage === scheduleExhibitions.length + 1) {
-      setScheduleTransitionEnabled(false)
-      setSchedulePage(1)
-      window.setTimeout(() => setScheduleTransitionEnabled(true), 10)
-    }
+    // no loop: keep final page as is
   }
 
   const acceptCookie = () => {
@@ -448,13 +425,14 @@ export default function LandingPage({ initialLang: _initialLang }: { initialLang
               <p className="text-center text-sm landing-text-muted">{t('landingScheduleEmpty')}</p>
             ) : (
               <div className="relative overflow-visible">
-                {scheduleExhibitions.length > 1 ? (
+                {scheduleRenderPages.length > 1 ? (
                   <>
                     <button
                       type="button"
                       className="inline-flex size-10 shrink-0 items-center justify-center rounded-full border-2 border-[#01AEF9] bg-white/95 text-[#01AEF9] shadow-sm transition-colors hover:bg-[#01AEF9]/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#01AEF9] disabled:pointer-events-none disabled:opacity-35 absolute -left-10 top-1/2 z-10 -translate-y-1/2 md:-left-12"
                       onClick={prevSchedulePage}
                       aria-label={t('landingCarouselPrev')}
+                      disabled={schedulePage <= 0}
                     >
                       <ChevronLeft className="size-5" aria-hidden />
                     </button>
@@ -463,6 +441,7 @@ export default function LandingPage({ initialLang: _initialLang }: { initialLang
                       className="inline-flex size-10 shrink-0 items-center justify-center rounded-full border-2 border-[#01AEF9] bg-white/95 text-[#01AEF9] shadow-sm transition-colors hover:bg-[#01AEF9]/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#01AEF9] disabled:pointer-events-none disabled:opacity-35 absolute -right-10 top-1/2 z-10 -translate-y-1/2 md:-right-12"
                       onClick={nextSchedulePage}
                       aria-label={t('landingCarouselNext')}
+                      disabled={schedulePage >= scheduleRenderPages.length - 1}
                     >
                       <ChevronRight className="size-5" aria-hidden />
                     </button>
@@ -477,16 +456,19 @@ export default function LandingPage({ initialLang: _initialLang }: { initialLang
                     style={{ transform: `translateX(-${schedulePage * 100}%)` }}
                     onTransitionEnd={onScheduleTrackTransitionEnd}
                   >
-                    {scheduleRenderPages.map((ex, pageIdx) => (
+                    {scheduleRenderPages.map((slideCards, pageIdx) => (
                       <div key={pageIdx} className="w-full shrink-0">
-                        <div className="mx-auto w-full max-w-xl">
-                          {(() => {
+                        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                          {slideCards.map((ex, cardIdx) => {
                             const { dateLine } = formatScheduleCardLinesForLang(ex, lang)
                             const venue = venueLabelForLang(ex, lang)
                             const mapHref = venueMapHref(venue)
                             const img = getImageUrl(ex.banner ?? ex.image)
                             return (
-                              <div className="landing-card landing-schedule-card overflow-hidden transition-transform duration-200 hover:scale-[1.02]">
+                              <div
+                                key={`${pageIdx}-${ex.id}-${cardIdx}`}
+                                className="landing-card landing-schedule-card overflow-hidden transition-transform duration-200 hover:scale-[1.02]"
+                              >
                                 <div className="relative aspect-[16/10] w-full min-h-[180px] overflow-hidden bg-gray-100 sm:min-h-[200px]">
                                   {img ? (
                                     <img
@@ -537,15 +519,15 @@ export default function LandingPage({ initialLang: _initialLang }: { initialLang
                                 </div>
                               </div>
                             )
-                          })()}
+                          })}
                         </div>
                       </div>
                     ))}
                   </div>
                 </div>
-                {scheduleExhibitions.length > 1 ? (
+                {scheduleRenderPages.length > 1 ? (
                   <div className="mt-6 flex justify-center gap-2">
-                    {scheduleExhibitions.map((_, idx) => {
+                    {scheduleRenderPages.map((_, idx) => {
                       const isActive = currentScheduleDot === idx
                       return (
                         <button
@@ -553,7 +535,7 @@ export default function LandingPage({ initialLang: _initialLang }: { initialLang
                           type="button"
                           onClick={() => {
                             setScheduleTransitionEnabled(true)
-                            setSchedulePage(hasScheduleLoop ? idx + 1 : idx)
+                            setSchedulePage(idx)
                           }}
                           aria-label={`${t('landingCarouselSlide')} ${idx + 1}`}
                           className={cn(
