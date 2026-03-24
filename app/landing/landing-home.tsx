@@ -182,6 +182,7 @@ export default function LandingPage({ initialLang: _initialLang }: { initialLang
   const [scheduleLoading, setScheduleLoading] = useState(true)
   const [schedulePage, setSchedulePage] = useState(0)
   const [scheduleTransitionEnabled, setScheduleTransitionEnabled] = useState(true)
+  const [scheduleCardsPerSlide, setScheduleCardsPerSlide] = useState(3)
   const [scheduleUtm, setScheduleUtm] = useState('')
   const [reviewVideoOpen, setReviewVideoOpen] = useState(false)
   const [appDetailsOpen, setAppDetailsOpen] = useState(false)
@@ -210,14 +211,23 @@ export default function LandingPage({ initialLang: _initialLang }: { initialLang
     }
   }, [])
 
+  useEffect(() => {
+    const syncCardsPerSlide = () => {
+      setScheduleCardsPerSlide(window.innerWidth < 640 ? 1 : 3)
+    }
+    syncCardsPerSlide()
+    window.addEventListener('resize', syncCardsPerSlide)
+    return () => window.removeEventListener('resize', syncCardsPerSlide)
+  }, [])
+
   const reviewEmbedSrc = getLandingReviewEmbedSrc(process.env.NEXT_PUBLIC_LANDING_REVIEW_YOUTUBE_VIDEO_ID)
   const scheduleRenderPages = useMemo(() => {
     const pages: LandingScheduleExhibition[][] = []
-    for (let i = 0; i < scheduleExhibitions.length; i += 3) {
-      pages.push(scheduleExhibitions.slice(i, i + 3))
+    for (let i = 0; i < scheduleExhibitions.length; i += scheduleCardsPerSlide) {
+      pages.push(scheduleExhibitions.slice(i, i + scheduleCardsPerSlide))
     }
     return pages
-  }, [scheduleExhibitions])
+  }, [scheduleExhibitions, scheduleCardsPerSlide])
   const currentScheduleDot = schedulePage
 
   const nextSchedulePage = () => {
@@ -425,128 +435,196 @@ export default function LandingPage({ initialLang: _initialLang }: { initialLang
               <p className="text-center text-sm landing-text-muted">{t('landingScheduleEmpty')}</p>
             ) : (
               <div className="relative overflow-visible">
-                {scheduleRenderPages.length > 1 ? (
-                  <>
-                    <button
-                      type="button"
-                      className="inline-flex size-10 shrink-0 items-center justify-center rounded-full border-2 border-[#01AEF9] bg-white/95 text-[#01AEF9] shadow-sm transition-colors hover:bg-[#01AEF9]/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#01AEF9] disabled:pointer-events-none disabled:opacity-35 absolute -left-10 top-1/2 z-10 -translate-y-1/2 md:-left-12"
-                      onClick={prevSchedulePage}
-                      aria-label={t('landingCarouselPrev')}
-                      disabled={schedulePage <= 0}
-                    >
-                      <ChevronLeft className="size-5" aria-hidden />
-                    </button>
-                    <button
-                      type="button"
-                      className="inline-flex size-10 shrink-0 items-center justify-center rounded-full border-2 border-[#01AEF9] bg-white/95 text-[#01AEF9] shadow-sm transition-colors hover:bg-[#01AEF9]/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#01AEF9] disabled:pointer-events-none disabled:opacity-35 absolute -right-10 top-1/2 z-10 -translate-y-1/2 md:-right-12"
-                      onClick={nextSchedulePage}
-                      aria-label={t('landingCarouselNext')}
-                      disabled={schedulePage >= scheduleRenderPages.length - 1}
-                    >
-                      <ChevronRight className="size-5" aria-hidden />
-                    </button>
-                  </>
-                ) : null}
-                <div className="mx-auto w-full max-w-6xl overflow-hidden">
-                  <div
-                    className={cn(
-                      'flex ease-linear',
-                      scheduleTransitionEnabled ? 'transition-transform duration-300' : 'transition-none',
-                    )}
-                    style={{ transform: `translateX(-${schedulePage * 100}%)` }}
-                    onTransitionEnd={onScheduleTrackTransitionEnd}
-                  >
-                    {scheduleRenderPages.map((slideCards, pageIdx) => (
-                      <div key={pageIdx} className="w-full shrink-0">
-                        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                          {slideCards.map((ex, cardIdx) => {
-                            const { dateLine } = formatScheduleCardLinesForLang(ex, lang)
-                            const venue = venueLabelForLang(ex, lang)
-                            const mapHref = venueMapHref(venue)
-                            const img = getImageUrl(ex.banner ?? ex.image)
-                            return (
-                              <div
-                                key={`${pageIdx}-${ex.id}-${cardIdx}`}
-                                className="landing-card landing-schedule-card overflow-hidden transition-transform duration-200 hover:scale-[1.02]"
-                              >
-                                <div className="relative aspect-[16/10] w-full min-h-[180px] overflow-hidden bg-gray-100 sm:min-h-[200px]">
-                                  {img ? (
-                                    <img
-                                      src={img}
-                                      alt=""
-                                      className="absolute inset-0 block h-full w-full object-fill"
-                                      width={640}
-                                      height={400}
-                                      loading="lazy"
-                                      decoding="async"
-                                    />
-                                  ) : null}
-                                </div>
-                                <div className="flex flex-col gap-3 p-4">
-                                  <h3 className="text-lg font-semibold text-gray-900">
-                                    <strong>{scheduleCardTitleForLang(ex, lang)}</strong>
-                                  </h3>
-                                  {dateLine ? <p className="text-sm landing-text-muted">{dateLine}</p> : null}
-                                  {venue ? (
-                                    <p className="text-sm leading-relaxed landing-text-muted">
-                                      {mapHref !== '#' ? (
-                                        <a
-                                          href={mapHref}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          className="text-inherit underline-offset-2 hover:underline"
-                                        >
-                                          {venue}
-                                        </a>
-                                      ) : (
-                                        venue
-                                      )}
-                                    </p>
-                                  ) : null}
-                                  <Link
-                                    href={`/${landingLang}/auth/signup`}
-                                    className="landing-btn-primary flex h-10 w-full items-center justify-center text-sm font-medium"
-                                  >
-                                    {t('landingScheduleFreeTicket')}
-                                  </Link>
-                                  <Link
-                                    href={`/exhibitions/${ex.id}${scheduleUtm}`}
-                                    className="flex h-10 w-full items-center justify-center gap-2 rounded-md border-2 border-gray-300 bg-white text-sm font-medium text-gray-900 hover:border-[#01AEF9]"
-                                  >
-                                    <Info className="h-4 w-4 shrink-0 text-[#01AEF9]" aria-hidden />
-                                    {t('landingScheduleMore')}
-                                  </Link>
-                                </div>
-                              </div>
-                            )
-                          })}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                {scheduleRenderPages.length > 1 ? (
-                  <div className="mt-6 flex justify-center gap-2">
-                    {scheduleRenderPages.map((_, idx) => {
-                      const isActive = currentScheduleDot === idx
+                {scheduleCardsPerSlide === 1 ? (
+                  <div className="flex gap-4 overflow-x-auto pb-2">
+                    {scheduleExhibitions.map((ex) => {
+                      const { dateLine } = formatScheduleCardLinesForLang(ex, lang)
+                      const venue = venueLabelForLang(ex, lang)
+                      const mapHref = venueMapHref(venue)
+                      const img = getImageUrl(ex.banner ?? ex.image)
                       return (
-                        <button
-                          key={idx}
-                          type="button"
-                          onClick={() => {
-                            setScheduleTransitionEnabled(true)
-                            setSchedulePage(idx)
-                          }}
-                          aria-label={`${t('landingCarouselSlide')} ${idx + 1}`}
-                          className={cn(
-                            'h-2.5 w-2.5 rounded-full transition-colors',
-                            isActive ? 'bg-[#01AEF9]' : 'bg-gray-300 hover:bg-gray-400',
-                          )}
-                        />
+                        <div
+                          key={ex.id}
+                          className="landing-card landing-schedule-card w-[86vw] max-w-[320px] shrink-0 overflow-hidden"
+                        >
+                          <div className="relative aspect-[16/10] w-full min-h-[180px] overflow-hidden bg-gray-100 sm:min-h-[200px]">
+                            {img ? (
+                              <img
+                                src={img}
+                                alt=""
+                                className="absolute inset-0 block h-full w-full object-fill"
+                                width={640}
+                                height={400}
+                                loading="lazy"
+                                decoding="async"
+                              />
+                            ) : null}
+                          </div>
+                          <div className="flex flex-col gap-3 p-4">
+                            <h3 className="text-lg font-semibold text-gray-900">
+                              <strong>{scheduleCardTitleForLang(ex, lang)}</strong>
+                            </h3>
+                            {dateLine ? <p className="text-sm landing-text-muted">{dateLine}</p> : null}
+                            {venue ? (
+                              <p className="text-sm leading-relaxed landing-text-muted">
+                                {mapHref !== '#' ? (
+                                  <a
+                                    href={mapHref}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-inherit underline-offset-2 hover:underline"
+                                  >
+                                    {venue}
+                                  </a>
+                                ) : (
+                                  venue
+                                )}
+                              </p>
+                            ) : null}
+                            <Link
+                              href={`/${landingLang}/auth/signup`}
+                              className="landing-btn-primary flex h-10 w-full items-center justify-center text-sm font-medium"
+                            >
+                              {t('landingScheduleFreeTicket')}
+                            </Link>
+                            <Link
+                              href={`/exhibitions/${ex.id}${scheduleUtm}`}
+                              className="flex h-10 w-full items-center justify-center gap-2 rounded-md border-2 border-gray-300 bg-white text-sm font-medium text-gray-900 hover:border-[#01AEF9]"
+                            >
+                              <Info className="h-4 w-4 shrink-0 text-[#01AEF9]" aria-hidden />
+                              {t('landingScheduleMore')}
+                            </Link>
+                          </div>
+                        </div>
                       )
                     })}
                   </div>
-                ) : null}
+                ) : (
+                  <>
+                    {scheduleRenderPages.length > 1 ? (
+                      <>
+                        <button
+                          type="button"
+                          className="hidden sm:inline-flex size-10 shrink-0 items-center justify-center rounded-full border-2 border-[#01AEF9] bg-white/95 text-[#01AEF9] shadow-sm transition-colors hover:bg-[#01AEF9]/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#01AEF9] disabled:pointer-events-none disabled:opacity-35 absolute -left-10 top-1/2 z-10 -translate-y-1/2 md:-left-12"
+                          onClick={prevSchedulePage}
+                          aria-label={t('landingCarouselPrev')}
+                          disabled={schedulePage <= 0}
+                        >
+                          <ChevronLeft className="size-5" aria-hidden />
+                        </button>
+                        <button
+                          type="button"
+                          className="hidden sm:inline-flex size-10 shrink-0 items-center justify-center rounded-full border-2 border-[#01AEF9] bg-white/95 text-[#01AEF9] shadow-sm transition-colors hover:bg-[#01AEF9]/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#01AEF9] disabled:pointer-events-none disabled:opacity-35 absolute -right-10 top-1/2 z-10 -translate-y-1/2 md:-right-12"
+                          onClick={nextSchedulePage}
+                          aria-label={t('landingCarouselNext')}
+                          disabled={schedulePage >= scheduleRenderPages.length - 1}
+                        >
+                          <ChevronRight className="size-5" aria-hidden />
+                        </button>
+                      </>
+                    ) : null}
+                    <div className="mx-auto w-full max-w-6xl overflow-hidden">
+                      <div
+                        className={cn(
+                          'flex ease-linear',
+                          scheduleTransitionEnabled ? 'transition-transform duration-300' : 'transition-none',
+                        )}
+                        style={{ transform: `translateX(-${schedulePage * 100}%)` }}
+                        onTransitionEnd={onScheduleTrackTransitionEnd}
+                      >
+                        {scheduleRenderPages.map((slideCards, pageIdx) => (
+                          <div key={pageIdx} className="w-full shrink-0">
+                            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                              {slideCards.map((ex, cardIdx) => {
+                                const { dateLine } = formatScheduleCardLinesForLang(ex, lang)
+                                const venue = venueLabelForLang(ex, lang)
+                                const mapHref = venueMapHref(venue)
+                                const img = getImageUrl(ex.banner ?? ex.image)
+                                return (
+                                  <div
+                                    key={`${pageIdx}-${ex.id}-${cardIdx}`}
+                                    className="landing-card landing-schedule-card mx-auto w-full max-w-[320px] overflow-hidden transition-transform duration-200 hover:scale-[1.02] sm:max-w-none"
+                                  >
+                                    <div className="relative aspect-[16/10] w-full min-h-[180px] overflow-hidden bg-gray-100 sm:min-h-[200px]">
+                                      {img ? (
+                                        <img
+                                          src={img}
+                                          alt=""
+                                          className="absolute inset-0 block h-full w-full object-fill"
+                                          width={640}
+                                          height={400}
+                                          loading="lazy"
+                                          decoding="async"
+                                        />
+                                      ) : null}
+                                    </div>
+                                    <div className="flex flex-col gap-3 p-4">
+                                      <h3 className="text-lg font-semibold text-gray-900">
+                                        <strong>{scheduleCardTitleForLang(ex, lang)}</strong>
+                                      </h3>
+                                      {dateLine ? <p className="text-sm landing-text-muted">{dateLine}</p> : null}
+                                      {venue ? (
+                                        <p className="text-sm leading-relaxed landing-text-muted">
+                                          {mapHref !== '#' ? (
+                                            <a
+                                              href={mapHref}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="text-inherit underline-offset-2 hover:underline"
+                                            >
+                                              {venue}
+                                            </a>
+                                          ) : (
+                                            venue
+                                          )}
+                                        </p>
+                                      ) : null}
+                                      <Link
+                                        href={`/${landingLang}/auth/signup`}
+                                        className="landing-btn-primary flex h-10 w-full items-center justify-center text-sm font-medium"
+                                      >
+                                        {t('landingScheduleFreeTicket')}
+                                      </Link>
+                                      <Link
+                                        href={`/exhibitions/${ex.id}${scheduleUtm}`}
+                                        className="flex h-10 w-full items-center justify-center gap-2 rounded-md border-2 border-gray-300 bg-white text-sm font-medium text-gray-900 hover:border-[#01AEF9]"
+                                      >
+                                        <Info className="h-4 w-4 shrink-0 text-[#01AEF9]" aria-hidden />
+                                        {t('landingScheduleMore')}
+                                      </Link>
+                                    </div>
+                                  </div>
+                                )
+                              })}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    {scheduleRenderPages.length > 1 ? (
+                      <div className="mt-6 flex justify-center gap-2">
+                        {scheduleRenderPages.map((_, idx) => {
+                          const isActive = currentScheduleDot === idx
+                          return (
+                            <button
+                              key={idx}
+                              type="button"
+                              onClick={() => {
+                                setScheduleTransitionEnabled(true)
+                                setSchedulePage(idx)
+                              }}
+                              aria-label={`${t('landingCarouselSlide')} ${idx + 1}`}
+                              className={cn(
+                                'h-2.5 w-2.5 rounded-full transition-colors',
+                                isActive ? 'bg-[#01AEF9]' : 'bg-gray-300 hover:bg-gray-400',
+                              )}
+                            />
+                          )
+                        })}
+                      </div>
+                    ) : null}
+                  </>
+                )}
               </div>
             )}
           </div>
