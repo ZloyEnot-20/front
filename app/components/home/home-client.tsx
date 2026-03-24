@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import { AppDownloadLinks } from '@/components/app-download-links'
 import { ExhibitionCard } from '@/components/exhibitions/exhibition-card'
 import { ExhibitionCardSkeleton } from '@/components/exhibitions/exhibition-card-skeleton'
@@ -11,7 +10,7 @@ import { useAdmin } from '@/lib/admin-context'
 import { useAuth } from '@/lib/auth-context'
 import { useLocale } from '@/lib/i18n'
 import Link from 'next/link'
-import { ArrowRight, ChevronDown } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 
 const HOME_EXHIBITIONS_LIMIT = 6
 const HOME_NEWS_LIMIT = 6
@@ -20,7 +19,6 @@ export function HomeClient() {
   const { t, lang } = useLocale()
   const { user } = useAuth()
   const { exhibitions, news, isLoading } = useAdmin()
-  const [appDetailsOpen, setAppDetailsOpen] = useState(false)
   const publishedExhibitions = exhibitions.filter((e) => e.status === 'published')
   const publishedNews = news.filter((n) => n.status === 'published')
 
@@ -122,56 +120,7 @@ export function HomeClient() {
       <section className="border-t border-border/40 bg-muted/30 py-10 md:py-12" aria-label={t('landingAppDownloadTitle')}>
         <div className="container mx-auto px-4">
           <AppDownloadLinks titleClassName="text-center text-foreground" />
-          <div className="mt-8 mb-8 flex justify-center">
-            <button
-              type="button"
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-primary px-7 py-3 text-sm font-medium uppercase text-primary-foreground transition-opacity hover:opacity-90"
-              onClick={() => setAppDetailsOpen((prev) => !prev)}
-              aria-expanded={appDetailsOpen}
-              aria-controls="edu-expo-details"
-            >
-              {t('landingAppDetailsCta')}
-              <ChevronDown className={`h-4 w-4 transition-transform duration-300 ${appDetailsOpen ? 'rotate-180' : ''}`} />
-            </button>
-          </div>
-          <p className="mb-6 text-center text-xs text-muted-foreground">
-            {appDetailsOpen ? 'Нажмите, чтобы скрыть секцию' : 'Нажмите, чтобы раскрыть секцию'}
-          </p>
-
-          <div
-            id="edu-expo-details"
-            className={`grid transition-all duration-500 ease-in-out ${appDetailsOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}
-          >
-            <div className="overflow-hidden">
-              <div className="mx-auto grid max-w-5xl gap-6 md:grid-cols-2 pb-1">
-              <article className="rounded-xl border border-border bg-background p-6 shadow-sm">
-                <h3 className="text-xl font-bold">{t('landingAppPromoTitle')}</h3>
-                <p className="mt-2 text-base text-muted-foreground">{t('landingAppPromoSubtitle')}</p>
-                <p className="mt-4 text-base font-medium">{t('landingAppPromoIntro')}</p>
-                <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
-                  <li>{t('landingAppPromoItem1')}</li>
-                  <li>{t('landingAppPromoItem2')}</li>
-                  <li>{t('landingAppPromoItem3')}</li>
-                  <li>{t('landingAppPromoItem4')}</li>
-                </ul>
-                <p className="mt-4 text-sm text-muted-foreground">{t('landingAppPromoOutro')}</p>
-              </article>
-
-              <article className="rounded-xl border border-border bg-background p-6 shadow-sm">
-                <h3 className="text-xl font-bold">{t('landingAppExpoPromoTitle')}</h3>
-                <p className="mt-2 text-sm text-muted-foreground">{t('landingAppExpoPromoBody')}</p>
-                <p className="mt-4 text-base font-medium">{t('landingAppExpoPromoIntro')}</p>
-                <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
-                  <li>{t('landingAppExpoPromoItem1')}</li>
-                  <li>{t('landingAppExpoPromoItem2')}</li>
-                  <li>{t('landingAppExpoPromoItem3')}</li>
-                  <li>{t('landingAppExpoPromoItem4')}</li>
-                </ul>
-                <p className="mt-4 text-sm text-muted-foreground">{t('landingAppExpoPromoOutro')}</p>
-              </article>
-            </div>
-            </div>
-          </div>
+       
         </div>
       </section>
 
