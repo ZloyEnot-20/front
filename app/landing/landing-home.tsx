@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
-import { Facebook, HelpCircle, Info, Instagram, Minus, Play, PlayCircle, Plus, Send, Youtube } from 'lucide-react'
+import { ChevronDown, ChevronLeft, ChevronRight, Facebook, HelpCircle, Info, Instagram, Minus, Play, PlayCircle, Plus, Send, Youtube } from 'lucide-react'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { landingPublicImage } from '@/lib/landing-public-images'
 import { getLandingReviewEmbedSrc } from '@/lib/landing-review-youtube'
@@ -21,7 +21,8 @@ import {
 import { LANDING_TELEGRAM_TEASER_CARD_IMAGE } from '@/lib/landing-telegram-teaser-cards'
 import type { LandingLang } from '@/lib/i18n/landing-lang'
 import { useLocale } from '@/lib/i18n'
-import { LANDING_ROTATING_CITY_PREFIXES } from '@/lib/landing-rotating-cities'
+import { LANDING_EXHIBITION_CITY_LABELS } from '@/lib/landing-rotating-cities'
+import { cn } from '@/lib/utils'
 import { LandingAppDownloadBand } from './landing-app-download-band'
 import { LandingOrganizersCarousel } from './organizers-carousel'
 import { LandingPartnersCarousel } from './partners-carousel'
@@ -108,30 +109,11 @@ function LandingHeroLangButtons({
   )
 }
 
-function RotatingCityHeadline({ cities }: { cities: readonly string[] }) {
-  const [index, setIndex] = useState(0)
-  const len = cities.length || 1
-
-  useEffect(() => {
-    const id = window.setInterval(() => {
-      setIndex((i) => (i + 1) % len)
-    }, 2200)
-    return () => window.clearInterval(id)
-  }, [len])
-
-  const label = cities[index] ?? ''
-  return (
-    <em className="landing-about-rotating-em" key={label}>
-      {label}
-    </em>
-  )
-}
-
 export default function LandingPage({ initialLang: _initialLang }: { initialLang: LandingLang }) {
   const router = useRouter()
   const { t, lang } = useLocale()
   const landingLang = lang as LandingLang
-  const rotatingCities = LANDING_ROTATING_CITY_PREFIXES[landingLang]
+  const landingCityLabels = LANDING_EXHIBITION_CITY_LABELS[lang]
 
   const faqItems = useMemo(
     () => [
@@ -198,8 +180,11 @@ export default function LandingPage({ initialLang: _initialLang }: { initialLang
   const [faqOpen, setFaqOpen] = useState<number | null>(null)
   const [scheduleExhibitions, setScheduleExhibitions] = useState<LandingScheduleExhibition[]>([])
   const [scheduleLoading, setScheduleLoading] = useState(true)
+  const [schedulePage, setSchedulePage] = useState(0)
+  const [scheduleTransitionEnabled, setScheduleTransitionEnabled] = useState(true)
   const [scheduleUtm, setScheduleUtm] = useState('')
   const [reviewVideoOpen, setReviewVideoOpen] = useState(false)
+  const [appDetailsOpen, setAppDetailsOpen] = useState(false)
 
   useEffect(() => {
     const stored = localStorage.getItem('landing_cookie_accept')
@@ -226,6 +211,64 @@ export default function LandingPage({ initialLang: _initialLang }: { initialLang
   }, [])
 
   const reviewEmbedSrc = getLandingReviewEmbedSrc(process.env.NEXT_PUBLIC_LANDING_REVIEW_YOUTUBE_VIDEO_ID)
+  const hasScheduleLoop = scheduleExhibitions.length > 1
+  const scheduleRenderPages = useMemo(() => {
+    if (!hasScheduleLoop) return scheduleExhibitions
+    return [
+      scheduleExhibitions[scheduleExhibitions.length - 1],
+      ...scheduleExhibitions,
+      scheduleExhibitions[0],
+    ]
+  }, [hasScheduleLoop, scheduleExhibitions])
+  const currentScheduleDot = hasScheduleLoop
+    ? (schedulePage - 1 + scheduleExhibitions.length) % scheduleExhibitions.length
+    : schedulePage
+
+  const nextSchedulePage = () => {
+    if (scheduleExhibitions.length <= 1) return
+    setScheduleTransitionEnabled(true)
+    setSchedulePage((p) => p + 1)
+  }
+
+  const prevSchedulePage = () => {
+    if (scheduleExhibitions.length <= 1) return
+    setScheduleTransitionEnabled(true)
+    setSchedulePage((p) => p - 1)
+  }
+
+  useEffect(() => {
+    if (scheduleExhibitions.length <= 1) {
+      if (schedulePage !== 0) setSchedulePage(0)
+      return
+    }
+    if (schedulePage === 0 || schedulePage === scheduleExhibitions.length + 1) return
+    if (schedulePage < 1 || schedulePage > scheduleExhibitions.length) setSchedulePage(1)
+  }, [schedulePage, scheduleExhibitions.length])
+
+  useEffect(() => {
+    if (scheduleExhibitions.length > 1) {
+      setScheduleTransitionEnabled(false)
+      setSchedulePage(1)
+      const id = window.setTimeout(() => setScheduleTransitionEnabled(true), 10)
+      return () => window.clearTimeout(id)
+    }
+    setSchedulePage(0)
+  }, [scheduleExhibitions.length])
+
+  const onScheduleTrackTransitionEnd = () => {
+    if (!hasScheduleLoop) return
+    if (schedulePage === 0) {
+      setScheduleTransitionEnabled(false)
+      setSchedulePage(scheduleExhibitions.length)
+      window.setTimeout(() => setScheduleTransitionEnabled(true), 10)
+      return
+    }
+    if (schedulePage === scheduleExhibitions.length + 1) {
+      setScheduleTransitionEnabled(false)
+      setSchedulePage(1)
+      window.setTimeout(() => setScheduleTransitionEnabled(true), 10)
+    }
+  }
 
   const acceptCookie = () => {
     localStorage.setItem('landing_cookie_accept', '1')
@@ -358,7 +401,7 @@ export default function LandingPage({ initialLang: _initialLang }: { initialLang
                 <div className="flex w-full justify-center md:justify-start">
                   <a
                     href="#registration"
-                    className="landing-hero-cta-white inline-flex w-full max-w-sm items-center justify-center md:w-auto md:max-w-none"
+                    className="landing-hero-cta-white landing-hero-cta-ticket inline-flex w-full max-w-sm items-center justify-center md:w-auto md:max-w-none"
                   >
                     {t('landingCtaFreeTicket')}
                   </a>
@@ -372,54 +415,300 @@ export default function LandingPage({ initialLang: _initialLang }: { initialLang
         <section id="about" className="landing-about-section border-b border-gray-200 py-12 md:py-16 lg:py-20">
           <div className="container mx-auto flex max-w-6xl flex-col gap-10 px-4 md:gap-12">
             <div className="landing-about-block transition-transform duration-200 hover:scale-[1.01]">
-              <div className="grid items-center gap-8 md:grid-cols-2 md:gap-10">
-                <div>
-                  <span className="landing-about-date-badge inline-flex items-center rounded-md border-2 border-[#01AEF9] px-3 py-2 text-sm font-medium text-gray-900">
-                    {t('landingAboutDateBadge')}
-                  </span>
-                  <p className="mt-6 text-xl font-bold leading-snug text-gray-900 md:text-2xl">
-                    <span className="text-[#01AEF9]">
-                      <RotatingCityHeadline cities={rotatingCities} />
-                    </span>{' '}
-                    {t('landingAboutRotatingSuffix')}
-                  </p>
+              <span className="landing-about-date-badge inline-flex items-center rounded-md border-2 border-[#01AEF9] px-3 py-2 text-sm font-medium text-gray-900">
+                {t('landingAboutDateBadge')}
+              </span>
+              <div className="mt-8 grid gap-8 md:grid-cols-2 md:gap-10 md:items-start">
+                <div className="space-y-4">
+                  <h2 className="text-2xl font-bold text-gray-900 md:text-3xl">
+                    <strong>{t('landingAboutBrandTitle')}</strong>
+                  </h2>
+                  <p className="text-xl font-bold text-gray-900 md:text-2xl">{t('landingAboutBrandTagline')}</p>
                 </div>
-                <p className="text-base leading-relaxed text-gray-600 md:text-lg">{t('landingAboutBody')}</p>
+                <div className="space-y-4 text-base leading-relaxed text-gray-600 md:text-lg">
+                  <p>{t('landingAboutBrandPara1')}</p>
+                  <p>{t('landingAboutBrandPara2')}</p>
+                  <p className="font-medium text-gray-900">{t('landingAboutBrandStores')}</p>
+                </div>
               </div>
             </div>
 
+        <section
+          id="schedule"
+          className="landing-schedule-section landing-section-alt relative left-1/2 right-1/2 w-screen -translate-x-1/2 py-16 md:py-20"
+        >
+          <div className="container mx-auto max-w-6xl px-4">
+            <h1 className="landing-section-heading mb-4 text-3xl font-bold md:text-4xl">
+              <strong>{t('landingScheduleTitle')}</strong>
+            </h1>
+            <p className="mb-10 text-lg text-gray-900">{t('landingScheduleSubtitle')}</p>
+            {scheduleLoading ? (
+              <p className="text-center text-sm landing-text-muted">{t('landingScheduleLoading')}</p>
+            ) : scheduleExhibitions.length === 0 ? (
+              <p className="text-center text-sm landing-text-muted">{t('landingScheduleEmpty')}</p>
+            ) : (
+              <div className="relative overflow-visible">
+                {scheduleExhibitions.length > 1 ? (
+                  <>
+                    <button
+                      type="button"
+                      className="inline-flex size-10 shrink-0 items-center justify-center rounded-full border-2 border-[#01AEF9] bg-white/95 text-[#01AEF9] shadow-sm transition-colors hover:bg-[#01AEF9]/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#01AEF9] disabled:pointer-events-none disabled:opacity-35 absolute -left-10 top-1/2 z-10 -translate-y-1/2 md:-left-12"
+                      onClick={prevSchedulePage}
+                      aria-label={t('landingCarouselPrev')}
+                    >
+                      <ChevronLeft className="size-5" aria-hidden />
+                    </button>
+                    <button
+                      type="button"
+                      className="inline-flex size-10 shrink-0 items-center justify-center rounded-full border-2 border-[#01AEF9] bg-white/95 text-[#01AEF9] shadow-sm transition-colors hover:bg-[#01AEF9]/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#01AEF9] disabled:pointer-events-none disabled:opacity-35 absolute -right-10 top-1/2 z-10 -translate-y-1/2 md:-right-12"
+                      onClick={nextSchedulePage}
+                      aria-label={t('landingCarouselNext')}
+                    >
+                      <ChevronRight className="size-5" aria-hidden />
+                    </button>
+                  </>
+                ) : null}
+                <div className="mx-auto w-full max-w-6xl overflow-hidden">
+                  <div
+                    className={cn(
+                      'flex ease-linear',
+                      scheduleTransitionEnabled ? 'transition-transform duration-300' : 'transition-none',
+                    )}
+                    style={{ transform: `translateX(-${schedulePage * 100}%)` }}
+                    onTransitionEnd={onScheduleTrackTransitionEnd}
+                  >
+                    {scheduleRenderPages.map((ex, pageIdx) => (
+                      <div key={pageIdx} className="w-full shrink-0">
+                        <div className="mx-auto w-full max-w-xl">
+                          {(() => {
+                            const { dateLine } = formatScheduleCardLinesForLang(ex, lang)
+                            const venue = venueLabelForLang(ex, lang)
+                            const mapHref = venueMapHref(venue)
+                            const img = getImageUrl(ex.banner ?? ex.image)
+                            return (
+                              <div className="landing-card landing-schedule-card overflow-hidden transition-transform duration-200 hover:scale-[1.02]">
+                                <div className="relative aspect-[16/10] w-full min-h-[180px] overflow-hidden bg-gray-100 sm:min-h-[200px]">
+                                  {img ? (
+                                    <img
+                                      src={img}
+                                      alt=""
+                                      className="absolute inset-0 block h-full w-full object-fill"
+                                      width={640}
+                                      height={400}
+                                      loading="lazy"
+                                      decoding="async"
+                                    />
+                                  ) : null}
+                                </div>
+                                <div className="flex flex-col gap-3 p-4">
+                                  <h3 className="text-lg font-semibold text-gray-900">
+                                    <strong>{scheduleCardTitleForLang(ex, lang)}</strong>
+                                  </h3>
+                                  {dateLine ? <p className="text-sm landing-text-muted">{dateLine}</p> : null}
+                                  {venue ? (
+                                    <p className="text-sm leading-relaxed landing-text-muted">
+                                      {mapHref !== '#' ? (
+                                        <a
+                                          href={mapHref}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="text-inherit underline-offset-2 hover:underline"
+                                        >
+                                          {venue}
+                                        </a>
+                                      ) : (
+                                        venue
+                                      )}
+                                    </p>
+                                  ) : null}
+                                  <Link
+                                    href={`/${landingLang}/auth/signup`}
+                                    className="landing-btn-primary flex h-10 w-full items-center justify-center text-sm font-medium"
+                                  >
+                                    {t('landingScheduleFreeTicket')}
+                                  </Link>
+                                  <Link
+                                    href={`/exhibitions/${ex.id}${scheduleUtm}`}
+                                    className="flex h-10 w-full items-center justify-center gap-2 rounded-md border-2 border-gray-300 bg-white text-sm font-medium text-gray-900 hover:border-[#01AEF9]"
+                                  >
+                                    <Info className="h-4 w-4 shrink-0 text-[#01AEF9]" aria-hidden />
+                                    {t('landingScheduleMore')}
+                                  </Link>
+                                </div>
+                              </div>
+                            )
+                          })()}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                {scheduleExhibitions.length > 1 ? (
+                  <div className="mt-6 flex justify-center gap-2">
+                    {scheduleExhibitions.map((_, idx) => {
+                      const isActive = currentScheduleDot === idx
+                      return (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => {
+                            setScheduleTransitionEnabled(true)
+                            setSchedulePage(hasScheduleLoop ? idx + 1 : idx)
+                          }}
+                          aria-label={`${t('landingCarouselSlide')} ${idx + 1}`}
+                          className={cn(
+                            'h-2.5 w-2.5 rounded-full transition-colors',
+                            isActive ? 'bg-[#01AEF9]' : 'bg-gray-300 hover:bg-gray-400',
+                          )}
+                        />
+                      )
+                    })}
+                  </div>
+                ) : null}
+              </div>
+            )}
+          </div>
+        </section>
+
+
+        <section className="bg-white py-16 md:py-20">
+          <div className="container mx-auto max-w-6xl px-4">
+            <h2 className="landing-section-heading mb-10 text-center text-3xl font-bold">
+              <strong>{t('landingAudienceTitle')}</strong>
+            </h2>
+            <div className="mb-8 grid gap-7 sm:grid-cols-2 lg:grid-cols-4 lg:gap-10">
+              {audienceCards.map((card) => (
+                <div key={`img-${card.title}`} className="overflow-hidden rounded-xl border border-gray-200 bg-white">
+                  <img src={card.src} alt="" width={540} height={540} className="h-auto w-full object-cover" loading="lazy" decoding="async" />
+                </div>
+              ))}
+            </div>
+            <div className="landing-about-block">
+              <div className="grid gap-7 sm:grid-cols-2 lg:grid-cols-4 lg:gap-10">
+                {audienceCards.map((card) => (
+                  <div key={card.title} className="flex h-full flex-col text-left">
+                    <h4 className="text-xl font-bold text-gray-900 md:text-[1.35rem]">
+                      <strong>{card.title}</strong>
+                    </h4>
+                    <p className="landing-text-muted mt-3 text-base leading-relaxed md:text-lg">{card.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="mt-10 flex justify-center">
+              <Link
+                href={`/${landingLang}/auth/signup`}
+                className="landing-btn-primary inline-flex h-10 min-w-[200px] items-center justify-center px-7 text-sm font-medium"
+              >
+                {t('landingCtaFreeTicket')}
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        <section className="landing-steps-section bg-white py-16 md:py-20">
+          <div className="container mx-auto max-w-6xl px-4">
+            <h2 className="landing-steps-section-title mb-4 text-center text-3xl font-bold">
+              <strong>{t('landingStepsTitle')}</strong>
+            </h2>
+            <p className="mb-10 text-center text-lg text-gray-900">{t('landingStepsSubtitle')}</p>
             <div className="grid gap-10 md:grid-cols-2 md:gap-8 lg:gap-12">
-              <div className="landing-about-block landing-about-card-with-footer-image transition-transform duration-200 hover:scale-[1.02]">
-                <h2 className="text-xl font-bold text-gray-900 md:text-2xl">
-                  <strong>{t('landingAboutWorldUnisTitle')}</strong>
-                </h2>
-                <p className="landing-text-muted mt-3 text-base leading-relaxed">{t('landingAboutWorldUnisBody')}</p>
-                <div className="landing-card-footer-image">
-                  <img
-                    src={landingPublicImage('8b0b00d8d71ad8e704ffec3f1d66652d.png')}
-                    alt=""
-                    width={428}
-                    height={320}
-                    loading="lazy"
-                    decoding="async"
-                  />
+              {landingSteps.map((item) => (
+                <div
+                  key={item.step}
+                  className={`landing-about-block landing-about-card-with-footer-image landing-step-card landing-step-card-${item.tone} transition-transform duration-200 hover:scale-[1.02]`}
+                >
+                  <span className="landing-step-pill inline-flex items-center rounded-full bg-white px-3 py-1.5 text-sm font-semibold text-gray-900 shadow-sm">
+                    {item.step}
+                  </span>
+                  <p className="mt-5 text-lg font-bold text-white md:text-xl">
+                    <strong>{item.title}</strong>
+                  </p>
+                  <p className="landing-step-desc mt-3 whitespace-pre-line text-white/95">{item.desc}</p>
+                  <div className="landing-card-footer-image landing-step-card-image-wrap">
+                    <a
+                      href={item.href}
+                      className="landing-step-image-link block rounded-b-[inherit] focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                    >
+                      <img src={item.src} alt="" width={428} height={320} loading="lazy" decoding="async" />
+                    </a>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <LandingAppDownloadBand variant="middle" />
+
+
+            <div className="mb-8 flex justify-center">
+              <button
+                type="button"
+                className="landing-btn-primary inline-flex min-h-11 items-center justify-center gap-2 px-7 py-3 text-sm font-medium uppercase"
+                onClick={() => setAppDetailsOpen((prev) => !prev)}
+                aria-expanded={appDetailsOpen}
+                aria-controls="landing-app-details"
+              >
+                {t('landingAppDetailsCta')}
+                <ChevronDown className={`size-4 transition-transform duration-300 ${appDetailsOpen ? 'rotate-180' : ''}`} aria-hidden />
+              </button>
+            </div>
+            <div
+              id="landing-app-details"
+              className={`grid transition-all duration-500 ease-in-out ${appDetailsOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}
+            >
+              <div className="overflow-hidden">
+                <div className="grid gap-10 pb-1 md:grid-cols-2 md:gap-8 lg:gap-12">
+                <div className="landing-about-block landing-about-card-with-footer-image transition-transform duration-200 hover:scale-[1.02]">
+                  <h2 className="text-xl font-bold text-gray-900 md:text-2xl">
+                    <strong>{t('landingAppPromoTitle')}</strong>
+                  </h2>
+                  <p className="mt-2 text-lg font-semibold text-gray-900 md:text-xl">{t('landingAppPromoSubtitle')}</p>
+                  <p className="mt-4 text-base font-medium text-gray-900">{t('landingAppPromoIntro')}</p>
+                  <ul className="mt-2 list-none space-y-2 text-base leading-relaxed text-gray-700">
+                    <li>{t('landingAppPromoItem1')}</li>
+                    <li>{t('landingAppPromoItem2')}</li>
+                    <li>{t('landingAppPromoItem3')}</li>
+                    <li>{t('landingAppPromoItem4')}</li>
+                  </ul>
+                  <p className="landing-text-muted mt-4 text-base leading-relaxed">{t('landingAppPromoOutro')}</p>
+                  <div className="landing-card-footer-image">
+                    <img
+                      src={landingPublicImage('8b0b00d8d71ad8e704ffec3f1d66652d.png')}
+                      alt=""
+                      width={428}
+                      height={320}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </div>
+                </div>
+                <div className="landing-about-block landing-about-card-with-footer-image transition-transform duration-200 hover:scale-[1.02]">
+                  <h2 className="text-xl font-bold text-gray-900 md:text-2xl">
+                    <strong>{t('landingAppExpoPromoTitle')}</strong>
+                  </h2>
+                  <p className="mt-2 text-base leading-relaxed text-gray-700">{t('landingAppExpoPromoBody')}</p>
+                  <p className="mt-4 text-base font-medium text-gray-900">{t('landingAppExpoPromoIntro')}</p>
+                  <ul className="mt-2 list-none space-y-2 text-base leading-relaxed text-gray-700">
+                    <li>{t('landingAppExpoPromoItem1')}</li>
+                    <li>{t('landingAppExpoPromoItem2')}</li>
+                    <li>{t('landingAppExpoPromoItem3')}</li>
+                    <li>{t('landingAppExpoPromoItem4')}</li>
+                  </ul>
+                  <p className="landing-text-muted mt-4 text-base leading-relaxed">{t('landingAppExpoPromoOutro')}</p>
+                  <div className="landing-card-footer-image">
+                    <img
+                      src={landingPublicImage('caca9b43739260b3b39a024b503bf4dd.png')}
+                      alt=""
+                      width={428}
+                      height={320}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </div>
                 </div>
               </div>
-              <div className="landing-about-block landing-about-card-with-footer-image transition-transform duration-200 hover:scale-[1.02]">
-                <h2 className="text-xl font-bold text-gray-900 md:text-2xl">
-                  <strong>{t('landingAbout100Title')}</strong>
-                </h2>
-                <p className="landing-text-muted mt-3 text-base leading-relaxed">{t('landingAbout100Body')}</p>
-                <div className="landing-card-footer-image">
-                  <img
-                    src={landingPublicImage('caca9b43739260b3b39a024b503bf4dd.png')}
-                    alt=""
-                    width={428}
-                    height={320}
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </div>
               </div>
             </div>
 
@@ -460,151 +749,6 @@ export default function LandingPage({ initialLang: _initialLang }: { initialLang
                 </div>
               </div>
             </div>
-          </div>
-        </section>
-
-        <section className="bg-white py-16 md:py-20">
-          <div className="container mx-auto max-w-6xl px-4">
-            <h2 className="landing-section-heading mb-10 text-center text-3xl font-bold">
-              <strong>{t('landingAudienceTitle')}</strong>
-            </h2>
-            <div className="grid gap-7 sm:grid-cols-2 lg:grid-cols-4 lg:gap-10">
-              {audienceCards.map((card) => (
-                <div
-                  key={card.title}
-                  className="landing-about-block landing-audience-card landing-about-card-with-footer-image flex h-full flex-col text-left transition-transform duration-200 hover:scale-[1.02]"
-                >
-                  <h4 className="text-xl font-bold text-gray-900 md:text-[1.35rem]">
-                    <strong>{card.title}</strong>
-                  </h4>
-                  <p className="landing-text-muted mt-3 flex-1 text-base leading-relaxed md:text-lg">{card.desc}</p>
-                  <div className="landing-card-footer-image">
-                    <img src={card.src} alt="" width={540} height={540} loading="lazy" decoding="async" />
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="mt-10 flex justify-center">
-              <Link
-                href={`/${landingLang}/auth/signup`}
-                className="landing-btn-primary inline-flex h-10 min-w-[200px] items-center justify-center px-7 text-sm font-medium"
-              >
-                {t('landingCtaFreeTicket')}
-              </Link>
-            </div>
-          </div>
-        </section>
-
-        <section className="landing-steps-section bg-white py-16 md:py-20">
-          <div className="container mx-auto max-w-6xl px-4">
-            <h2 className="landing-steps-section-title mb-4 text-center text-3xl font-bold">
-              <strong>{t('landingStepsTitle')}</strong>
-            </h2>
-            <p className="mb-10 text-center text-lg text-gray-900">{t('landingStepsSubtitle')}</p>
-            <div className="grid gap-10 md:grid-cols-2 md:gap-8 lg:gap-12">
-              {landingSteps.map((item) => (
-                <div
-                  key={item.step}
-                  className={`landing-about-block landing-about-card-with-footer-image landing-step-card landing-step-card-${item.tone} transition-transform duration-200 hover:scale-[1.02]`}
-                >
-                  <span className="landing-step-pill inline-flex items-center rounded-full bg-white px-3 py-1.5 text-sm font-semibold text-gray-900 shadow-sm">
-                    {item.step}
-                  </span>
-                  <p className="mt-5 text-lg font-bold text-white md:text-xl">
-                    <strong>{item.title}</strong>
-                  </p>
-                  <p className="mt-3 text-base leading-relaxed text-white/95">{item.desc}</p>
-                  <div className="landing-card-footer-image">
-                    <a
-                      href={item.href}
-                      className="landing-step-image-link block rounded-b-[inherit] focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
-                    >
-                      <img src={item.src} alt="" width={428} height={320} loading="lazy" decoding="async" />
-                    </a>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <LandingAppDownloadBand variant="middle" />
-
-        <section id="schedule" className="landing-schedule-section landing-section-alt py-16 md:py-20">
-          <div className="container mx-auto max-w-6xl px-4">
-            <h1 className="landing-section-heading mb-4 text-3xl font-bold md:text-4xl">
-              <strong>{t('landingScheduleTitle')}</strong>
-            </h1>
-            <p className="mb-10 text-lg text-gray-900">{t('landingScheduleSubtitle')}</p>
-            {scheduleLoading ? (
-              <p className="text-center text-sm landing-text-muted">{t('landingScheduleLoading')}</p>
-            ) : scheduleExhibitions.length === 0 ? (
-              <p className="text-center text-sm landing-text-muted">{t('landingScheduleEmpty')}</p>
-            ) : (
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {scheduleExhibitions.map((ex) => {
-                  const { dateLine } = formatScheduleCardLinesForLang(ex, lang)
-                  const venue = venueLabelForLang(ex, lang)
-                  const mapHref = venueMapHref(venue)
-                  const img = getImageUrl(ex.banner ?? ex.image)
-                  return (
-                    <div
-                      key={ex.id}
-                      className="landing-card landing-schedule-card overflow-hidden transition-transform duration-200 hover:scale-[1.02]"
-                    >
-                      <div className="relative aspect-[16/10] w-full min-h-[180px] overflow-hidden bg-gray-100 sm:min-h-[200px]">
-                        {img ? (
-                          <img
-                            src={img}
-                            alt=""
-                            className="absolute inset-0 block h-full w-full object-fill"
-                            width={640}
-                            height={400}
-                            loading="lazy"
-                            decoding="async"
-                          />
-                        ) : null}
-                      </div>
-                      <div className="flex flex-col gap-3 p-4">
-                        <h3 className="text-lg font-semibold text-gray-900">
-                          <strong>{scheduleCardTitleForLang(ex, lang)}</strong>
-                        </h3>
-                        {dateLine ? <p className="text-sm landing-text-muted">{dateLine}</p> : null}
-                        {venue ? (
-                          <p className="text-sm leading-relaxed landing-text-muted">
-                            {mapHref !== '#' ? (
-                              <a
-                                href={mapHref}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-inherit underline-offset-2 hover:underline"
-                              >
-                                {venue}
-                              </a>
-                            ) : (
-                              venue
-                            )}
-                          </p>
-                        ) : null}
-                        <Link
-                          href={`/${landingLang}/auth/signup`}
-                          className="landing-btn-primary flex h-10 w-full items-center justify-center text-sm font-medium"
-                        >
-                          {t('landingScheduleFreeTicket')}
-                        </Link>
-                        <Link
-                          href={`/exhibitions/${ex.id}${scheduleUtm}`}
-                          className="flex h-10 w-full items-center justify-center gap-2 rounded-md border-2 border-gray-300 bg-white text-sm font-medium text-gray-900 hover:border-[#01AEF9]"
-                        >
-                          <Info className="h-4 w-4 shrink-0 text-[#01AEF9]" aria-hidden />
-                          {t('landingScheduleMore')}
-                        </Link>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            )}
           </div>
         </section>
 
@@ -755,7 +899,9 @@ export default function LandingPage({ initialLang: _initialLang }: { initialLang
                 <h2 className="landing-section-heading mb-4 text-2xl font-bold md:text-3xl">
                   <strong>{t('landingRegBlockTitle')}</strong>
                 </h2>
-                <p className="mb-6 text-base leading-relaxed landing-text-muted">{t('landingRegBlockBody')}</p>
+                <p className="mx-auto mb-6 max-w-2xl whitespace-pre-line text-[1.03rem] leading-8 text-gray-700 md:mx-0 md:text-[1.08rem]">
+                  {t('landingRegBlockBody')}
+                </p>
                 <Link
                   href={`/${landingLang}/auth/signup`}
                   className="landing-btn-primary inline-flex h-10 min-w-[200px] items-center justify-center px-7 text-sm font-medium"

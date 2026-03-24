@@ -376,6 +376,31 @@
   flex-shrink: 0;
 }
 
+.landing-page .landing-hero-first .landing-hero-cta-ticket {
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.9rem;
+  background-image: linear-gradient(135deg, #06b6d4 0%, #2563eb 52%, #7c3aed 100%);
+  box-shadow:
+    0 12px 30px rgb(37 99 235 / 0.48),
+    0 0 0 1px rgb(255 255 255 / 0.18) inset;
+}
+
+.landing-page .landing-hero-first .landing-hero-cta-ticket:hover {
+  color: #ffffff;
+  background-image: linear-gradient(135deg, #22d3ee 0%, #3b82f6 52%, #8b5cf6 100%);
+  box-shadow:
+    0 16px 34px rgb(37 99 235 / 0.58),
+    0 0 0 1px rgb(255 255 255 / 0.24) inset;
+}
+
+.landing-page .landing-hero-first .landing-hero-cta-ticket:active {
+  color: #ffffff;
+  box-shadow:
+    0 8px 18px rgb(37 99 235 / 0.44),
+    0 0 0 1px rgb(255 255 255 / 0.2) inset;
+}
+
 .landing-page .landing-card {
   background-color: var(--landing-card);
   border: 1px solid var(--landing-card-border);
@@ -418,6 +443,10 @@
     padding-right: 1.5rem;
     font-size: 0.875rem;
   }
+
+  .landing-page .landing-hero-first .landing-hero-cta-ticket {
+    font-size: 0.95rem;
+  }
 }
 
 .landing-page .landing-section-alt {
@@ -430,6 +459,10 @@
 
 .landing-page .landing-link {
   color: var(--landing-primary);
+}
+
+.landing-page button {
+  cursor: pointer;
 }
 
 .landing-page .landing-link:hover {
@@ -786,6 +819,28 @@
   border: none;
   border-radius: 1.25rem;
   box-shadow: 0 8px 28px rgb(0 0 0 / 0.14);
+}
+
+.landing-page .landing-step-desc {
+  font-size: 1.05rem;
+  line-height: 1.75;
+}
+
+.landing-page .landing-step-card .landing-step-card-image-wrap {
+  margin-top: 1.5rem;
+}
+
+.landing-page .landing-step-card .landing-step-card-image-wrap img {
+  width: 100%;
+  max-width: 360px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.landing-page .landing-step-card .landing-step-desc br + br {
+  content: '';
+  display: block;
+  margin-top: 0.6rem;
 }
 
 .landing-page .landing-about-block.landing-step-card-violet {

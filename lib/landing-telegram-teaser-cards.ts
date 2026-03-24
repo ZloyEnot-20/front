@@ -36,7 +36,7 @@ export const LANDING_TELEGRAM_TEASER_CARDS: LandingTelegramTeaserCard[] = z
     {
       title: "O'zbekistonda xorijiy OTMlarining qaysi filiallari akkreditatsiyadan o'tgan?",
       description:
-        "2025-yilda O'zbekistonda akkreditatsiyadan o'tgan xorijiy OTMlarining dolzarb ro'yxati.",
+        "2026-yilda O'zbekistonda akkreditatsiyadan o'tgan xorijiy OTMlarining dolzarb ro'yxati.",
       ctaLabel: "Ro'yxatni ko'rish...",
     },
   ])

@@ -19,7 +19,7 @@ export function LandingAppDownloadBand({ variant }: { variant: LandingAppDownloa
   )
 
   const inner = (
-    <div className="container mx-auto max-w-6xl px-4">
+    <div className={cn(variant === 'middle' ? 'w-full px-4' : 'container mx-auto max-w-6xl px-4')}>
       <AppDownloadLinks titleClassName={titleClassName} />
     </div>
   )
@@ -34,7 +34,13 @@ export function LandingAppDownloadBand({ variant }: { variant: LandingAppDownloa
 
   if (variant === 'middle') {
     return (
-      <section className={cn('border-y py-12 md:py-14', appDownloadSectionBg)} aria-label={t('landingAppDownloadTitle')}>
+      <section
+        className={cn(
+          'relative left-1/2 right-1/2 w-screen -translate-x-1/2 border-y py-12 md:py-14',
+          appDownloadSectionBg,
+        )}
+        aria-label={t('landingAppDownloadTitle')}
+      >
         {inner}
       </section>
     )

@@ -532,10 +532,16 @@ const ru = {
   landingStat4Label: 'посетителей в год',
   landingCtaWatchVideo: 'Смотреть видеообзор',
   landingCtaFreeTicket: 'Получить бесплатный билет',
-  landingAboutDateBadge: 'С 10 по 24 октября 2025 года',
+  landingAboutDateBadge: 'С 10 по 24 октября 2026 года',
   landingAboutRotatingSuffix: 'крупнейшая выставка образования',
-  landingAboutBody:
-    'Ежегодное мероприятие в Узбекистане, где вузы представляют свои программы. Вы узнаете всё о поступлении, грантах и востребованных профессиях — и главное, сможете лично пообщаться с представителями вузов.',
+  landingAboutBrandTitle: 'EDU Expo',
+  landingAboutBrandTagline: 'Найди университет своей мечты',
+  landingAboutBrandPara1:
+    'EDU Expo — это приложение, которое помогает будущим студентам познакомиться с университетами со всего мира, посетить образовательные выставки и получить прямой контакт с представителями вузов.',
+  landingAboutBrandPara2:
+    'Скачайте приложение, получите бесплатный QR-код и начните свой путь к обучению за рубежом.',
+  landingAboutBrandStores: '📱 Доступно в App Store, Google Play и Web-версии',
+  landingAboutCitiesAria: 'Города проведения выставок',
   landingAboutWorldUnisTitle: 'Мировые вузы — в одном месте',
   landingAboutWorldUnisBody:
     'Вас ждут вузы Узбекистана, России, Казахстана, Беларуси, Италии, Турции, ОАЭ, Южной Кореи, Малайзии, Польши, Канады, США и других стран!',
@@ -545,7 +551,7 @@ const ru = {
   landingAboutLiveTitle: 'Живое общение',
   landingAboutLiveBody:
     'Индивидуальные консультации, интерактив и вдохновляющая атмосфера помогут сделать осознанный и интересный выбор образования.',
-  landingAudienceTitle: 'Кому будет полезна выставка?',
+  landingAudienceTitle: 'Быстрый вход на выставку',
   landingAudience1Title: 'Родителям',
   landingAudience1Desc: 'Помогите ребёнку сделать правильный выбор.',
   landingAudience2Title: 'Школьникам',
@@ -559,19 +565,54 @@ const ru = {
   landingStep1Label: 'Шаг 1',
   landingStep1Title: 'Выберите город',
   landingStep1Desc:
-    'Выставка проходит в 12 городах Узбекистана. Приходите с родителями или друзьями и выберите будущее вместе!',
+    `Выставка проходит в 12 городах Узбекистана. Приходите с родителями или друзьями и выберите будущее вместе!
+
+Быстрый вход на выставку
+После регистрации на выбранную выставку в приложении вы получаете персональный QR-код.
+Этот код:
+✔ дает право бесплатного входа
+✔ хранится в вашем личном кабинете
+✔ позволяет пройти регистрацию за несколько секунд
+Никаких очередей — просто покажите QR-код на входе.`,
   landingStep2Label: 'Шаг 2',
   landingStep2Title: 'Найдите свою специальность',
   landingStep2Desc:
-    'IT, бизнес, медицина, инженерия, психология, экономика, дипломатия, маркетинг и десятки других направлений.',
+    `IT, бизнес, медицина, инженерия, психология, экономика, дипломатия, маркетинг и десятки других направлений.
+
+Общайтесь с университетами напрямую
+Во время выставки вы можете показать свой QR-код представителю университета.
+После сканирования:
+• университет получает ваш контакт
+• вы попадаете в список заинтересованных студентов
+• представители вузов смогут связаться с вами после выставки
+Это означает, что университеты смогут:
+📩 отправить вам информацию о программах
+🎓 рассказать об условиях поступления
+💻 пригласить на онлайн-консультацию`,
   landingStep3Label: 'Шаг 3',
   landingStep3Title: 'Подробности о поступлении',
   landingStep3Desc:
-    'Представители вузов расскажут об условиях, жизни студентов, специальных предложениях и скидках.',
+    `Представители вузов расскажут об условиях, жизни студентов, специальных предложениях и скидках.
+
+Найдите подходящий университет
+С помощью EDU Expo вы можете:
+🔎 искать университеты
+📖 изучать программы обучения
+🌍 узнавать о странах для учебы
+🎓 сравнивать образовательные возможности
+Все важные данные о поступлении — в одном приложении.`,
   landingStep4Label: 'Шаг 4',
   landingStep4Title: 'Поступайте!',
   landingStep4Desc:
-    'Соберите контакты, запишите даты вступительных экзаменов, готовьтесь — и поступайте на выбранную специальность!',
+    `Соберите контакты, запишите даты вступительных экзаменов, готовьтесь — и поступайте на выбранную специальность!
+
+Полезная информация для будущих студентов
+EDU Expo — это не только приложение для выставок.
+В приложении вы найдете:
+📰 новости образовательных выставок
+📚 информацию о поступлении в университеты
+🌍 советы по обучению за рубежом
+📅 анонсы образовательных мероприятий`,
   landingScheduleTitle: 'Выберите город',
   landingScheduleSubtitle: 'и получите приглашение на выставку!',
   landingScheduleLoading: 'Загрузка…',
@@ -605,8 +646,14 @@ const ru = {
     'Конечно! Вместе интереснее. Но каждый гость должен зарегистрироваться на сайте отдельно.',
   landingFaq5Q: 'Где список участников?',
   landingFaq5A: 'Информация о вузах — на этом сайте и на этапе регистрации.',
-  landingRegBlockTitle: 'Получите бесплатный билет на выставку',
-  landingRegBlockBody: 'Нажмите кнопку, чтобы зарегистрироваться и узнать подробности об участвующих вузах.',
+  landingRegBlockTitle: 'Как начать пользоваться',
+  landingRegBlockBody:
+    `Начать очень просто:
+1️⃣ Скачайте приложение EDU Expo
+2️⃣ Пройдите быструю регистрацию
+3️⃣ Выберите выставку, зарегистрируйтесь и получите QR-код для выставки
+4️⃣ Посетите выставку и познакомьтесь с университетами
+Всего несколько минут — и вы уже на пути к своему будущему образованию.`,
   landingRegBlockCta: 'Регистрация',
   landingBlogTitle: 'Подпишитесь на Telegram-канал о высшем образовании',
   landingBlogBody: 'Полезные статьи, новости и советы о поступлении в Узбекистане и за рубежом — каждый день.',
@@ -622,7 +669,7 @@ const ru = {
   landingTg3Desc: 'Регулярно публикуем актуальные конкурсы. Подпишитесь, чтобы не пропустить!',
   landingTg3Cta: 'Подписаться',
   landingTg4Title: 'Какие филиалы иностранных вузов аккредитованы в Узбекистане?',
-  landingTg4Desc: 'Актуальный список на 2025 год.',
+  landingTg4Desc: 'Актуальный список на 2026 год.',
   landingTg4Cta: 'Смотреть список…',
   landingFooterSocialsAria: 'Соцсети',
   landingFooterPortalAria: 'Портал абитуриента',
@@ -642,6 +689,23 @@ const ru = {
   landingAppDownloadIosLine2: 'App Store',
   landingAppDownloadAndroidLine1: 'Доступно в',
   landingAppDownloadAndroidLine2: 'Google Play',
+  landingAppDetailsCta: 'ПОДРОБНЕЕ О ПРИЛОЖЕНИЕ EDU EXPO',
+  landingAppPromoTitle: 'Почему стоит скачать EDU Expo',
+  landingAppPromoSubtitle: 'Все университеты в одном приложении',
+  landingAppPromoIntro: 'С EDU Expo вы можете:',
+  landingAppPromoItem1: '🎓 находить университеты из разных стран',
+  landingAppPromoItem2: '📚 узнавать о программах обучения',
+  landingAppPromoItem3: '🌍 получать информацию о поступлении за рубеж',
+  landingAppPromoItem4: '🤝 общаться с представителями университетов напрямую',
+  landingAppPromoOutro: 'Приложение помогает сделать первый шаг к международному образованию.',
+  landingAppExpoPromoTitle: 'Посещайте образовательные выставки бесплатно',
+  landingAppExpoPromoBody: 'В приложении публикуются все образовательные выставки MYFAIR.',
+  landingAppExpoPromoIntro: 'Вы можете:',
+  landingAppExpoPromoItem1: '📅 увидеть даты и города проведения',
+  landingAppExpoPromoItem2: '📍 узнать место проведения',
+  landingAppExpoPromoItem3: '🏫 посмотреть список университетов',
+  landingAppExpoPromoItem4: '📝 зарегистрироваться на выставку за несколько секунд',
+  landingAppExpoPromoOutro: 'После регистрации вы получаете бесплатный QR-код для входа на выставку.',
 }
 
 const en: Record<string, string> = {
@@ -1142,10 +1206,16 @@ const en: Record<string, string> = {
   landingStat4Label: 'visitors per year',
   landingCtaWatchVideo: 'Watch video overview',
   landingCtaFreeTicket: 'Get a free ticket',
-  landingAboutDateBadge: 'October 10–24, 2025',
+  landingAboutDateBadge: 'October 10–24, 2026',
   landingAboutRotatingSuffix: 'largest education fair',
-  landingAboutBody:
-    'An annual event in Uzbekistan where universities present their programmes. Learn about admission, grants and in-demand careers — and talk to university representatives in person.',
+  landingAboutBrandTitle: 'EDU Expo',
+  landingAboutBrandTagline: 'Find your dream university',
+  landingAboutBrandPara1:
+    'EDU Expo is an app that helps future students discover universities around the world, attend education fairs and connect directly with university representatives.',
+  landingAboutBrandPara2:
+    'Download the app, get a free QR code and start your journey towards studying abroad.',
+  landingAboutBrandStores: '📱 Available on the App Store, Google Play, and the web version',
+  landingAboutCitiesAria: 'Exhibition cities',
   landingAboutWorldUnisTitle: 'World universities in one place',
   landingAboutWorldUnisBody:
     'Universities from Uzbekistan, Russia, Kazakhstan, Belarus, Italy, Turkey, UAE, South Korea, Malaysia, Poland, Canada, the USA and more await you!',
@@ -1155,7 +1225,7 @@ const en: Record<string, string> = {
   landingAboutLiveTitle: 'Live interaction',
   landingAboutLiveBody:
     'Personal consultations, engaging activities and an inspiring atmosphere help you make a conscious, enjoyable choice.',
-  landingAudienceTitle: 'Who is the fair for?',
+  landingAudienceTitle: 'Quick entry to the fair',
   landingAudience1Title: 'Parents',
   landingAudience1Desc: 'Help your child make the right choice.',
   landingAudience2Title: 'School students',
@@ -1169,19 +1239,54 @@ const en: Record<string, string> = {
   landingStep1Label: 'Step 1',
   landingStep1Title: 'Choose your city',
   landingStep1Desc:
-    'The fair runs in 12 cities across Uzbekistan. Come with family or friends and choose your future together!',
+    `The fair takes place in 12 cities across Uzbekistan. Come with your parents or friends and choose your future together!
+
+Quick entry to the fair
+After you register for your chosen fair in the app, you receive a personal QR code.
+This code:
+✔ grants free admission
+✔ is stored in your personal account
+✔ lets you register in seconds
+No queues — simply show your QR code at the entrance.`,
   landingStep2Label: 'Step 2',
   landingStep2Title: 'Find your field',
   landingStep2Desc:
-    'IT, business, medicine, engineering, psychology, economics, diplomacy, marketing and dozens more directions.',
+    `IT, business, medicine, engineering, psychology, economics, diplomacy, marketing and dozens of other directions.
+
+Talk to universities directly
+During the fair you can show your QR code to a university representative.
+After scanning:
+• the university receives your contact
+• you join the list of interested students
+• representatives can reach you after the fair
+This means universities can:
+📩 send you information about programmes
+🎓 explain admission requirements
+💻 invite you to online consultations`,
   landingStep3Label: 'Step 3',
   landingStep3Title: 'Admission details',
   landingStep3Desc:
-    'Representatives will share conditions, student life, special offers and discounts.',
+    `Representatives will tell you about conditions, student life, special offers and discounts.
+
+Find the right university
+With EDU Expo you can:
+🔎 search for universities
+📖 explore study programmes
+🌍 learn about countries to study in
+🎓 compare education options
+All essential admission information — in one app.`,
   landingStep4Label: 'Step 4',
   landingStep4Title: 'Apply!',
   landingStep4Desc:
-    'Collect contacts, note entrance exam dates, prepare — and enrol in the programme you want!',
+    `Collect contacts, note entrance exam dates, prepare — and apply for the programme you want!
+
+Useful information for future students
+EDU Expo is not just a fair app.
+In the app you'll find:
+📰 news about education fairs
+📚 information on university admission
+🌍 tips on studying abroad
+📅 announcements of educational events`,
   landingScheduleTitle: 'Choose your city',
   landingScheduleSubtitle: 'and get an invitation to the fair!',
   landingScheduleLoading: 'Loading…',
@@ -1211,8 +1316,14 @@ const en: Record<string, string> = {
   landingFaq4A: 'Yes! It is more fun together. Each guest must register separately on the website.',
   landingFaq5Q: 'Where is the participant list?',
   landingFaq5A: 'University information is on this website and during registration.',
-  landingRegBlockTitle: 'Get a free fair ticket',
-  landingRegBlockBody: 'Tap the button to register and read more about participating universities.',
+  landingRegBlockTitle: 'How to get started',
+  landingRegBlockBody:
+    `It's very easy:
+1️⃣ Download the EDU Expo app
+2️⃣ Complete quick registration
+3️⃣ Choose a fair, register and get your exhibition QR code
+4️⃣ Visit the fair and meet universities
+Just a few minutes — and you're on your way to your future education.`,
   landingRegBlockCta: 'Register',
   landingBlogTitle: 'Subscribe to our Telegram on higher education',
   landingBlogBody: 'Useful articles, news and tips on studying in Uzbekistan and abroad — every day.',
@@ -1228,7 +1339,7 @@ const en: Record<string, string> = {
   landingTg3Desc: 'We post relevant competitions regularly. Subscribe so you do not miss them!',
   landingTg3Cta: 'Subscribe',
   landingTg4Title: 'Which foreign university branches are accredited in Uzbekistan?',
-  landingTg4Desc: 'Up-to-date list for 2025.',
+  landingTg4Desc: 'Up-to-date list for 2026.',
   landingTg4Cta: 'View list…',
   landingFooterSocialsAria: 'Social networks',
   landingFooterPortalAria: 'Applicant portal',
@@ -1248,6 +1359,23 @@ const en: Record<string, string> = {
   landingAppDownloadIosLine2: 'App Store',
   landingAppDownloadAndroidLine1: 'GET IT ON',
   landingAppDownloadAndroidLine2: 'Google Play',
+  landingAppDetailsCta: 'Learn more about the EDU Expo app',
+  landingAppPromoTitle: 'Why download EDU Expo',
+  landingAppPromoSubtitle: 'All universities in one app',
+  landingAppPromoIntro: 'With EDU Expo you can:',
+  landingAppPromoItem1: '🎓 find universities from different countries',
+  landingAppPromoItem2: '📚 learn about study programs',
+  landingAppPromoItem3: '🌍 get information about studying abroad',
+  landingAppPromoItem4: '🤝 communicate directly with university representatives',
+  landingAppPromoOutro: 'The app helps you take the first step toward international education.',
+  landingAppExpoPromoTitle: 'Visit education exhibitions for free',
+  landingAppExpoPromoBody: 'All MYFAIR education exhibitions are published in the app.',
+  landingAppExpoPromoIntro: 'You can:',
+  landingAppExpoPromoItem1: '📅 see event dates and cities',
+  landingAppExpoPromoItem2: '📍 view the exact venue',
+  landingAppExpoPromoItem3: '🏫 check the list of universities',
+  landingAppExpoPromoItem4: '📝 register for an exhibition in seconds',
+  landingAppExpoPromoOutro: 'After registration, you receive a free QR code for entry to the exhibition.',
 }
 
 const uz: Record<string, string> = {
@@ -1748,10 +1876,16 @@ const uz: Record<string, string> = {
   landingStat4Label: "yiliga tashrif buyuruvchilar",
   landingCtaWatchVideo: "Video sharhni ko'rish",
   landingCtaFreeTicket: 'Bepul chipta olish',
-  landingAboutDateBadge: '2025 yil 10-oktyabrdan 24-oktyabrgacha',
+  landingAboutDateBadge: '2026 yil 10-oktyabrdan 24-oktyabrgacha',
   landingAboutRotatingSuffix: "eng yirik ta'lim ko'rgazmasi",
-  landingAboutBody:
-    "O'zbekistonda har yili o'tkaziladigan tadbir bo'lib, unda OTMlar o'z o'quv dasturlarini taqdim etadi. Siz o'qishga kirish, grantlar va talabgir kasblar haqida hamma narsani bilib olasiz, eng muhimi — OTMlar vakillari bilan shaxsan muloqot qilish va savollarga javob olish imkoniyatiga ega bo'lasiz.",
+  landingAboutBrandTitle: 'EDU Expo',
+  landingAboutBrandTagline: 'Orzu universitetingizni toping',
+  landingAboutBrandPara1:
+    "EDU Expo — kelajakdagi talabalarga jahon bo'ylab universitetlar bilan tanishish, ta'lim ko'rgazmalariga borish va OTM vakillari bilan to'g'ridan-to'g'ri aloqa qilishda yordam beradigan ilova.",
+  landingAboutBrandPara2:
+    "Ilovani yuklab oling, bepul QR-kod oling va xorijda o'qish yo'lini boshlang.",
+  landingAboutBrandStores: '📱 App Store, Google Play va veb-versiyada mavjud',
+  landingAboutCitiesAria: "Ko'rgazmalar o'tkaziladigan shaharlar",
   landingAboutWorldUnisTitle: 'Jahon OTMlar — bir joyda',
   landingAboutWorldUnisBody:
     "Sizni O'zbekiston, Rossiya Federatsiyasi, Qozog'iston, Belarus, Italiya, Turkiya, BAA, Janubiy Koreya, Malayziya, Polsha, Kanada, AQSH va boshqa mamlakatlarning OTMlar kutmoqda!",
@@ -1761,7 +1895,7 @@ const uz: Record<string, string> = {
   landingAboutLiveTitle: 'Jonli muloqot',
   landingAboutLiveBody:
     "Shaxsiy maslahatlar, qiziqarli interaktiv mashg'ulotlar va ilhomlantiruvchi muhit sizga ongli, oson va qiziqarli ta'lim tanlovini amalga oshirishga yordam beradi!",
-  landingAudienceTitle: "Ko'rgazma kimga foydali bo'ladi?",
+  landingAudienceTitle: "Ko'rgazmaga tez kirish",
   landingAudience1Title: 'Ota-onaga',
   landingAudience1Desc: "Bolaga to'g'ri tanlov qilishga yordam bering.",
   landingAudience2Title: "O'quvchilarga",
@@ -1775,19 +1909,54 @@ const uz: Record<string, string> = {
   landingStep1Label: '1-qadam',
   landingStep1Title: 'Shahringizni tanlang',
   landingStep1Desc:
-    "Ko'rgazma O'zbekistonning 12 shahrida bo'lib o'tmoqda. Ota-onangiz yoki do'stlaringiz bilan keling va kelajakni birgalikda tanlang!",
+    `Ko'rgazma O'zbekistonning 12 shahrida bo'lib o'tadi. Ota-onangiz yoki do'stlaringiz bilan keling va kelajakni birgalikda tanlang!
+
+Ko'rgazmaga tez kirish
+Tanlangan ko'rgazmaga ilovada ro'yxatdan o'tgach, shaxsiy QR-kodingizni olasiz.
+Bu kod:
+✔ bepul kirish huquqini beradi
+✔ shaxsiy kabinetingizda saqlanadi
+✔ bir necha soniyada ro'yxatdan o'tish imkonini beradi
+Navbatlarsiz — kirishda shunchaki QR-kodni ko'rsating.`,
   landingStep2Label: '2-qadam',
   landingStep2Title: 'Kasbingizni toping',
   landingStep2Desc:
-    "IT, biznes, tibbiyot, muhandislik, psixologiya, iqtisodiyot, diplomatiya, marketing va yana o'nlab yo'nalishlar. Ko'rgazmadan o'zingizga yoqqan mutaxassislikni toping!",
+    `IT, biznes, tibbiyot, muhandislik, psixologiya, iqtisodiyot, diplomatiya, marketing va yana o'nlab yo'nalishlar.
+
+Universitetlar bilan bevosita muloqot
+Ko'rgazma davomida QR-kodingizni universitet vakiliga ko'rsatishingiz mumkin.
+Skanerdan keyin:
+• universitet sizning kontaktingizni oladi
+• siz qiziqtirgan talabalar ro'yxatiga tushasiz
+• vakillar ko'rgazmadan keyin siz bilan bog'lanishi mumkin
+Bu universitetlar quyidagilarni qila olishini anglatadi:
+📩 dasturlar haqida ma'lumot yuborish
+🎓 kirish shartlari haqida so'zlab berish
+💻 onlayn maslahatga taklif qilish`,
   landingStep3Label: '3-qadam',
   landingStep3Title: 'Kirish haqida batafsil',
   landingStep3Desc:
-    "Rasmiylar OTM, ta'lim sharoitlari va talabalar hayoti haqida so'zlab beradi. Bundan tashqari, sizni maxsus takliflar, bonuslar va chegirmalar kutmoqda!",
+    `OTM vakillari shartlar, talabalar hayoti, maxsus takliflar va chegirmalar haqida gapirib beradi.
+
+To'g'ri universitetni toping
+EDU Expo yordamida siz:
+🔎 universitetlarni qidirishingiz
+📖 o'quv dasturlarini o'rganishingiz
+🌍 o'qish uchun mamlakatlar haqida bilib olishingiz
+🎓 ta'lim imkoniyatlarini solishtirishingiz mumkin
+Kirish bo'yicha barcha muhim ma'lumotlar — bitta ilovada.`,
   landingStep4Label: '4-qadam',
   landingStep4Title: "O'qishga kiring!",
   landingStep4Desc:
-    "OTM kontaktlarini oling, kirish imtihonlari sanalarini yozib oling, puxta tayyorlaning - va o'zingiz istagan mutaxassislikka o'qishga kiring!",
+    `Kontaktlarni yig'ing, kirish imtihonlari sanalarini yozib oling, tayyorlaning — va tanlangan mutaxassislikka o'qishga kiring!
+
+Kelajak talabalari uchun foydali ma'lumot
+EDU Expo — faqat ko'rgazma ilovasi emas.
+Ilovada topasiz:
+📰 ta'lim ko'rgazmalari yangiliklari
+📚 universitetlarga qabul haqidagi ma'lumot
+🌍 xorijda o'qish bo'yicha maslahatlar
+📅 ta'lim tadbirlari e'lonlari`,
   landingScheduleTitle: 'Shahringizni tanlang',
   landingScheduleSubtitle: "va ko'rgazmaga taklifnoma oling!",
   landingScheduleLoading: 'Yuklanmoqda…',
@@ -1822,9 +1991,14 @@ const uz: Record<string, string> = {
     "Albatta! Birgalikda - quvnoqroq va qiziqarliroq. Ammo har bir mehmon ushbu saytda alohida ro'yxatdan o'tishi kerak.",
   landingFaq5Q: "Ishtirokchilar ro'yxatini qayerdan topsam bo'ladi?",
   landingFaq5A: "Ishtirokchi OTMlar haqidagi ma'lumotlarni ushbu saytdan va ro'yxatdan o'tish bosqichidan topishingiz mumkin.",
-  landingRegBlockTitle: "Ko'rgazmaga bepul chipta oling",
+  landingRegBlockTitle: 'Qanday boshlash mumkin',
   landingRegBlockBody:
-    "Ro'yxatdan o'tish va ishtirokchi OTMlar haqida batafsil ma'lumot olish uchun tugmani bosing.",
+    `Juda ham oson:
+1️⃣ EDU Expo ilovasini yuklab oling
+2️⃣ Tez ro'yxatdan o'ting
+3️⃣ Ko'rgazmani tanlang, ro'yxatdan o'ting va ko'rgazma uchun QR-kodingizni oling
+4️⃣ Ko'rgazmaga boring va universitetlar bilan tanishing
+Bir necha daqiqa — va siz allaqachon kelajakdagi ta'lim yo'lingizdasiz.`,
   landingRegBlockCta: "Ro'yxatga olish",
   landingBlogTitle: "Oliy ta'lim haqidagi Telegram kanaliga obuna bo'ling",
   landingBlogBody:
@@ -1844,7 +2018,7 @@ const uz: Record<string, string> = {
     "Biz muntazam ravishda dolzarb tanlovlarni e'lon qilib boramiz. O'tkazib yuborish uchun obuna qiling!",
   landingTg3Cta: "Obuna bo'lish",
   landingTg4Title: "O'zbekistonda xorijiy OTMlarining qaysi filiallari akkreditatsiyadan o'tgan?",
-  landingTg4Desc: "2025-yilda O'zbekistonda akkreditatsiyadan o'tgan xorijiy OTMlarining dolzarb ro'yxati.",
+  landingTg4Desc: "2026-yilda O'zbekistonda akkreditatsiyadan o'tgan xorijiy OTMlarining dolzarb ro'yxati.",
   landingTg4Cta: "Ro'yxatni ko'rish...",
   landingFooterSocialsAria: 'Ijtimoiy tarmoqlar',
   landingFooterPortalAria: 'Abituriyent portali',
@@ -1864,6 +2038,23 @@ const uz: Record<string, string> = {
   landingAppDownloadIosLine2: 'dan yuklab oling',
   landingAppDownloadAndroidLine1: 'Google Play',
   landingAppDownloadAndroidLine2: 'dan yuklab oling',
+  landingAppDetailsCta: "EDU Expo ilovasi haqida batafsil",
+  landingAppPromoTitle: 'Nega EDU Expo ilovasini yuklab olish kerak',
+  landingAppPromoSubtitle: 'Barcha universitetlar bitta ilovada',
+  landingAppPromoIntro: 'EDU Expo bilan siz:',
+  landingAppPromoItem1: "🎓 turli mamlakatlardagi universitetlarni topishingiz",
+  landingAppPromoItem2: "📚 ta'lim dasturlari haqida bilib olishingiz",
+  landingAppPromoItem3: "🌍 xorijda o'qish bo'yicha ma'lumot olishingiz",
+  landingAppPromoItem4: '🤝 universitet vakillari bilan bevosita muloqot qilishingiz mumkin',
+  landingAppPromoOutro: "Ilova xalqaro ta'lim sari birinchi qadamni tashlashga yordam beradi.",
+  landingAppExpoPromoTitle: "Ta'lim ko'rgazmalariga bepul tashrif buyuring",
+  landingAppExpoPromoBody: "Ilovada MYFAIR'ning barcha ta'lim ko'rgazmalari e'lon qilinadi.",
+  landingAppExpoPromoIntro: 'Siz:',
+  landingAppExpoPromoItem1: "📅 o'tkazilish sanalari va shaharlarni ko'rishingiz",
+  landingAppExpoPromoItem2: "📍 o'tkazilish manzilini bilib olishingiz",
+  landingAppExpoPromoItem3: "🏫 universitetlar ro'yxatini ko'rishingiz",
+  landingAppExpoPromoItem4: "📝 ko'rgazmaga bir necha soniyada ro'yxatdan o'tishingiz mumkin",
+  landingAppExpoPromoOutro: "Ro'yxatdan o'tgach, ko'rgazmaga kirish uchun bepul QR-kod olasiz.",
 }
 
 export const translations = buildMap(ru, en, uz)
