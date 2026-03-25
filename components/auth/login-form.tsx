@@ -2,7 +2,7 @@
 
 import React from "react"
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
 import { useLocale } from '@/lib/i18n'
