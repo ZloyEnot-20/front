@@ -1424,9 +1424,23 @@ export function ExhibitorProfileSection() {
       row.countryOfInterest ?? '',
       row.admissionPlan ?? '',
     ]);
-    const csv = [[t('nameLabel'), t('emailLabel'), t('phoneLabelShort'), t('cityColumn'), t('status'), t('exhibitionFallback'), t('interestColumn'), t('countryOfInterestColumn'), t('admissionPlanColumn')], ...rows]
-      .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(','))
-      .join('\n');
+    const delimiter = ';'
+    const lineBreak = '\r\n'
+
+    const escapeCell = (cell: unknown) => {
+      // Excel иногда “ломает” CSV если значение содержит перенос строки.
+      const raw = String(cell ?? '')
+      const normalized = raw.replace(/\r?\n/g, ' ').replace(/\u2028|\u2029/g, ' ')
+      const escapedQuotes = normalized.replace(/"/g, '""')
+      return `"${escapedQuotes}"`
+    }
+
+    const csv = [
+      [t('nameLabel'), t('emailLabel'), t('phoneLabelShort'), t('cityColumn'), t('status'), t('exhibitionFallback'), t('interestColumn'), t('countryOfInterestColumn'), t('admissionPlanColumn')],
+      ...rows,
+    ]
+      .map((row) => row.map((cell) => escapeCell(cell)).join(delimiter))
+      .join(lineBreak)
     const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
