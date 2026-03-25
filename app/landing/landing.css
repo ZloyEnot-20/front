@@ -84,6 +84,75 @@
   padding-bottom: 10px;
 }
 
+/* Мобильный хедер: во всю ширину + только язык и auth */
+@media (max-width: 767px) {
+  .landing-page .landing-hero-first .landing-hero-nav-bar.landing-hero-nav-bar-lang-only {
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+    border-radius: 0;
+    padding: 10px 16px;
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+  }
+
+  .landing-page .landing-mobile-header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+  }
+
+  .landing-page .landing-mobile-auth-buttons {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .landing-page .landing-auth-buttons-under-title {
+    margin-top: 0.75rem;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  .landing-page .landing-lang-select {
+    width: 92px;
+    border-radius: 9999px;
+    border: none;
+    padding: 0.45em 1.05em;
+    font-weight: 700;
+    font-size: 12px;
+    font-family: 'Roboto', 'Segoe UI', sans-serif;
+    color: #ffffff;
+    background-color: #2dd4bf; /* совпадает с landing-lang-btn */
+    appearance: none;
+  }
+
+  .landing-page .landing-lang-select:focus-visible {
+    outline: 2px solid var(--landing-primary);
+    outline-offset: 2px;
+  }
+}
+
+/* Кнопки login/signup под заголовком (mobile и desktop) */
+.landing-page .landing-auth-buttons-under-title {
+  margin-top: 0.75rem;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.landing-page .landing-mobile-auth-buttons {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
 .landing-page .landing-nav-grid {
   display: grid;
   grid-template-columns: 9% 1fr 11%;
@@ -125,13 +194,13 @@
 
 .landing-page .landing-hero-first .landing-hero-header .landing-nav-link {
   color: rgba(255, 255, 255, 0.95);
-  padding: 0 5px;
-  font-size: 0.9375rem;
+  padding: 0 3px;
+  font-size: 0.85rem;
 }
 
 .landing-page .landing-hero-first .landing-hero-nav-bar .landing-nav-link {
   color: #000000;
-  font-size: 1.0625rem;
+  font-size: 0.98rem;
 }
 
 .landing-page .landing-hero-first .landing-hero-header .landing-nav-link:hover {
@@ -463,6 +532,72 @@
 
 .landing-page button {
   cursor: pointer;
+}
+
+/* Кнопки Ta'lim va Kasb (myexpo.uz): стиль Uiverse.io */
+.landing-page .btn {
+  --color: #01AEF9;
+  --color2: #ffffff;
+  padding: 0.45em 1.05em;
+  background-color: var(--color);
+  border-radius: 6px;
+  border: 0.3px solid var(--color);
+  transition: 0.5s;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  z-index: 1;
+  isolation: isolate;
+  font-weight: 700;
+  font-size: 13px;
+  font-family: 'Roboto', 'Segoe UI', sans-serif;
+  text-transform: uppercase;
+  color: #ffffff;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.05;
+}
+
+.landing-page .btn::after,
+.landing-page .btn::before {
+  content: '';
+  display: block;
+  height: 100%;
+  width: 100%;
+  transform: skew(90deg) translate(-50%, -50%);
+  position: absolute;
+  inset: 50%;
+  left: 25%;
+  z-index: -1;
+  transition: 0.5s ease-out;
+  background-color: var(--color2);
+}
+
+.landing-page .btn::before {
+  top: -50%;
+  left: -25%;
+  transform: skew(90deg) rotate(180deg) translate(-50%, -50%);
+}
+
+.landing-page .btn:hover::before {
+  transform: skew(45deg) rotate(180deg) translate(-50%, -50%);
+}
+
+.landing-page .btn:hover::after {
+  transform: skew(45deg) translate(-50%, -50%);
+}
+
+.landing-page .btn:hover {
+  color: var(--color);
+  background-color: var(--color2);
+  border-color: var(--color);
+}
+
+.landing-page .btn:active {
+  filter: brightness(0.7);
+  transform: scale(0.98);
 }
 
 .landing-page .landing-link:hover {

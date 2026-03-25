@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { landingPublicImage } from '@/lib/landing-public-images'
 import { getLandingReviewEmbedSrc } from '@/lib/landing-review-youtube'
 import { getImageUrl } from '@/lib/api'
+import { AppDownloadLinks } from '@/components/app-download-links'
 import {
   buildUtmQueryFromSearch,
   fetchLandingScheduleExhibitions,
@@ -81,29 +82,26 @@ function LandingHeroLangButtons({
   lang: string
   setLang: (lang: 'ru' | 'en' | 'uz') => void
 }) {
+  const LANGS = [
+    { id: 'ru' as const, label: 'RU' },
+    { id: 'en' as const, label: 'EN' },
+    { id: 'uz' as const, label: 'UZ' },
+  ]
+
   return (
     <>
-      <button
-        type="button"
-        onClick={() => setLang('ru')}
-        className={`landing-lang-btn ${lang === 'ru' ? 'landing-lang-active' : ''}`}
-      >
-        RU
-      </button>
-      <button
-        type="button"
-        onClick={() => setLang('en')}
-        className={`landing-lang-btn ${lang === 'en' ? 'landing-lang-active' : ''}`}
-      >
-        EN
-      </button>
-      <button
-        type="button"
-        onClick={() => setLang('uz')}
-        className={`landing-lang-btn ${lang === 'uz' ? 'landing-lang-active' : ''}`}
-      >
-        UZ
-      </button>
+      {LANGS.map(({ id, label }) => (
+        <button
+          key={id}
+          type="button"
+          onClick={() => setLang(id)}
+          className={`px-1 py-0.25 rounded text-xs font-medium min-w-[46px] whitespace-nowrap ${
+            lang === id ? 'bg-[#01AEF9] text-white font-medium' : 'text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          {label}
+        </button>
+      ))}
     </>
   )
 }
@@ -300,11 +298,11 @@ export default function LandingPage({ initialLang: _initialLang }: { initialLang
           <div className="landing-hero-inner">
             <div className="landing-hero-content w-full px-4">
               <header className="landing-hero-header landing-hero-nav-bar landing-hero-nav-bar-lang-only md:hidden">
-                <nav className="flex w-full justify-center" aria-label={t('landingLangSwitchAria')}>
+                <div className="landing-mobile-header-inner">
                   <div className="landing-nav-col-lang flex items-center justify-center gap-2">
                     <LandingHeroLangButtons lang={lang} setLang={setLang} />
                   </div>
-                </nav>
+                </div>
               </header>
 
               <header className="landing-hero-header landing-hero-nav-bar hidden md:block">
@@ -334,19 +332,47 @@ export default function LandingPage({ initialLang: _initialLang }: { initialLang
                       {t('landingNavBlog')}
                     </a>
                   </nav>
-                  <div className="landing-nav-col landing-nav-col-lang">
+                  <div className="landing-nav-col landing-nav-col-lang flex items-center justify-end gap-4">
                     <LandingHeroLangButtons lang={lang} setLang={setLang} />
                   </div>
                 </div>
               </header>
 
               <div className="-mx-4">
-                <LandingAppDownloadBand variant="afterHero" />
+                <section className="py-8 md:py-10" aria-label={t('landingAppDownloadTitle')}>
+                  <div className="container mx-auto max-w-6xl px-4">
+                    <div className="flex justify-center">
+                      <AppDownloadLinks
+                          titleClassName="text-white drop-shadow-sm text-xl font-bold md:text-2xl text-center"
+                        actionsClassName="sm:justify-center"
+                      />
+                    </div>
+                  </div>
+                </section>
               </div>
 
               <div className="landing-hero-title-wrap relative">
                 <p className="landing-hero-title-line">{t('landingHeroLine1')}</p>
                 <p className="landing-hero-title-line">{t('landingHeroLine2')}</p>
+              </div>
+
+              <div className="landing-auth-buttons-under-title">
+                <div className="landing-mobile-auth-buttons">
+                  <Link
+                    href="/auth/login"
+                    className="landing-hero-cta-white inline-flex min-w-[80px] items-center justify-center whitespace-nowrap"
+                    aria-label={t('login')}
+                  >
+                    {lang === 'uz' ? 'login' : t('login')}
+                  </Link>
+                  <Link
+                    href="/auth/signup"
+                    className="landing-hero-cta-white landing-hero-cta-ticket inline-flex min-w-[170px] items-center justify-center whitespace-nowrap"
+                    aria-label={t('signup')}
+                  >
+                    {lang === 'uz' ? 'registratsiya' : t('signup')}
+                  </Link>
+                </div>
               </div>
 
               <div className="landing-hero-stats grid grid-cols-2 gap-4 py-4 md:grid-cols-4 md:gap-5 md:py-6">
