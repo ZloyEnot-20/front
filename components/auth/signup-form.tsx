@@ -130,7 +130,7 @@ export function SignupForm() {
 
         <div className="mt-4 text-center text-sm text-muted-foreground">
           Уже есть учетная запись?{' '}
-          <a href={`/${lang}/auth/login`} className="text-primary hover:underline">
+          <a href="/auth/login" className="text-primary hover:underline">
             Войти
           </a>
         </div>

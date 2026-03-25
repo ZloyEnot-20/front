@@ -1235,10 +1235,10 @@ function Header({
             ) : (
               <>
                 <Button variant="ghost" asChild>
-                  <Link href={`/${lang}/auth/login`}>{t('login')}</Link>
+                  <Link href="/auth/login">{t('login')}</Link>
                 </Button>
                 <Button asChild>
-                  <Link href={`/${lang}/auth/signup`}>{t('signup')}</Link>
+                  <Link href="/auth/signup">{t('signup')}</Link>
                 </Button>
               </>
             )}

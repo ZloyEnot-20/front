@@ -626,7 +626,7 @@ export function VisitorSignupForm({ initialLang }: { initialLang: Lang }) {
 
         <div className="mt-4 text-center text-sm text-muted-foreground">
           {T.haveAccount}{' '}
-          <a href={`/${lang}/auth/login`} className="text-primary hover:underline">
+        <a href="/auth/login" className="text-primary hover:underline">
             {T.login}
           </a>
         </div>

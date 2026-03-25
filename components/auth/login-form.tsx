@@ -16,12 +16,13 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 export function LoginForm({ localePrefix = 'uz' }: { localePrefix?: Lang }) {
   const router = useRouter()
   const { t } = useLocale()
-  const { login, isLoading } = useAuth()
+  const { login, isLoading, user } = useAuth()
   const [error, setError] = useState('')
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   })
+  const [postLoginRedirect, setPostLoginRedirect] = useState(false)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -36,11 +37,26 @@ export function LoginForm({ localePrefix = 'uz' }: { localePrefix?: Lang }) {
     e.preventDefault()
     try {
       await login(formData.email, formData.password)
-      router.push('/main')
+      setPostLoginRedirect(true)
     } catch (err) {
       setError(err instanceof Error ? err.message : t('loginError'))
     }
   }
+
+  // После логина редиректим только когда `user` действительно доступен в контексте
+  // (чтобы не было гонок по setState).
+  useEffect(() => {
+    if (!postLoginRedirect) return
+    if (isLoading) return
+    if (!user) return
+
+    if (user.role === 'exhibitor') {
+      router.push('/profile')
+      return
+    }
+
+    router.push('/main')
+  }, [postLoginRedirect, isLoading, user, router])
 
   return (
     <Card className="w-full max-w-md">
@@ -96,7 +112,7 @@ export function LoginForm({ localePrefix = 'uz' }: { localePrefix?: Lang }) {
 
         <div className="mt-4 text-center text-sm text-muted-foreground">
           {t('noAccount')}{' '}
-          <a href={`/${localePrefix}/auth/signup`} className="text-primary hover:underline">
+          <a href="/auth/signup" className="text-primary hover:underline">
             {t('registerLink')}
           </a>
         </div>

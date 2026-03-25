@@ -48,7 +48,7 @@ export default function ForgotPasswordPage() {
           </CardHeader>
           <CardContent>
             <Button asChild className="w-full">
-              <Link href={`/${lang}/auth/login`}>{t('backToLogin')}</Link>
+              <Link href="/auth/login">{t('backToLogin')}</Link>
             </Button>
           </CardContent>
         </Card>
@@ -87,7 +87,7 @@ export default function ForgotPasswordPage() {
             </Button>
           </form>
           <div className="mt-4 text-center text-sm text-muted-foreground">
-            <Link href={`/${lang}/auth/login`} className="text-primary hover:underline">
+            <Link href="/auth/login" className="text-primary hover:underline">
               {t('backToLogin')}
             </Link>
           </div>

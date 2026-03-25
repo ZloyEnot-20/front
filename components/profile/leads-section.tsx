@@ -381,10 +381,15 @@ export function LeadsSection() {
       }))
       const columns = ['name', 'email', 'phone', 'city', 'status', 'exhibitionTitle'] as const
       const headers = [t('nameColumn'), t('email'), t('phoneColumn'), t('city'), t('filterByStatus'), t('exhibitionColumn')]
-      const csv = [
-        headers.map((h) => `"${h}"`).join(','),
-        ...rows.map((row) => columns.map((c) => `"${String(row[c] ?? '').replace(/"/g, '""')}"`).join(',')),
-      ].join('\n')
+      // Excel на RU/части EN локалей часто ожидает `;` как разделитель и `\r\n` как перенос строки.
+      const delimiter = ';'
+      const lineBreak = '\r\n'
+      const csvLines = [
+        headers.map((h) => `"${h}"`).join(delimiter),
+        ...rows.map((row) => columns.map((c) => `"${String(row[c] ?? '').replace(/"/g, '""')}"`).join(delimiter)),
+      ]
+      const csv = csvLines.join(lineBreak)
+
       const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' })
       const a = document.createElement('a')
       a.href = URL.createObjectURL(blob)

@@ -59,7 +59,7 @@ export function HomeClient() {
               <p className="text-muted-foreground mb-4">{t('noExhibitionsNow')}</p>
               {!user && (
                 <Button asChild>
-                  <Link href={`/${lang}/auth/signup`}>{t('stayTuned')}</Link>
+                  <Link href="/auth/signup">{t('stayTuned')}</Link>
                 </Button>
               )}
             </div>
@@ -111,7 +111,7 @@ export function HomeClient() {
               {t('ctaSubtitle')}
             </p>
             <Button size="lg" asChild>
-              <Link href={`/${lang}/auth/signup`}>{t('registerNowCta')}</Link>
+              <Link href="/auth/signup">{t('registerNowCta')}</Link>
             </Button>
           </div>
         </section>

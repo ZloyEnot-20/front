@@ -128,7 +128,7 @@ export function RegistrationModal({
               <AlertDescription>{t('signInToRegister')}</AlertDescription>
             </Alert>
             <Button asChild>
-              <Link href={`/${lang}/auth/login`}>{t('login')}</Link>
+              <Link href="/auth/login">{t('login')}</Link>
             </Button>
           </>
         ) : step === 'city' ? (
