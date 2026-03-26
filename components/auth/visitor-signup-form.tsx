@@ -185,11 +185,32 @@ export function VisitorSignupForm({ initialLang }: { initialLang: Lang }) {
   const { setLang: setGlobalLang } = useLocale()
   const [step, setStep] = useState<'form' | 'confirm'>('form')
   const [lang, setLangState] = useState<Lang>(initialLang)
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window === 'undefined') return false
+    return window.matchMedia('(max-width: 767px)').matches
+  })
 
   useEffect(() => {
     setLangState(initialLang)
     setGlobalLang(initialLang)
   }, [initialLang, setGlobalLang])
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 767px)')
+    const update = () => setIsMobile(mq.matches)
+    update()
+
+    // Safari fallback
+    if ('addEventListener' in mq) {
+      mq.addEventListener('change', update)
+      return () => mq.removeEventListener('change', update)
+    }
+
+    // eslint-disable-next-line deprecation/deprecation
+    mq.addListener(update)
+    // eslint-disable-next-line deprecation/deprecation
+    return () => mq.removeListener(update)
+  }, [])
   const [error, setError] = useState('')
   const [emailCodeSent, setEmailCodeSent] = useState(false)
   const [sendingCode, setSendingCode] = useState(false)
@@ -254,7 +275,15 @@ export function VisitorSignupForm({ initialLang }: { initialLang: Lang }) {
     setFieldError(null)
     const phoneDigits = formData.phone.replace(/\D/g, '')
     const validPhone = (phoneDigits.length === 12 && phoneDigits.startsWith('998')) || (phoneDigits.length === 9 && !phoneDigits.startsWith('0'))
-    if (!validPhone) {
+    const phoneRequired = !isMobile
+    if (phoneDigits.length === 0) {
+      if (phoneRequired) {
+        setError(T.errRequired)
+        setFieldError('phone')
+        scrollToError()
+        return
+      }
+    } else if (!validPhone) {
       setError(T.errPhoneInvalid)
       setFieldError('phone')
       scrollToError()
@@ -305,6 +334,7 @@ export function VisitorSignupForm({ initialLang }: { initialLang: Lang }) {
       return
     }
     try {
+      const phoneTrim = formData.phone.trim()
       await signup({
         email: formData.email.trim(),
         password: formData.password,
@@ -312,7 +342,6 @@ export function VisitorSignupForm({ initialLang }: { initialLang: Lang }) {
         emailCode: formData.emailCode.trim(),
         firstName: formData.firstName.trim(),
         lastName: formData.lastName.trim(),
-        phone: formData.phone.trim(),
         city: formData.city.trim(),
         visitorStatus: formData.visitorStatus as 'student' | 'parent' | 'specialist',
         languageKnowledge: formData.languageKnowledge.trim(),
@@ -320,7 +349,8 @@ export function VisitorSignupForm({ initialLang }: { initialLang: Lang }) {
         countryOfInterest: formData.countryOfInterest.trim() || undefined,
         admissionPlan: formData.admissionPlan || undefined,
         consentGiven: true,
-      })
+        ...(phoneTrim || !isMobile ? { phone: phoneTrim } : {}),
+      } as any)
       router.push('/main')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Ошибка регистрации')
@@ -453,14 +483,17 @@ export function VisitorSignupForm({ initialLang }: { initialLang: Lang }) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="phone">{T.phone} *</Label>
+              <Label htmlFor="phone">
+                {T.phone}
+                {!isMobile ? ' *' : ''}
+              </Label>
             <Input
               id="phone"
               type="tel"
               value={formData.phone}
               onChange={(e) => { setFormData({ ...formData, phone: e.target.value }); setFieldError(null) }}
               placeholder="+998 90 123 45 67"
-              required
+                required={!isMobile}
               disabled={isLoading}
               className={cn(fieldError === 'phone' && 'border-destructive ring-2 ring-destructive/20')}
             />

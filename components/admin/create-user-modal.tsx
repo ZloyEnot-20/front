@@ -87,14 +87,8 @@ export function CreateUserModal({ isOpen, onOpenChange }: CreateUserModalProps) 
       setError(t('enterValidEmail'))
       return false
     }
-    const phoneDigits = formData.phone.replace(/\D/g, '')
-    const validPhone = (phoneDigits.length === 12 && phoneDigits.startsWith('998')) || (phoneDigits.length === 9 && !phoneDigits.startsWith('0'))
     if (!formData.phone.trim()) {
       setError(t('enterPhone'))
-      return false
-    }
-    if (!validPhone) {
-      setError(t('enterValidUzPhone'))
       return false
     }
     if (!formData.password || formData.password.length < 8) {
@@ -223,7 +217,7 @@ export function CreateUserModal({ isOpen, onOpenChange }: CreateUserModalProps) 
                 type="tel"
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                placeholder="+998 90 123 45 67"
+                placeholder="+1 555 123 4567"
               />
             </div>
 
