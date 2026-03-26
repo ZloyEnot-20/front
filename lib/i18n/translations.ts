@@ -133,7 +133,7 @@ const ru = {
   status: 'Статус',
   actions: 'Действия',
   noExhibitions: 'Нет выставок',
-  noNews: 'Новости не найдены',
+  noNews: 'Новостей нет',
   publicationManagement: 'Организация выставок и новостей',
   createNew: 'Создать новую',
   exhibition: 'выставку',

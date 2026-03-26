@@ -43,7 +43,13 @@ export default function ExhibitionsPage() {
         })
         .sort((a, b) => {
           if (sortBy === 'upcoming') {
-            return new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
+            const now = Date.now()
+            const aTime = new Date(a.startDate).getTime()
+            const bTime = new Date(b.startDate).getTime()
+            const aUpcoming = aTime >= now
+            const bUpcoming = bTime >= now
+            if (aUpcoming !== bUpcoming) return aUpcoming ? -1 : 1
+            return aTime - bTime
           }
           if (sortBy === 'popular') {
             return b.registrations - a.registrations

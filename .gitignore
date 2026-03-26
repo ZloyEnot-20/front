@@ -21,6 +21,16 @@ yarn-error.log*
 
 # vercel
 .vercel
+.expo
+
+# local tools / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+.venv/
+venv/
+__pycache__/
 
 # typescript
 *.tsbuildinfo
