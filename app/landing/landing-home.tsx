@@ -224,6 +224,16 @@ export default function LandingPage({ initialLang: _initialLang }: { initialLang
     }
     return pages
   }, [scheduleExhibitions, scheduleCardsPerSlide])
+  const mobileOrderedScheduleExhibitions = useMemo(() => {
+    const now = Date.now()
+    const upcoming = scheduleExhibitions
+      .filter((e) => new Date(e.startDate).getTime() >= now)
+      .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
+    const past = scheduleExhibitions
+      .filter((e) => new Date(e.startDate).getTime() < now)
+      .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
+    return [...upcoming, ...past]
+  }, [scheduleExhibitions])
   const currentScheduleDot = schedulePage
 
   const nextSchedulePage = () => {
@@ -461,7 +471,7 @@ export default function LandingPage({ initialLang: _initialLang }: { initialLang
               <div className="relative overflow-visible">
                 {scheduleCardsPerSlide === 1 ? (
                   <div className="flex gap-4 overflow-x-auto pb-2">
-                    {scheduleExhibitions.map((ex) => {
+                    {mobileOrderedScheduleExhibitions.map((ex) => {
                       const { dateLine } = formatScheduleCardLinesForLang(ex, lang)
                       const venue = venueLabelForLang(ex, lang)
                       const mapHref = venueMapHref(venue)

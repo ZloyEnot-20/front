@@ -19,7 +19,17 @@ export function HomeClient() {
   const { t, lang } = useLocale()
   const { user } = useAuth()
   const { exhibitions, news, isLoading } = useAdmin()
-  const publishedExhibitions = exhibitions.filter((e) => e.status === 'published')
+  const now = Date.now()
+  const publishedExhibitions = exhibitions
+    .filter((e) => e.status === 'published')
+    .sort((a, b) => {
+      const aTime = new Date(a.startDate).getTime()
+      const bTime = new Date(b.startDate).getTime()
+      const aUpcoming = aTime >= now
+      const bUpcoming = bTime >= now
+      if (aUpcoming !== bUpcoming) return aUpcoming ? -1 : 1
+      return aTime - bTime
+    })
   const publishedNews = news.filter((n) => n.status === 'published')
 
   return (
