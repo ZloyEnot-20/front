@@ -37,8 +37,9 @@ const ru = {
   // Home / hero
   heroTitle: 'Открывайте миры',
   heroTitleHighlight: 'новых возможностей',
-  heroSubtitle: 'Найдите и посетите лучшие выставки, встречайте единомышленников и развивайте свой бизнес на ведущих платформах для нетворкинга.',
+  heroSubtitle: 'Спасибо, что Вы с нами! А теперь выберите город и зарегистрируйтесь на выставку в Вашем городе!',
   viewExhibitions: 'Смотреть выставки',
+  registerForExhibition: 'Регистрация на выставку',
   registerNow: 'Зарегистрироваться',
 
   // Auth
@@ -730,8 +731,9 @@ const en: Record<string, string> = {
 
   heroTitle: 'Discover worlds of',
   heroTitleHighlight: 'new opportunities',
-  heroSubtitle: 'Find and attend the best exhibitions, meet like-minded people and grow your business on leading networking platforms.',
+  heroSubtitle: 'Thank you for being with us! Now choose your city and register for an exhibition in your city!',
   viewExhibitions: 'View exhibitions',
+  registerForExhibition: 'Exhibition registration',
   registerNow: 'Sign up now',
 
   loginTitle: 'Log in',
@@ -1400,8 +1402,9 @@ const uz: Record<string, string> = {
 
   heroTitle: 'Ochiladigan dunyolar',
   heroTitleHighlight: 'yangi imkoniyatlar',
-  heroSubtitle: 'Eng yaxshi ko\'rgazmalarni toping va tashrif buyuring, teng fikrdoshlar bilan tanishing va yetakchi tarmoq platformalarida biznesingizni rivojlantiring.',
+  heroSubtitle: "Biz bilan bo'lganingiz uchun rahmat! Endi shahringizni tanlang va shahringizdagi ko'rgazmaga ro'yxatdan o'ting!",
   viewExhibitions: "Ko'rgazmalarni ko'rish",
+  registerForExhibition: "Ko'rgazmaga ro'yxatdan o'tish",
   registerNow: "Ro'yxatdan o'tish",
 
   loginTitle: 'Tizimga kirish',

@@ -28,7 +28,7 @@ export function Hero() {
                 href="#exhibitions"
                 className="inline-flex items-center justify-center rounded-md text-sm font-medium bg-primary text-primary-foreground h-11 px-8 hover:bg-primary/90"
               >
-                {t('viewExhibitions')}
+                {t('registerForExhibition')}
               </a>
               {showRegister && (
                 <Link
