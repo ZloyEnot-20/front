@@ -7,7 +7,7 @@ export function getLandingMobileAppStoreUrls(): { ios: string; android: string }
   const ios = process.env.NEXT_PUBLIC_IOS_APP_STORE_URL?.trim()
   const android = process.env.NEXT_PUBLIC_ANDROID_PLAY_STORE_URL?.trim()
   return {
-    ios: ios || 'https://apps.apple.com/search?term=Eduexpo',
+    ios: ios || 'https://apps.apple.com/uz/app/edu-expo/id6760607864',
     android: android || LANDING_GOOGLE_PLAY_STORE_URL,
   }
 }
