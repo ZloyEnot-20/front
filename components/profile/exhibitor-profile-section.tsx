@@ -21,7 +21,6 @@ import { useLocale } from '@/lib/i18n';
 import { leadsApi, registrationsApi, exhibitionsApi, getImageUrl, type ApiLeadRow, type ApiRegistration } from '@/lib/api';
 import { PersonalInfoSection } from '@/components/profile/personal-info-section';
 import { UniversityProfileSection } from '@/components/profile/university-profile-section';
-import { SecuritySection } from '@/components/profile/security-section';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ExhibitorModal } from '@/components/exhibitions/exhibitor-modal';
 import { getCityName, getVenue, getContentTitle, getContentDescription, formatDateLocalized } from '@/lib/utils';
@@ -1019,7 +1018,6 @@ function getProfileTabs(role: string | undefined, t: (key: string) => string): {
       { id: 'exhibitions', label: t('tabExhibitions') },
       { id: 'university', label: t('tabUniversities') },
       { id: 'profile', label: t('tabPersonalData') },
-      { id: 'mail', label: t('tabEmailPassword') },
     ];
   }
   if (role === 'exhibitor') {
@@ -1027,13 +1025,11 @@ function getProfileTabs(role: string | undefined, t: (key: string) => string): {
       { id: 'leads', label: t('tabLeads') },
       { id: 'exhibitions', label: t('tabExhibitions') },
       { id: 'university', label: t('tabUniversityProfile') },
-      { id: 'mail', label: t('tabEmailPassword') },
     ];
   }
   return [
     { id: 'myExhibitions', label: t('myExhibitions') },
     { id: 'profile', label: t('tabPersonalData') },
-    { id: 'mail', label: t('tabEmailPassword') },
   ];
 }
 
@@ -1589,11 +1585,6 @@ export function ExhibitorProfileSection() {
         </div>
       )}
 
-      {profileSectionTab === 'mail' && (
-        <div className="flex-1 min-h-0 overflow-auto flex flex-col">
-          <SecuritySection />
-        </div>
-      )}
     </div>
   );
 }

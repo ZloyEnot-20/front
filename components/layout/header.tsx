@@ -83,9 +83,6 @@ export function Header({ profileTabs }: HeaderProps) {
                   <Link href="/profile?tab=personal" onClick={closeMobileMenu}>{t('personalInfo')}</Link>
                 </Button>
                 <Button variant="ghost" className="justify-start font-medium" asChild>
-                  <Link href="/profile?tab=security" onClick={closeMobileMenu}>{t('emailAndPassword')}</Link>
-                </Button>
-                <Button variant="ghost" className="justify-start font-medium" asChild>
                   <Link href="/profile?tab=exhibitions" onClick={closeMobileMenu}>{t('myExhibitions')}</Link>
                 </Button>
               </nav>

@@ -100,11 +100,6 @@ export function LoginForm({ localePrefix = 'uz' }: { localePrefix?: Lang }) {
             />
           </div>
 
-          <div className="flex justify-end">
-            <a href="/auth/forgot-password" className="text-sm text-primary hover:underline">
-              {t('forgotPassword')}
-            </a>
-          </div>
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? t('loggingIn') : t('loginButton')}
           </Button>
