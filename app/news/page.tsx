@@ -57,7 +57,9 @@ export default function NewsPage() {
                           setPage((p) => Math.max(1, p - 1))
                         }}
                         className={page <= 1 ? 'pointer-events-none opacity-50' : ''}
-                      />
+                      >
+                        {t('paginationPrevious')}
+                      </PaginationPrevious>
                     </PaginationItem>
                     {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
                       <PaginationItem key={p}>
@@ -81,7 +83,9 @@ export default function NewsPage() {
                           setPage((p) => Math.min(totalPages, p + 1))
                         }}
                         className={page >= totalPages ? 'pointer-events-none opacity-50' : ''}
-                      />
+                      >
+                        {t('paginationNext')}
+                      </PaginationNext>
                     </PaginationItem>
                   </PaginationContent>
                 </Pagination>

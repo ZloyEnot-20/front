@@ -31,6 +31,9 @@ export function ExhibitionCard({ exhibition, showExhibitionBadge = false }: Exhi
   const canRegister = !user || user.role === 'admin' || user.role === 'visitor'
   const startDate = formatDateLocalized(exhibition.startDate, lang, 'short')
   const endDate = formatDateLocalized(exhibition.endDate, lang, 'short')
+  const registrationDeadline = new Date(exhibition.endDate)
+  registrationDeadline.setHours(23, 59, 59, 999)
+  const isRegistrationClosed = Date.now() > registrationDeadline.getTime()
 
   const statusLabel = {
     draft: t('draft'),
@@ -92,6 +95,8 @@ export function ExhibitionCard({ exhibition, showExhibitionBadge = false }: Exhi
                 <p className="text-sm font-medium text-green-600">{t('youAreRegistered')}</p>
               </div>
             </div>
+          ) : isRegistrationClosed ? (
+            <p className="text-sm text-muted-foreground text-center py-2">{t('exhibitionEndedRegistrationUnavailable')}</p>
           ) : canRegister ? (
             <Button className="flex-1" onClick={() => setRegistrationOpen(true)}>
               {t('registerToExhibition')}

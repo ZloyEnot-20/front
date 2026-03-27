@@ -75,6 +75,9 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
 
   const startDate = formatDateLocalized(exhibition.startDate, lang, 'full')
   const endDate = formatDateLocalized(exhibition.endDate, lang, 'full')
+  const registrationDeadline = new Date(exhibition.endDate)
+  registrationDeadline.setHours(23, 59, 59, 999)
+  const isRegistrationClosed = Date.now() > registrationDeadline.getTime()
 
   return (
     <div className="min-h-screen bg-background">
@@ -243,9 +246,13 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
                         ? t('chooseCityForVisit')
                         : t('signInToRegister')}
                     </p>
-                    <Button className="w-full" onClick={() => setRegistrationOpen(true)}>
-                      {user ? t('submitRegistration') : t('signInAndRegister')}
-                    </Button>
+                    {isRegistrationClosed ? (
+                      <p className="text-sm text-muted-foreground">{t('exhibitionEndedRegistrationUnavailable')}</p>
+                    ) : (
+                      <Button className="w-full" onClick={() => setRegistrationOpen(true)}>
+                        {user ? t('submitRegistration') : t('signInAndRegister')}
+                      </Button>
+                    )}
                   </CardContent>
                 </Card>
               </div>
