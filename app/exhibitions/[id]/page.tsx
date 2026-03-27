@@ -131,7 +131,7 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
 
               {/* Галерея: 3 в ряд, небольшие превью, по клику — модалка */}
               {(exhibition.images?.length ?? 0) > 0 && (
-                <div className="grid grid-cols-3 gap-2 max-w-sm">
+                <div className="grid w-full grid-cols-3 gap-2">
                   {(exhibition.images ?? []).map((url, idx) => (
                     <button
                       key={idx}
