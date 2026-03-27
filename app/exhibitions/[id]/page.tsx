@@ -77,7 +77,8 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
   const endDate = formatDateLocalized(exhibition.endDate, lang, 'full')
   const registrationDeadline = new Date(exhibition.endDate)
   registrationDeadline.setHours(23, 59, 59, 999)
-  const isRegistrationClosed = getServerNowMs() > registrationDeadline.getTime()
+  const trustedNowMs = exhibition.serverNow?.getTime() ?? getServerNowMs()
+  const isRegistrationClosed = trustedNowMs > registrationDeadline.getTime()
 
   return (
     <div className="min-h-screen bg-background">

@@ -329,6 +329,7 @@ export interface ApiExhibition {
   createdBy: string
   createdAt: string
   updatedAt: string
+  serverNow?: string
 }
 
 export interface ApiExhibitorInfo {

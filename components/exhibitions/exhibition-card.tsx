@@ -33,7 +33,8 @@ export function ExhibitionCard({ exhibition, showExhibitionBadge = false }: Exhi
   const endDate = formatDateLocalized(exhibition.endDate, lang, 'short')
   const registrationDeadline = new Date(exhibition.endDate)
   registrationDeadline.setHours(23, 59, 59, 999)
-  const isRegistrationClosed = getServerNowMs() > registrationDeadline.getTime()
+  const trustedNowMs = exhibition.serverNow?.getTime() ?? getServerNowMs()
+  const isRegistrationClosed = trustedNowMs > registrationDeadline.getTime()
 
   const statusLabel = {
     draft: t('draft'),

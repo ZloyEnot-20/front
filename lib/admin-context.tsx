@@ -33,6 +33,7 @@ function toExhibition(e: { id: string; title: string; description: string; title
     createdBy: e.createdBy,
     createdAt: new Date(e.createdAt),
     updatedAt: new Date(e.updatedAt),
+    serverNow: e.serverNow ? new Date(e.serverNow) : undefined,
   }
 }
 

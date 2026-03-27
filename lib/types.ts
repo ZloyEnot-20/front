@@ -81,6 +81,7 @@ export interface Exhibition {
   createdBy: string
   createdAt: Date
   updatedAt: Date
+  serverNow?: Date
 }
 
 // Новость (title/content/excerpt — fallback; по языку: titleUz/Ru/En, contentUz/Ru/En, excerptUz/Ru/En)
