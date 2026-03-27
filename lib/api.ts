@@ -1,4 +1,19 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "https://api.myfair.tw1.ru"
+let serverTimeOffsetMs = 0
+let hasServerTimeSync = false
+
+function syncServerTimeFromResponse(res: Response): void {
+  const dateHeader = res.headers.get('date')
+  if (!dateHeader) return
+  const serverMs = Date.parse(dateHeader)
+  if (Number.isNaN(serverMs)) return
+  serverTimeOffsetMs = serverMs - Date.now()
+  hasServerTimeSync = true
+}
+
+export function getServerNowMs(): number {
+  return Date.now() + (hasServerTimeSync ? serverTimeOffsetMs : 0)
+}
 
 function getToken(): string | null {
   if (typeof window === 'undefined') return null
@@ -22,6 +37,7 @@ export async function api<T>(
   if (token) headers['Authorization'] = `Bearer ${token}`
 
   const res = await fetch(url, { ...fetchOptions, headers })
+  syncServerTimeFromResponse(res)
   if (res.status === 204) return undefined as T
   const data = await res.json().catch(() => ({}))
   if (!res.ok) throw new Error(data.error ?? 'Ошибка запроса')
@@ -33,6 +49,7 @@ async function apiFormData<T>(path: string, formData: FormData, method: 'POST' |
   const token = getToken()
   const headers: HeadersInit = { Authorization: `Bearer ${token}` }
   const res = await fetch(`${API_URL}${path}`, { method, headers, body: formData })
+  syncServerTimeFromResponse(res)
   const data = await res.json().catch(() => ({}))
   if (!res.ok) throw new Error((data as { error?: string }).error ?? 'Ошибка запроса')
   return data as T

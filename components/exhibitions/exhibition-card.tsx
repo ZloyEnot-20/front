@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Exhibition } from '@/lib/types'
-import { getImageUrl } from '@/lib/api'
+import { getImageUrl, getServerNowMs } from '@/lib/api'
 import { useAuth } from '@/lib/auth-context'
 import { useAdmin } from '@/lib/admin-context'
 import { useLocale } from '@/lib/i18n'
@@ -33,7 +33,7 @@ export function ExhibitionCard({ exhibition, showExhibitionBadge = false }: Exhi
   const endDate = formatDateLocalized(exhibition.endDate, lang, 'short')
   const registrationDeadline = new Date(exhibition.endDate)
   registrationDeadline.setHours(23, 59, 59, 999)
-  const isRegistrationClosed = Date.now() > registrationDeadline.getTime()
+  const isRegistrationClosed = getServerNowMs() > registrationDeadline.getTime()
 
   const statusLabel = {
     draft: t('draft'),

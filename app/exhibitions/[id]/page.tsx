@@ -3,7 +3,7 @@
 import { use, useState } from 'react'
 import { Header } from '@/components/layout/header'
 import { useAdmin } from '@/lib/admin-context'
-import { getImageUrl } from '@/lib/api'
+import { getImageUrl, getServerNowMs } from '@/lib/api'
 import { useAuth } from '@/lib/auth-context'
 import { useLocale } from '@/lib/i18n'
 import { getCityName, getVenue, formatDateLocalized, getContentTitle, getContentDescription } from '@/lib/utils'
@@ -77,7 +77,7 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
   const endDate = formatDateLocalized(exhibition.endDate, lang, 'full')
   const registrationDeadline = new Date(exhibition.endDate)
   registrationDeadline.setHours(23, 59, 59, 999)
-  const isRegistrationClosed = Date.now() > registrationDeadline.getTime()
+  const isRegistrationClosed = getServerNowMs() > registrationDeadline.getTime()
 
   return (
     <div className="min-h-screen bg-background">
@@ -131,12 +131,12 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
 
               {/* Галерея: 3 в ряд, небольшие превью, по клику — модалка */}
               {(exhibition.images?.length ?? 0) > 0 && (
-                <div className="grid w-full grid-cols-3 gap-2">
+                <div className="flex w-full flex-wrap gap-2">
                   {(exhibition.images ?? []).map((url, idx) => (
                     <button
                       key={idx}
                       type="button"
-                      className="relative aspect-square overflow-hidden rounded-lg border border-border/40 hover:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/30"
+                      className="relative h-24 w-24 overflow-hidden rounded-lg border border-border/40 hover:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/30 sm:h-28 sm:w-28"
                       onClick={() => setGalleryImageModal(getImageUrl(url) || url)}
                     >
                       <OptimizedImage
@@ -241,11 +241,13 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
                     <CardTitle>{t('registrationTitle')}</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <p className="text-sm text-muted-foreground">
-                      {user
-                        ? t('chooseCityForVisit')
-                        : t('signInToRegister')}
-                    </p>
+                    {!isRegistrationClosed && (
+                      <p className="text-sm text-muted-foreground">
+                        {user
+                          ? t('chooseCityForVisit')
+                          : t('signInToRegister')}
+                      </p>
+                    )}
                     {isRegistrationClosed ? (
                       <p className="text-sm text-muted-foreground">{t('exhibitionEndedRegistrationUnavailable')}</p>
                     ) : (
