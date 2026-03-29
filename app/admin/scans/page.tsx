@@ -32,6 +32,30 @@ function regStatusLabel(t: (k: string) => string, status?: string) {
   return status?.trim() ? status : '—'
 }
 
+const VISITOR_STATUS_CSV_KEYS: Record<string, string> = {
+  student: 'statusStudent',
+  parent: 'statusParent',
+  specialist: 'statusSpecialist',
+}
+
+const ADMISSION_PLAN_CSV_KEYS: Record<string, string> = {
+  '0-3': 'admissionPlan03',
+  '3-6': 'admissionPlan36',
+  '6-12': 'admissionPlan612',
+}
+
+function visitorStatusCsvLabel(t: (k: string) => string, v?: string) {
+  if (!v?.trim()) return ''
+  const key = VISITOR_STATUS_CSV_KEYS[v]
+  return key ? t(key) : v
+}
+
+function admissionPlanCsvLabel(t: (k: string) => string, v?: string) {
+  if (!v?.trim()) return ''
+  const key = ADMISSION_PLAN_CSV_KEYS[v]
+  return key ? t(key) : v
+}
+
 function scannerDisplay(log: ApiScanLogItem): string {
   const sb = log.scannedBy
   if (sb?.name?.trim()) return sb.name.trim()
@@ -110,36 +134,43 @@ function ScansContent() {
     }
     const rows = scans.map((log) => {
       const r = log.registration
-      const name = r ? `${r.firstName ?? ''} ${r.lastName ?? ''}`.trim() : ''
-      const status =
-        r != null
-          ? regStatusLabel(t, r.status)
-          : log.success
-            ? t('success')
-            : t('error')
       return [
-        name,
+        scannerDisplay(log),
+        r?.id ?? '',
+        r?.userId ?? '',
+        r?.firstName ?? '',
+        r?.lastName ?? '',
         r?.email ?? '',
         r?.phone ?? '',
         r?.city ?? '',
-        status,
-        log.exhibition?.title ?? '',
+        r != null ? regStatusLabel(t, r.status) : '',
+        visitorStatusCsvLabel(t, r?.visitorStatus),
+        r?.languageKnowledge ?? '',
         r?.interest ?? '',
         r?.countryOfInterest ?? '',
-        r?.admissionPlan ?? '',
+        admissionPlanCsvLabel(t, r?.admissionPlan),
+        r?.registeredAt ? formatDt(r.registeredAt) : '',
+        r?.scannedAt ? formatDt(r.scannedAt) : '',
       ]
     })
     const csv = [
       [
-        t('nameLabel'),
+        t('scansExportUniversityColumn'),
+        t('scansGuestRegistrationId'),
+        t('scansExportGuestUserId'),
+        t('firstNameLabel'),
+        t('lastNameLabel'),
         t('emailLabel'),
         t('phoneLabelShort'),
-        t('cityColumn'),
-        t('status'),
-        t('exhibitionFallback'),
+        t('cityLabel'),
+        t('filterByStatus'),
+        t('scansExportGuestVisitorCategory'),
+        t('languageKnowledge'),
         t('interestColumn'),
         t('countryOfInterestColumn'),
         t('admissionPlanColumn'),
+        t('dateRegistered'),
+        t('firstQrScanAt'),
       ],
       ...rows,
     ]
