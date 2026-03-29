@@ -123,7 +123,7 @@ function ScansContent() {
     iso ? new Date(iso).toLocaleString(locale, { dateStyle: 'short', timeStyle: 'short' }) : '—'
 
   const handleDownloadCSV = () => {
-    if (scannerFilter === 'all' || scans.length === 0) return
+    if (scans.length === 0) return
     const delimiter = ';'
     const lineBreak = '\r\n'
     const escapeCell = (cell: unknown) => {
@@ -184,7 +184,7 @@ function ScansContent() {
     URL.revokeObjectURL(a.href)
   }
 
-  const canExportScans = scannerFilter !== 'all' && !loading && scans.length > 0
+  const canExportScans = !loading && scans.length > 0
 
   return (
     <div className="flex min-h-screen bg-background">
