@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
 import { useLocale } from '@/lib/i18n'
 import { Button } from '@/components/ui/button'
-import { Users, FileText, BarChart3, LogOut, Menu, X, Home, BookMarked } from 'lucide-react'
+import { Users, FileText, BarChart3, LogOut, Menu, X, Home, BookMarked, QrCode } from 'lucide-react'
 
 export function AdminSidebar() {
   const pathname = usePathname()
@@ -18,6 +18,7 @@ export function AdminSidebar() {
     { labelKey: 'publications' as const, href: '/admin/publications', icon: FileText, roles: ['admin', 'content_manager'] as const },
     { labelKey: 'reference' as const, href: '/admin/reference', icon: BookMarked, roles: ['admin', 'content_manager'] as const },
     { labelKey: 'reports' as const, href: '/admin/reports', icon: BarChart3, roles: ['admin'] as const },
+    { labelKey: 'scans' as const, href: '/admin/scans', icon: QrCode, roles: ['admin'] as const },
     { labelKey: 'logs' as const, href: '/admin/logs', icon: LogOut, roles: ['admin'] as const },
   ]
   const menuItems = FULL_MENU.filter((item) => user?.role && item.roles.includes(user.role))

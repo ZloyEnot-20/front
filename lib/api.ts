@@ -195,22 +195,45 @@ export const leadsApi = {
     }),
 }
 
+export interface ApiScanLogRegistration {
+  id: string
+  userId?: string
+  firstName: string
+  lastName: string
+  email: string
+  phone?: string
+  city: string
+  status?: string
+  registeredAt?: string
+  scannedAt?: string
+  visitorStatus?: string
+  languageKnowledge?: string
+  interest?: string
+  countryOfInterest?: string
+  admissionPlan?: string
+}
+
 export interface ApiScanLogItem {
   id: string
   scannedAt: string
   scannedByUserId: string
+  /** Кто выполнил скан (если пользователь ещё есть в БД) */
+  scannedBy?: { id: string; name: string; email: string } | null
   deviceId?: string
   success: boolean
   errorMessage?: string
-  registration: { id: string; firstName: string; lastName: string; email: string; city: string } | null
+  registration: ApiScanLogRegistration | null
   exhibition: { id: string; title: string } | null
 }
 
 /** Все логи сканов (админ) */
 export const scansApi = {
-  listAll: (opts?: { limit?: number }) =>
+  listAll: (opts?: { limit?: number; scannedByUserId?: string }) =>
     api<ApiScanLogItem[]>('/api/registrations/scans/all', {
-      params: opts?.limit ? { limit: String(opts.limit) } : undefined,
+      params: {
+        ...(opts?.limit != null ? { limit: String(opts.limit) } : {}),
+        ...(opts?.scannedByUserId ? { scannedByUserId: opts.scannedByUserId } : {}),
+      },
     }),
 }
 
