@@ -21,6 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Download } from 'lucide-react'
 
 const PAGE_SIZE = 50
 const FETCH_LIMIT = 500
@@ -97,6 +98,63 @@ function ScansContent() {
   const formatDt = (iso?: string) =>
     iso ? new Date(iso).toLocaleString(locale, { dateStyle: 'short', timeStyle: 'short' }) : '—'
 
+  const handleDownloadCSV = () => {
+    if (scannerFilter === 'all' || scans.length === 0) return
+    const delimiter = ';'
+    const lineBreak = '\r\n'
+    const escapeCell = (cell: unknown) => {
+      const raw = String(cell ?? '')
+      const normalized = raw.replace(/\r?\n/g, ' ').replace(/\u2028|\u2029/g, ' ')
+      const escapedQuotes = normalized.replace(/"/g, '""')
+      return `"${escapedQuotes}"`
+    }
+    const rows = scans.map((log) => {
+      const r = log.registration
+      const name = r ? `${r.firstName ?? ''} ${r.lastName ?? ''}`.trim() : ''
+      const status =
+        r != null
+          ? regStatusLabel(t, r.status)
+          : log.success
+            ? t('success')
+            : t('error')
+      return [
+        name,
+        r?.email ?? '',
+        r?.phone ?? '',
+        r?.city ?? '',
+        status,
+        log.exhibition?.title ?? '',
+        r?.interest ?? '',
+        r?.countryOfInterest ?? '',
+        r?.admissionPlan ?? '',
+      ]
+    })
+    const csv = [
+      [
+        t('nameLabel'),
+        t('emailLabel'),
+        t('phoneLabelShort'),
+        t('cityColumn'),
+        t('status'),
+        t('exhibitionFallback'),
+        t('interestColumn'),
+        t('countryOfInterestColumn'),
+        t('admissionPlanColumn'),
+      ],
+      ...rows,
+    ]
+      .map((row) => row.map((cell) => escapeCell(cell)).join(delimiter))
+      .join(lineBreak)
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' })
+    const a = document.createElement('a')
+    a.href = URL.createObjectURL(blob)
+    a.download = `scans_${new Date().toISOString().slice(0, 10)}.csv`
+    a.click()
+    URL.revokeObjectURL(a.href)
+  }
+
+  const canExportScans = scannerFilter !== 'all' && !loading && scans.length > 0
+
   return (
     <div className="flex min-h-screen bg-background">
       <AdminSidebar />
@@ -111,21 +169,34 @@ function ScansContent() {
 
         <div className="p-4 sm:p-6 lg:p-8">
           <Card className="mb-4 lg:mb-6">
-            <CardContent className="pt-4 lg:pt-6">
-              <label className="text-sm font-medium block mb-2">{t('filterByUniversity')}</label>
-              <Select value={scannerFilter} onValueChange={setScannerFilter}>
-                <SelectTrigger className="w-full max-w-md">
-                  <SelectValue placeholder={t('allScanners')} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">{t('allScanners')}</SelectItem>
-                  {exhibitors.map((u) => (
-                    <SelectItem key={u.id} value={u.id}>
-                      {u.name?.trim() || u.email}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <CardContent className="pt-4 lg:pt-6 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+              <div className="w-full max-w-md space-y-2">
+                <label className="text-sm font-medium block">{t('filterByUniversity')}</label>
+                <Select value={scannerFilter} onValueChange={setScannerFilter}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder={t('allScanners')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">{t('allScanners')}</SelectItem>
+                    {exhibitors.map((u) => (
+                      <SelectItem key={u.id} value={u.id}>
+                        {u.name?.trim() || u.email}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="gap-2 shrink-0 self-start sm:self-auto"
+                disabled={!canExportScans}
+                onClick={handleDownloadCSV}
+              >
+                <Download size={16} />
+                {t('downloadCsv')}
+              </Button>
             </CardContent>
           </Card>
 
@@ -147,7 +218,7 @@ function ScansContent() {
                         {t('scannedVisitor')}
                       </th>
                       <th className="text-left p-3 lg:p-4 font-medium text-xs lg:text-sm text-muted-foreground">
-                        {t('exhibition')}
+                        {t('exhibitionFallback')}
                       </th>
                       <th className="text-left p-3 lg:p-4 font-medium text-xs lg:text-sm text-muted-foreground">
                         {t('status')}
@@ -262,7 +333,7 @@ function ScansContent() {
                 <span className="text-xs text-muted-foreground font-mono">{detail.scannedByUserId}</span>
               </div>
               <div className="grid gap-1">
-                <span className="text-muted-foreground">{t('exhibition')}</span>
+                <span className="text-muted-foreground">{t('exhibitionFallback')}</span>
                 <span>{detail.exhibition?.title ?? '—'}</span>
                 {detail.exhibition?.id ? (
                   <span className="text-xs font-mono text-muted-foreground">{detail.exhibition.id}</span>
