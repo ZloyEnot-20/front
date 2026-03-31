@@ -18,7 +18,7 @@ import {
 import { useAuth } from '@/lib/auth-context';
 import { useAdmin } from '@/lib/admin-context';
 import { useLocale } from '@/lib/i18n';
-import { leadsApi, registrationsApi, exhibitionsApi, getImageUrl, type ApiLeadRow, type ApiRegistration } from '@/lib/api';
+import { leadsApi, registrationsApi, getImageUrl, type ApiLeadRow, type ApiRegistration } from '@/lib/api';
 import { PersonalInfoSection } from '@/components/profile/personal-info-section';
 import { UniversityProfileSection } from '@/components/profile/university-profile-section';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -1287,7 +1287,6 @@ export function ExhibitorProfileSection() {
 
   // «Мои выставки»: загрузка только при первом входе на вкладку или перезагрузке страницы
   const [myExhibitionsRegistrations, setMyExhibitionsRegistrations] = useState<ApiRegistration[]>([]);
-  const [myExhibitionsExhibitions, setMyExhibitionsExhibitions] = useState<Exhibition[]>([]);
   const [myExhibitionsLoading, setMyExhibitionsLoading] = useState(false);
   const [myExhibitionsHasFetched, setMyExhibitionsHasFetched] = useState(false);
 
@@ -1295,11 +1294,10 @@ export function ExhibitorProfileSection() {
     if (profileSectionTab !== 'myExhibitions' || myExhibitionsHasFetched) return;
     let cancelled = false;
     setMyExhibitionsLoading(true);
-    Promise.all([registrationsApi.list(), exhibitionsApi.list()])
-      .then(([regs, exList]) => {
+    registrationsApi.list()
+      .then((regs) => {
         if (cancelled) return;
         setMyExhibitionsRegistrations(regs);
-        setMyExhibitionsExhibitions((exList ?? []) as unknown as Exhibition[]);
         setMyExhibitionsHasFetched(true);
       })
       .catch(() => {
@@ -1570,7 +1568,7 @@ export function ExhibitorProfileSection() {
       {profileSectionTab === 'myExhibitions' && (
         <MyExhibitionsTabContent
           registrations={myExhibitionsRegistrations}
-          exhibitions={myExhibitionsExhibitions}
+          exhibitions={allExhibitions ?? []}
           loading={myExhibitionsLoading}
         />
       )}

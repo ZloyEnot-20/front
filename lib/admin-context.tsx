@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react'
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react'
 import { usePathname } from 'next/navigation'
 import { Exhibition, News, User, ExhibitionRegistration } from './types'
 import { exhibitionsApi, newsApi, usersApi, registrationsApi, ApiUser } from './api'
@@ -181,6 +181,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   const [users, setUsers] = useState<User[]>([])
   const [registrations, setRegistrations] = useState<ExhibitionRegistration[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const lastRefreshKeyRef = useRef<string>('')
 
   const refreshUsers = useCallback(async () => {
     if (user?.role !== 'admin') {
@@ -235,9 +236,12 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   const refresh = useCallback(async () => {
     setIsLoading(true)
     try {
-      const [ex, nw] = await Promise.all([exhibitionsApi.list(), newsApi.list()])
-      setExhibitions(ex.map(toExhibition))
-      setNews(nw.map(toNews))
+      const isVisitorProfile = pathname?.startsWith('/profile') && user?.role === 'visitor'
+      if (!isVisitorProfile) {
+        const [ex, nw] = await Promise.all([exhibitionsApi.list(), newsApi.list()])
+        setExhibitions(ex.map(toExhibition))
+        setNews(nw.map(toNews))
+      }
       if (user?.role === 'admin') {
         try {
           const us = await usersApi.list()
@@ -269,18 +273,15 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setIsLoading(false)
     }
-  }, [user?.role])
+  }, [pathname, user?.id, user?.role])
 
   useEffect(() => {
     if (pathname?.startsWith('/admin')) return
+    const key = `${pathname}|${user?.id ?? 'anon'}|${user?.role ?? 'none'}`
+    if (lastRefreshKeyRef.current === key) return
+    lastRefreshKeyRef.current = key
     refresh()
-  }, [pathname, refresh])
-
-  // Повторная загрузка когда пользователь уже залогинен (исправляет случай, когда при первом mount токен ещё не применён)
-  useEffect(() => {
-    if (pathname?.startsWith('/admin')) return
-    if (user?.id) refresh()
-  }, [pathname, user?.id, refresh])
+  }, [pathname, user?.id, user?.role, refresh])
 
   const addExhibition = async (exhibition: Exhibition) => {
     const cityIds = Array.isArray(exhibition.cities)
