@@ -134,7 +134,6 @@ function UsersModeration() {
                   <div>
                     <p className="text-sm text-muted-foreground">{t('totalUsers')}</p>
                     <p className="text-2xl font-bold">{stats.totalUsers}</p>
-                    <p className="text-xs text-green-600 mt-1">+12% vs прошлый месяц</p>
                   </div>
                 </div>
               </CardContent>
