@@ -273,21 +273,15 @@ export function VisitorSignupForm({ initialLang }: { initialLang: Lang }) {
     e.preventDefault()
     setError('')
     setFieldError(null)
-    const phoneDigits = formData.phone.replace(/\D/g, '')
-    const validPhone = (phoneDigits.length === 12 && phoneDigits.startsWith('998')) || (phoneDigits.length === 9 && !phoneDigits.startsWith('0'))
+    const phoneValue = formData.phone.trim()
     const phoneRequired = !isMobile
-    if (phoneDigits.length === 0) {
+    if (!phoneValue) {
       if (phoneRequired) {
         setError(T.errRequired)
         setFieldError('phone')
         scrollToError()
         return
       }
-    } else if (!validPhone) {
-      setError(T.errPhoneInvalid)
-      setFieldError('phone')
-      scrollToError()
-      return
     }
     if (formData.password !== formData.confirmPassword) {
       setError(T.errPasswordMatch)
