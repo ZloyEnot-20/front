@@ -404,14 +404,6 @@ function UsersModeration() {
                   {viewUser.role === 'visitor' && (
                     <>
                       <div>
-                        <p className="text-xs text-muted-foreground">{t('firstNameLabel')}</p>
-                        <p className="font-medium">{viewUser.firstName || '—'}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground">{t('lastNameLabel')}</p>
-                        <p className="font-medium">{viewUser.lastName || '—'}</p>
-                      </div>
-                      <div>
                         <p className="text-xs text-muted-foreground">{t('cityLabel')}</p>
                         <p className="font-medium">{viewUser.city || '—'}</p>
                       </div>
