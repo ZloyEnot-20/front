@@ -28,7 +28,7 @@ import { ChevronDown } from 'lucide-react'
 
 function PublicationsContent() {
   const { t, lang } = useLocale()
-  const { exhibitions, news, updateExhibition, updateExhibitionFormData, deleteExhibition, deleteNews, updateNews, updateNewsFormData, addExhibition, addExhibitionFormData, addNews, addNewsFormData, isLoading } = useAdmin()
+  const { exhibitions, news, updateExhibition, updateExhibitionFormData, deleteExhibition, deleteNews, updateNews, updateNewsFormData, addExhibition, addExhibitionFormData, addNews, addNewsFormData, isLoading, refreshPublications } = useAdmin()
   const { user } = useAuth()
   const [searchQuery, setSearchQuery] = useState('')
   const [modalOpen, setModalOpen] = useState(false)
@@ -52,6 +52,10 @@ function PublicationsContent() {
   const citiesDropdownRef = useRef<HTMLDivElement>(null)
   const participantsDropdownRef = useRef<HTMLDivElement>(null)
   const MAX_FILE_MB = 10
+
+  useEffect(() => {
+    refreshPublications()
+  }, [refreshPublications])
 
   const handleToggleExhibitionStatus = async (id: string, currentStatus: string) => {
     setTogglingStatusExhibitionId(id)

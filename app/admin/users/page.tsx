@@ -47,10 +47,31 @@ const ROLE_LABEL_KEYS: Record<string, string> = {
   admin: 'admin',
 }
 
+const VISITOR_STATUS_KEYS: Record<string, string> = {
+  student: 'statusStudent',
+  parent: 'statusParent',
+  specialist: 'statusSpecialist',
+}
+
+const ADMISSION_PLAN_KEYS: Record<string, string> = {
+  '0-3': 'admissionPlan03',
+  '3-6': 'admissionPlan36',
+  '6-12': 'admissionPlan612',
+  '12+': 'admissionPlan12plus',
+}
+
+const INTEREST_LABEL_KEYS: Record<string, string> = {
+  Bachelor: 'interestBachelor',
+  Master: 'interestMaster',
+  MBA: 'interestMBA',
+  'Short Courses': 'interestShortCourses',
+  School: 'interestSchool',
+}
+
 function UsersModeration() {
   const { t } = useLocale()
   const { user: currentUser } = useAuth()
-  const { users, updateUser, isLoading, refresh } = useAdmin()
+  const { users, updateUser, isLoading, refreshUsers } = useAdmin()
   const [searchQuery, setSearchQuery] = useState('')
   const [createUserOpen, setCreateUserOpen] = useState(false)
   const [viewUser, setViewUser] = useState<User | null>(null)
@@ -62,8 +83,8 @@ function UsersModeration() {
   const [page, setPage] = useState(1)
 
   useEffect(() => {
-    refresh()
-  }, [refresh])
+    refreshUsers()
+  }, [refreshUsers])
 
   const filteredUsers = users.filter((u) => {
     const matchesSearch =
@@ -99,6 +120,9 @@ function UsersModeration() {
   }
 
   const getRoleLabel = (role: string) => t(ROLE_LABEL_KEYS[role] ?? role)
+  const visitorStatusLabel = (v?: string) => (v ? t(VISITOR_STATUS_KEYS[v] ?? v) : '—')
+  const admissionPlanLabel = (v?: string) => (v ? t(ADMISSION_PLAN_KEYS[v] ?? v) : '—')
+  const interestLabel = (v?: string) => (v ? t(INTEREST_LABEL_KEYS[v] ?? v) : '—')
 
   const getStatusBadge = (status: string) => {
     if (status === 'active')
@@ -376,6 +400,42 @@ function UsersModeration() {
                       <p className="text-xs text-muted-foreground">{t('phone')}</p>
                       <p className="font-medium">{viewUser.phone}</p>
                     </div>
+                  )}
+                  {viewUser.role === 'visitor' && (
+                    <>
+                      <div>
+                        <p className="text-xs text-muted-foreground">{t('firstNameLabel')}</p>
+                        <p className="font-medium">{viewUser.firstName || '—'}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">{t('lastNameLabel')}</p>
+                        <p className="font-medium">{viewUser.lastName || '—'}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">{t('cityLabel')}</p>
+                        <p className="font-medium">{viewUser.city || '—'}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">{t('status')}</p>
+                        <p className="font-medium">{visitorStatusLabel(viewUser.visitorStatus)}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">{t('languageKnowledge')}</p>
+                        <p className="font-medium">{viewUser.languageKnowledge || '—'}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">{t('interestColumn')}</p>
+                        <p className="font-medium">{interestLabel(viewUser.interest)}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">{t('countryOfInterestColumn')}</p>
+                        <p className="font-medium">{viewUser.countryOfInterest || '—'}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">{t('admissionPlanColumn')}</p>
+                        <p className="font-medium">{admissionPlanLabel(viewUser.admissionPlan)}</p>
+                      </div>
+                    </>
                   )}
                   <div>
                     <p className="text-xs text-muted-foreground">{t('registeredAt')}</p>

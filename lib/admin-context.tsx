@@ -1,6 +1,7 @@
 'use client'
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react'
+import { usePathname } from 'next/navigation'
 import { Exhibition, News, User, ExhibitionRegistration } from './types'
 import { exhibitionsApi, newsApi, usersApi, registrationsApi, ApiUser } from './api'
 import { useAuth } from './auth-context'
@@ -77,6 +78,14 @@ function toUser(u: {
   exhibitorAddress?: string
   exhibitorWebsite?: string
   exhibitorPhotos?: string[]
+  firstName?: string
+  lastName?: string
+  city?: string
+  visitorStatus?: string
+  languageKnowledge?: string
+  interest?: string
+  countryOfInterest?: string
+  admissionPlan?: string
 }): User {
   return {
     id: u.id,
@@ -86,6 +95,14 @@ function toUser(u: {
     status: u.status as User['status'],
     avatar: u.avatar,
     phone: u.phone,
+    firstName: u.firstName,
+    lastName: u.lastName,
+    city: u.city,
+    visitorStatus: u.visitorStatus,
+    languageKnowledge: u.languageKnowledge,
+    interest: u.interest,
+    countryOfInterest: u.countryOfInterest,
+    admissionPlan: u.admissionPlan,
     exhibitorDescription: u.exhibitorDescription,
     exhibitorAddress: u.exhibitorAddress,
     exhibitorWebsite: u.exhibitorWebsite,
@@ -102,6 +119,9 @@ interface AdminContextType {
   registrations: ExhibitionRegistration[]
   isLoading: boolean
   refresh: () => Promise<void>
+  refreshUsers: () => Promise<void>
+  refreshPublications: () => Promise<void>
+  refreshReports: () => Promise<void>
   addExhibition: (exhibition: Exhibition) => Promise<void>
   addExhibitionFormData: (formData: FormData) => Promise<void>
   updateExhibition: (id: string, exhibition: Partial<Exhibition>) => Promise<void>
@@ -125,11 +145,62 @@ const AdminContext = createContext<AdminContextType | undefined>(undefined)
 
 export function AdminProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth()
+  const pathname = usePathname()
   const [exhibitions, setExhibitions] = useState<Exhibition[]>([])
   const [news, setNews] = useState<News[]>([])
   const [users, setUsers] = useState<User[]>([])
   const [registrations, setRegistrations] = useState<ExhibitionRegistration[]>([])
   const [isLoading, setIsLoading] = useState(true)
+
+  const refreshUsers = useCallback(async () => {
+    if (user?.role !== 'admin') {
+      setUsers([])
+      return
+    }
+    setIsLoading(true)
+    try {
+      const us = await usersApi.list()
+      setUsers(us.map(toUser))
+    } catch {
+      setUsers([])
+    } finally {
+      setIsLoading(false)
+    }
+  }, [user?.role])
+
+  const refreshPublications = useCallback(async () => {
+    setIsLoading(true)
+    try {
+      const [ex, nw] = await Promise.all([exhibitionsApi.list(), newsApi.list()])
+      setExhibitions(ex.map(toExhibition))
+      setNews(nw.map(toNews))
+    } catch {
+      setExhibitions([])
+      setNews([])
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
+
+  const refreshReports = useCallback(async () => {
+    setIsLoading(true)
+    try {
+      const [ex, nw, us] = await Promise.all([
+        exhibitionsApi.list(),
+        newsApi.list(),
+        user?.role === 'admin' ? usersApi.list() : Promise.resolve([] as ApiUser[]),
+      ])
+      setExhibitions(ex.map(toExhibition))
+      setNews(nw.map(toNews))
+      setUsers(us.map(toUser))
+    } catch {
+      setExhibitions([])
+      setNews([])
+      setUsers([])
+    } finally {
+      setIsLoading(false)
+    }
+  }, [user?.role])
 
   const refresh = useCallback(async () => {
     setIsLoading(true)
@@ -175,13 +246,15 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   }, [user?.role])
 
   useEffect(() => {
+    if (pathname?.startsWith('/admin')) return
     refresh()
-  }, [refresh])
+  }, [pathname, refresh])
 
   // Повторная загрузка когда пользователь уже залогинен (исправляет случай, когда при первом mount токен ещё не применён)
   useEffect(() => {
+    if (pathname?.startsWith('/admin')) return
     if (user?.id) refresh()
-  }, [user?.id, refresh])
+  }, [pathname, user?.id, refresh])
 
   const addExhibition = async (exhibition: Exhibition) => {
     const cityIds = Array.isArray(exhibition.cities)
@@ -326,6 +399,9 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         registrations,
         isLoading,
         refresh,
+        refreshUsers,
+        refreshPublications,
+        refreshReports,
         addExhibition,
         addExhibitionFormData,
         updateExhibition,

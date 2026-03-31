@@ -22,9 +22,13 @@ const ROLE_LABEL_KEYS: Record<string, string> = {
 
 function ReportsContent() {
   const { t } = useLocale()
-  const { users, exhibitions, news, isLoading: adminLoading } = useAdmin()
+  const { users, exhibitions, news, isLoading: adminLoading, refreshReports } = useAdmin()
   const [allRegistrations, setAllRegistrations] = useState<{ id: string }[]>([])
   const [regsLoading, setRegsLoading] = useState(true)
+  useEffect(() => {
+    refreshReports()
+  }, [refreshReports])
+
   useEffect(() => {
     setRegsLoading(true)
     registrationsApi
