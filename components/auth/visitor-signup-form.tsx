@@ -72,7 +72,7 @@ const t: Record<Lang, Record<string, string>> = {
     errEmailCode: 'Emailni tasdiqlang: kodni kiriting',
     errConsent: 'Rozilikni belgilang',
     errPasswordMatch: 'Parollar mos kelmadi',
-    errPhoneInvalid: "O'zbekiston raqami: +998 XX XXX XX XX",
+    errPhoneInvalid: "Telefon raqamida faqat raqamlar bo'lishi kerak",
   },
   ru: {
     title: 'Регистрация',
@@ -122,7 +122,7 @@ const t: Record<Lang, Record<string, string>> = {
     errEmailCode: 'Подтвердите email: введите код из письма',
     errConsent: 'Необходимо согласие на обработку данных',
     errPasswordMatch: 'Пароли не совпадают',
-    errPhoneInvalid: 'Введите корректный узбекский номер: +998 XX XXX XX XX',
+    errPhoneInvalid: 'Номер телефона должен содержать только цифры',
   },
   en: {
     title: 'Sign up',
@@ -172,7 +172,7 @@ const t: Record<Lang, Record<string, string>> = {
     errEmailCode: 'Verify email: enter the code from the email',
     errConsent: 'You must agree to data processing',
     errPasswordMatch: 'Passwords do not match',
-    errPhoneInvalid: 'Enter a valid Uzbek number: +998 XX XXX XX XX',
+    errPhoneInvalid: 'Phone number must contain digits only',
   },
 }
 
@@ -282,6 +282,11 @@ export function VisitorSignupForm({ initialLang }: { initialLang: Lang }) {
         scrollToError()
         return
       }
+    } else if (!/^\d+$/.test(phoneValue)) {
+      setError(T.errPhoneInvalid)
+      setFieldError('phone')
+      scrollToError()
+      return
     }
     if (formData.password !== formData.confirmPassword) {
       setError(T.errPasswordMatch)
@@ -485,8 +490,13 @@ export function VisitorSignupForm({ initialLang }: { initialLang: Lang }) {
               id="phone"
               type="tel"
               value={formData.phone}
-              onChange={(e) => { setFormData({ ...formData, phone: e.target.value }); setFieldError(null) }}
-              placeholder="+998 90 123 45 67"
+              onChange={(e) => {
+                const digitsOnly = e.target.value.replace(/\D/g, '')
+                setFormData({ ...formData, phone: digitsOnly })
+                setFieldError(null)
+              }}
+              placeholder="901234567"
+              inputMode="numeric"
                 required={!isMobile}
               disabled={isLoading}
               className={cn(fieldError === 'phone' && 'border-destructive ring-2 ring-destructive/20')}
