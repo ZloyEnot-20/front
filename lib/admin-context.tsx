@@ -6,7 +6,7 @@ import { Exhibition, News, User, ExhibitionRegistration } from './types'
 import { exhibitionsApi, newsApi, usersApi, registrationsApi, ApiUser } from './api'
 import { useAuth } from './auth-context'
 
-function toExhibition(e: { id: string; title: string; description: string; titleUz?: string; titleRu?: string; titleEn?: string; descriptionUz?: string; descriptionRu?: string; descriptionEn?: string; venue?: string; venueUz?: string; venueRu?: string; venueEn?: string; startDate: string; endDate: string; cities?: { id: string; name: string }[]; participants?: { id: string; name: string; avatar?: string; exhibitorDescription?: string; exhibitorAddress?: string; exhibitorWebsite?: string; exhibitorPhotos?: string[] }[]; image?: string; banner?: string; images?: string[]; status: string; participantCount: number; registrations: number; createdBy: string; createdAt: string; updatedAt: string }): Exhibition {
+function toExhibition(e: { id: string; title: string; description: string; titleUz?: string; titleRu?: string; titleEn?: string; descriptionUz?: string; descriptionRu?: string; descriptionEn?: string; venue?: string; venueUz?: string; venueRu?: string; venueEn?: string; startDate: string; endDate: string; cities?: { id: string; name: string }[]; participants?: { id: string; name: string; avatar?: string; exhibitorDescription?: string; exhibitorAddress?: string; exhibitorWebsite?: string; exhibitorPhotos?: string[] }[]; image?: string; banner?: string; images?: string[]; status: string; participantCount: number; registrations: number; createdBy: string; createdAt: string; updatedAt: string; serverNow?: string }): Exhibition {
   return {
     id: e.id,
     title: e.title,
@@ -109,6 +109,36 @@ function toUser(u: {
     exhibitorPhotos: u.exhibitorPhotos,
     createdAt: new Date(u.createdAt),
     updatedAt: new Date(u.updatedAt),
+  }
+}
+
+function toRegistration(r: {
+  id: string
+  exhibitionId: string
+  userId: string
+  firstName: string
+  lastName: string
+  email: string
+  phone: string
+  city: string
+  qrCode: string
+  status: string
+  registeredAt: string
+  cancelledAt?: string
+}): ExhibitionRegistration {
+  return {
+    id: r.id,
+    exhibitionId: r.exhibitionId,
+    userId: r.userId,
+    firstName: r.firstName,
+    lastName: r.lastName,
+    email: r.email,
+    phone: r.phone,
+    city: r.city,
+    qrCode: r.qrCode,
+    status: r.status as 'registered' | 'cancelled',
+    registeredAt: new Date(r.registeredAt),
+    cancelledAt: r.cancelledAt ? new Date(r.cancelledAt) : undefined,
   }
 }
 
@@ -217,26 +247,22 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         }
         try {
           const regs = await registrationsApi.list()
-          setRegistrations(regs.map((r) => ({
-            id: r.id,
-            exhibitionId: r.exhibitionId,
-            userId: r.userId,
-            firstName: r.firstName,
-            lastName: r.lastName,
-            email: r.email,
-            phone: r.phone,
-            city: r.city,
-            qrCode: r.qrCode,
-            status: r.status as 'registered' | 'cancelled',
-            registeredAt: new Date(r.registeredAt),
-            cancelledAt: r.cancelledAt ? new Date(r.cancelledAt) : undefined,
-          })))
+          setRegistrations(regs.map(toRegistration))
         } catch {
           setRegistrations([])
         }
       } else {
         setUsers([])
-        setRegistrations([])
+        if (user?.id) {
+          try {
+            const regs = await registrationsApi.list()
+            setRegistrations(regs.map(toRegistration))
+          } catch {
+            setRegistrations([])
+          }
+        } else {
+          setRegistrations([])
+        }
       }
     } catch (e) {
       console.error(e)
@@ -271,7 +297,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       endDate: exhibition.endDate instanceof Date ? exhibition.endDate.toISOString() : (exhibition.endDate as unknown as string),
       createdAt: exhibition.createdAt instanceof Date ? exhibition.createdAt.toISOString() : (exhibition.createdAt as unknown as string),
       updatedAt: exhibition.updatedAt instanceof Date ? exhibition.updatedAt.toISOString() : (exhibition.updatedAt as unknown as string),
-    })
+    } as any)
     setExhibitions((prev) => [toExhibition(created), ...prev])
   }
 
