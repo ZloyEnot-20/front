@@ -360,7 +360,7 @@ function PublicationsContent() {
             const vRu = (dataToSave.venueRu ?? '').trim()
             const vUz = (dataToSave.venueUz ?? '').trim()
             const vEn = (dataToSave.venueEn ?? '').trim()
-            await updateExhibition(editingItem.id, { ...dataToSave, venue: vRu || vEn || vUz, venueRu: vRu || undefined, venueUz: vUz || undefined, venueEn: vEn || undefined, cities: dataToSave.cities ?? [], participants: dataToSave.participants ?? [], banner, images: dataToSave.images ?? [], titleUz: dataToSave.titleUz, titleRu: dataToSave.titleRu, titleEn: dataToSave.titleEn, descriptionUz: dataToSave.descriptionUz, descriptionRu: dataToSave.descriptionRu, descriptionEn: dataToSave.descriptionEn })
+            await updateExhibition(editingItem.id, { ...dataToSave, venue: vRu || vEn || vUz, venueRu: vRu || undefined, venueUz: vUz || undefined, venueEn: vEn || undefined, eventTime: buildEventTimeRange(String(dataToSave.eventTimeStart ?? '').trim(), String(dataToSave.eventTimeEnd ?? '').trim()) || undefined, cities: dataToSave.cities ?? [], participants: dataToSave.participants ?? [], banner, images: dataToSave.images ?? [], titleUz: dataToSave.titleUz, titleRu: dataToSave.titleRu, titleEn: dataToSave.titleEn, descriptionUz: dataToSave.descriptionUz, descriptionRu: dataToSave.descriptionRu, descriptionEn: dataToSave.descriptionEn })
           } else {
             const newsPayload = {
               title: dataToSave.titleRu ?? dataToSave.title,
