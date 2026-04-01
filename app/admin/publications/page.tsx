@@ -26,18 +26,16 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { cn, getCityName, formatDateLocalized, getContentTitle, getContentDescription, getNewsContent } from '@/lib/utils'
 import { ChevronDown } from 'lucide-react'
 
-/** Для `<input type="time">`: только валидное HH:mm, иначе пусто (старые текстовые значения не подходят). */
-function normalizeEventTimeInput(raw: string | undefined): string {
-  if (!raw?.trim()) return ''
-  const s = raw.trim()
-  if (/^\d{2}:\d{2}$/.test(s)) return s
-  const m = s.match(/^(\d{1,2}):(\d{2})/)
-  if (m) {
-    const h = m[1].padStart(2, '0')
-    const min = m[2]
-    if (Number(h) <= 23 && Number(min) <= 59) return `${h}:${min}`
-  }
-  return ''
+function parseEventTimeRange(raw: string | undefined): { start: string; end: string } {
+  const s = (raw ?? '').trim()
+  const m = s.match(/^(\d{2}:\d{2})\s*-\s*(\d{2}:\d{2})$/)
+  if (!m) return { start: '', end: '' }
+  return { start: m[1], end: m[2] }
+}
+
+function buildEventTimeRange(start: string, end: string): string {
+  if (!start || !end) return ''
+  return `${start}-${end}`
 }
 
 function PublicationsContent() {
@@ -130,7 +128,7 @@ function PublicationsContent() {
     setEditingItem(null)
     setFormData(
       type === 'exhibition'
-        ? { venueRu: '', venueUz: '', venueEn: '', eventTime: '', cities: [], participants: [], images: [], titleUz: '', titleRu: '', titleEn: '', descriptionUz: '', descriptionRu: '', descriptionEn: '' }
+        ? { venueRu: '', venueUz: '', venueEn: '', eventTimeStart: '', eventTimeEnd: '', cities: [], participants: [], images: [], titleUz: '', titleRu: '', titleEn: '', descriptionUz: '', descriptionRu: '', descriptionEn: '' }
         : { images: [], titleUz: '', titleRu: '', titleEn: '', contentUz: '', contentRu: '', contentEn: '', excerptUz: '', excerptRu: '', excerptEn: '' }
     )
     setPendingBannerFile(null)
@@ -161,7 +159,10 @@ function PublicationsContent() {
             venueRu: item.venueRu ?? item.venue ?? '',
             venueUz: item.venueUz ?? item.venue ?? '',
             venueEn: item.venueEn ?? item.venue ?? '',
-            eventTime: item.eventTime ?? '',
+            ...(() => {
+              const parsed = parseEventTimeRange(item.eventTime)
+              return { eventTimeStart: parsed.start, eventTimeEnd: parsed.end }
+            })(),
           }
         : {
             contentUz: item.contentUz ?? item.content ?? '',
@@ -244,6 +245,16 @@ function PublicationsContent() {
         setUploadError(t('endDateAfterStart'))
         return
       }
+      const eventTimeStart = String(formData.eventTimeStart ?? '').trim()
+      const eventTimeEnd = String(formData.eventTimeEnd ?? '').trim()
+      if (!eventTimeStart || !eventTimeEnd) {
+        setUploadError(t('exhibitionEventTimeHint'))
+        return
+      }
+      if (eventTimeStart > eventTimeEnd) {
+        setUploadError(t('exhibitionEventTimeRangeError'))
+        return
+      }
       const cityIds = formData.cities ?? []
       if (cityIds.length === 0) {
         setUploadError(t('selectAtLeastOneCity'))
@@ -312,7 +323,7 @@ function PublicationsContent() {
           const end = formData.endDate ? (formData.endDate instanceof Date ? formData.endDate : new Date(formData.endDate)) : new Date()
           fd.append('startDate', start.toISOString())
           fd.append('endDate', end.toISOString())
-          fd.append('eventTime', (formData.eventTime ?? '').trim().slice(0, 300))
+          fd.append('eventTime', buildEventTimeRange(String(formData.eventTimeStart ?? '').trim(), String(formData.eventTimeEnd ?? '').trim()))
           fd.append('status', formData.status ?? 'draft')
         } else {
           fd.append('titleUz', (formData.titleUz ?? '').trim())
@@ -400,7 +411,7 @@ function PublicationsContent() {
               venueEn: (dataToSave.venueEn ?? '').trim() || undefined,
               startDate: dataToSave.startDate ?? new Date(),
               endDate: dataToSave.endDate ?? new Date(),
-              eventTime: (dataToSave.eventTime ?? '').trim().slice(0, 300) || undefined,
+              eventTime: buildEventTimeRange(String(dataToSave.eventTimeStart ?? '').trim(), String(dataToSave.eventTimeEnd ?? '').trim()) || undefined,
               cities: dataToSave.cities ?? [],
               participants: dataToSave.participants ?? [],
               image: banner,
@@ -970,11 +981,18 @@ function PublicationsContent() {
                         <div>
                           <label className="text-sm font-medium">{t('exhibitionEventTime')}</label>
                           <p className="text-xs text-muted-foreground mt-0.5 mb-1">{t('exhibitionEventTimeHint')}</p>
-                          <Input
-                            type="time"
-                            value={normalizeEventTimeInput(formData.eventTime)}
-                            onChange={(e) => setFormData({ ...formData, eventTime: e.target.value })}
-                          />
+                          <div className="grid grid-cols-2 gap-4">
+                            <Input
+                              type="time"
+                              value={formData.eventTimeStart ?? ''}
+                              onChange={(e) => setFormData({ ...formData, eventTimeStart: e.target.value })}
+                            />
+                            <Input
+                              type="time"
+                              value={formData.eventTimeEnd ?? ''}
+                              onChange={(e) => setFormData({ ...formData, eventTimeEnd: e.target.value })}
+                            />
+                          </div>
                         </div>
                       </>
                     ) : (
