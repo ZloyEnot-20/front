@@ -36,6 +36,12 @@ interface ExhibitionPageProps {
   params: Promise<{ id: string }>
 }
 
+function formatEventTimeRange(raw?: string): string {
+  const s = (raw ?? '').trim()
+  const m = s.match(/^(\d{2}:\d{2})\s*-\s*(\d{2}:\d{2})$/)
+  return m ? `${m[1]} - ${m[2]}` : s
+}
+
 export default function ExhibitionPage({ params }: ExhibitionPageProps) {
   const { id } = use(params)
   const [registrationOpen, setRegistrationOpen] = useState(false)
@@ -173,7 +179,7 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
                       <Clock className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
                       <div>
                         <p className="font-medium">{t('exhibitionEventTime')}</p>
-                        <p className="text-sm text-muted-foreground">{exhibition.eventTime.trim()}</p>
+                        <p className="text-sm text-muted-foreground">{formatEventTimeRange(exhibition.eventTime)}</p>
                       </div>
                     </div>
                   ) : null}

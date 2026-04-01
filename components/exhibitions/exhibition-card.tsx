@@ -21,6 +21,12 @@ interface ExhibitionCardProps {
   showExhibitionBadge?: boolean
 }
 
+function formatEventTimeRange(raw?: string): string {
+  const s = (raw ?? '').trim()
+  const m = s.match(/^(\d{2}:\d{2})\s*-\s*(\d{2}:\d{2})$/)
+  return m ? `${m[1]} - ${m[2]}` : s
+}
+
 export function ExhibitionCard({ exhibition, showExhibitionBadge = false }: ExhibitionCardProps) {
   const { t, lang } = useLocale()
   const [registrationOpen, setRegistrationOpen] = useState(false)
@@ -74,7 +80,7 @@ export function ExhibitionCard({ exhibition, showExhibitionBadge = false }: Exhi
           {exhibition.eventTime?.trim() ? (
             <div className="flex items-center gap-2 text-muted-foreground">
               <Clock className="w-4 h-4 shrink-0" />
-              <span>{exhibition.eventTime.trim()}</span>
+              <span>{formatEventTimeRange(exhibition.eventTime)}</span>
             </div>
           ) : null}
           <div className="flex items-center gap-2 text-muted-foreground">
