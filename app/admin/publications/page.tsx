@@ -245,16 +245,6 @@ function PublicationsContent() {
         setUploadError(t('endDateAfterStart'))
         return
       }
-      const eventTimeStart = String(formData.eventTimeStart ?? '').trim()
-      const eventTimeEnd = String(formData.eventTimeEnd ?? '').trim()
-      if (!eventTimeStart || !eventTimeEnd) {
-        setUploadError(t('exhibitionEventTimeHint'))
-        return
-      }
-      if (eventTimeStart > eventTimeEnd) {
-        setUploadError(t('exhibitionEventTimeRangeError'))
-        return
-      }
       const cityIds = formData.cities ?? []
       if (cityIds.length === 0) {
         setUploadError(t('selectAtLeastOneCity'))
@@ -980,18 +970,24 @@ function PublicationsContent() {
                         </div>
                         <div>
                           <label className="text-sm font-medium">{t('exhibitionEventTime')}</label>
-                          <p className="text-xs text-muted-foreground mt-0.5 mb-1">{t('exhibitionEventTimeHint')}</p>
-                          <div className="grid grid-cols-2 gap-4">
-                            <Input
-                              type="time"
-                              value={formData.eventTimeStart ?? ''}
-                              onChange={(e) => setFormData({ ...formData, eventTimeStart: e.target.value })}
-                            />
-                            <Input
-                              type="time"
-                              value={formData.eventTimeEnd ?? ''}
-                              onChange={(e) => setFormData({ ...formData, eventTimeEnd: e.target.value })}
-                            />
+                          <div className="grid grid-cols-[1fr_auto_1fr] items-end gap-3">
+                            <div>
+                              <label className="text-xs text-muted-foreground mb-1 block">Начало</label>
+                              <Input
+                                type="time"
+                                value={formData.eventTimeStart ?? ''}
+                                onChange={(e) => setFormData({ ...formData, eventTimeStart: e.target.value })}
+                              />
+                            </div>
+                            <span className="text-muted-foreground pb-2">-</span>
+                            <div>
+                              <label className="text-xs text-muted-foreground mb-1 block">Конец</label>
+                              <Input
+                                type="time"
+                                value={formData.eventTimeEnd ?? ''}
+                                onChange={(e) => setFormData({ ...formData, eventTimeEnd: e.target.value })}
+                              />
+                            </div>
                           </div>
                         </div>
                       </>
