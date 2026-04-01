@@ -66,6 +66,8 @@ export interface Exhibition {
   venueEn?: string
   startDate: Date
   endDate: Date
+  /** Время проведения (текст, напр. часы работы) */
+  eventTime?: string
   /** Города из справочника (множественный выбор) */
   cities?: { id: string; name: string }[]
   /** Университеты-участники (exhibitor) */

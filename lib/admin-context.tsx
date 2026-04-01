@@ -6,7 +6,7 @@ import { Exhibition, News, User, ExhibitionRegistration } from './types'
 import { exhibitionsApi, newsApi, usersApi, registrationsApi, ApiUser } from './api'
 import { useAuth } from './auth-context'
 
-function toExhibition(e: { id: string; title: string; description: string; titleUz?: string; titleRu?: string; titleEn?: string; descriptionUz?: string; descriptionRu?: string; descriptionEn?: string; venue?: string; venueUz?: string; venueRu?: string; venueEn?: string; startDate: string; endDate: string; cities?: { id: string; name: string }[]; participants?: { id: string; name: string; avatar?: string; exhibitorDescription?: string; exhibitorAddress?: string; exhibitorWebsite?: string; exhibitorPhotos?: string[] }[]; image?: string; banner?: string; images?: string[]; status: string; participantCount: number; registrations: number; createdBy: string; createdAt: string; updatedAt: string; serverNow?: string }): Exhibition {
+function toExhibition(e: { id: string; title: string; description: string; titleUz?: string; titleRu?: string; titleEn?: string; descriptionUz?: string; descriptionRu?: string; descriptionEn?: string; venue?: string; venueUz?: string; venueRu?: string; venueEn?: string; startDate: string; endDate: string; eventTime?: string; cities?: { id: string; name: string }[]; participants?: { id: string; name: string; avatar?: string; exhibitorDescription?: string; exhibitorAddress?: string; exhibitorWebsite?: string; exhibitorPhotos?: string[] }[]; image?: string; banner?: string; images?: string[]; status: string; participantCount: number; registrations: number; createdBy: string; createdAt: string; updatedAt: string; serverNow?: string }): Exhibition {
   return {
     id: e.id,
     title: e.title,
@@ -23,6 +23,7 @@ function toExhibition(e: { id: string; title: string; description: string; title
     venueEn: e.venueEn,
     startDate: new Date(e.startDate),
     endDate: new Date(e.endDate),
+    eventTime: e.eventTime?.trim() || undefined,
     cities: e.cities ?? [],
     participants: e.participants ?? [],
     image: e.banner ?? e.image,

@@ -341,6 +341,7 @@ export interface ApiExhibition {
   venueEn?: string
   startDate: string
   endDate: string
+  eventTime?: string
   cities?: { id: string; name: string }[]
   participants?: ApiExhibitorInfo[]
   image?: string

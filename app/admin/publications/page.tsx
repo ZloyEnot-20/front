@@ -26,6 +26,20 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { cn, getCityName, formatDateLocalized, getContentTitle, getContentDescription, getNewsContent } from '@/lib/utils'
 import { ChevronDown } from 'lucide-react'
 
+/** Для `<input type="time">`: только валидное HH:mm, иначе пусто (старые текстовые значения не подходят). */
+function normalizeEventTimeInput(raw: string | undefined): string {
+  if (!raw?.trim()) return ''
+  const s = raw.trim()
+  if (/^\d{2}:\d{2}$/.test(s)) return s
+  const m = s.match(/^(\d{1,2}):(\d{2})/)
+  if (m) {
+    const h = m[1].padStart(2, '0')
+    const min = m[2]
+    if (Number(h) <= 23 && Number(min) <= 59) return `${h}:${min}`
+  }
+  return ''
+}
+
 function PublicationsContent() {
   const { t, lang } = useLocale()
   const { exhibitions, news, updateExhibition, updateExhibitionFormData, deleteExhibition, deleteNews, updateNews, updateNewsFormData, addExhibition, addExhibitionFormData, addNews, addNewsFormData, isLoading, refreshPublications } = useAdmin()
@@ -116,7 +130,7 @@ function PublicationsContent() {
     setEditingItem(null)
     setFormData(
       type === 'exhibition'
-        ? { venueRu: '', venueUz: '', venueEn: '', cities: [], participants: [], images: [], titleUz: '', titleRu: '', titleEn: '', descriptionUz: '', descriptionRu: '', descriptionEn: '' }
+        ? { venueRu: '', venueUz: '', venueEn: '', eventTime: '', cities: [], participants: [], images: [], titleUz: '', titleRu: '', titleEn: '', descriptionUz: '', descriptionRu: '', descriptionEn: '' }
         : { images: [], titleUz: '', titleRu: '', titleEn: '', contentUz: '', contentRu: '', contentEn: '', excerptUz: '', excerptRu: '', excerptEn: '' }
     )
     setPendingBannerFile(null)
@@ -147,6 +161,7 @@ function PublicationsContent() {
             venueRu: item.venueRu ?? item.venue ?? '',
             venueUz: item.venueUz ?? item.venue ?? '',
             venueEn: item.venueEn ?? item.venue ?? '',
+            eventTime: item.eventTime ?? '',
           }
         : {
             contentUz: item.contentUz ?? item.content ?? '',
@@ -297,6 +312,7 @@ function PublicationsContent() {
           const end = formData.endDate ? (formData.endDate instanceof Date ? formData.endDate : new Date(formData.endDate)) : new Date()
           fd.append('startDate', start.toISOString())
           fd.append('endDate', end.toISOString())
+          fd.append('eventTime', (formData.eventTime ?? '').trim().slice(0, 300))
           fd.append('status', formData.status ?? 'draft')
         } else {
           fd.append('titleUz', (formData.titleUz ?? '').trim())
@@ -384,6 +400,7 @@ function PublicationsContent() {
               venueEn: (dataToSave.venueEn ?? '').trim() || undefined,
               startDate: dataToSave.startDate ?? new Date(),
               endDate: dataToSave.endDate ?? new Date(),
+              eventTime: (dataToSave.eventTime ?? '').trim().slice(0, 300) || undefined,
               cities: dataToSave.cities ?? [],
               participants: dataToSave.participants ?? [],
               image: banner,
@@ -949,6 +966,15 @@ function PublicationsContent() {
                               onChange={(e) => setFormData({ ...formData, endDate: new Date(e.target.value) })}
                             />
                           </div>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium">{t('exhibitionEventTime')}</label>
+                          <p className="text-xs text-muted-foreground mt-0.5 mb-1">{t('exhibitionEventTimeHint')}</p>
+                          <Input
+                            type="time"
+                            value={normalizeEventTimeInput(formData.eventTime)}
+                            onChange={(e) => setFormData({ ...formData, eventTime: e.target.value })}
+                          />
                         </div>
                       </>
                     ) : (

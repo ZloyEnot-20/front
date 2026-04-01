@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
-import { ArrowLeft, MapPin, Calendar, Users, ExternalLink, Building2, X } from 'lucide-react'
+import { ArrowLeft, MapPin, Calendar, Clock, Users, ExternalLink, Building2, X } from 'lucide-react'
 import { ExhibitorModal } from '@/components/exhibitions/exhibitor-modal'
 import { OptimizedImage } from '@/components/ui/optimized-image'
 import { ExhibitionDetailSkeleton } from '@/components/exhibitions/exhibition-detail-skeleton'
@@ -167,6 +167,16 @@ export default function ExhibitionPage({ params }: ExhibitionPageProps) {
                       </p>
                     </div>
                   </div>
+
+                  {exhibition.eventTime?.trim() ? (
+                    <div className="flex items-start gap-4">
+                      <Clock className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+                      <div>
+                        <p className="font-medium">{t('exhibitionEventTime')}</p>
+                        <p className="text-sm text-muted-foreground">{exhibition.eventTime.trim()}</p>
+                      </div>
+                    </div>
+                  ) : null}
 
                   {(getVenue(exhibition, lang) || (exhibition.cities?.length ?? 0) > 0) && (
                     <div className="flex items-start gap-4">

@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge'
 import { RegistrationModal } from './registration-modal'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { MapPin, Calendar, Users, CheckCircle2 } from 'lucide-react'
+import { MapPin, Calendar, Clock, Users, CheckCircle2 } from 'lucide-react'
 import { OptimizedImage } from '@/components/ui/optimized-image'
 import { getCityName, getVenue, formatDateLocalized, getContentTitle, getContentDescription } from '@/lib/utils'
 
@@ -71,6 +71,12 @@ export function ExhibitionCard({ exhibition, showExhibitionBadge = false }: Exhi
             <Calendar className="w-4 h-4" />
             {startDate} - {endDate}
           </div>
+          {exhibition.eventTime?.trim() ? (
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Clock className="w-4 h-4 shrink-0" />
+              <span>{exhibition.eventTime.trim()}</span>
+            </div>
+          ) : null}
           <div className="flex items-center gap-2 text-muted-foreground">
             <MapPin className="w-4 h-4 flex-shrink-0" />
             <span className="truncate">
