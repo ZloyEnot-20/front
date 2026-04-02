@@ -7,6 +7,7 @@ const nextConfig = {
     unoptimized: true,
     remotePatterns: [
       { protocol: 'http', hostname: 'localhost', port: '3001', pathname: '/**' },
+      { protocol: 'https', hostname: 'api.myexpo.uz', pathname: '/**' },
       { protocol: 'https', hostname: '*.up.railway.app', pathname: '/**' },
     ],
   },

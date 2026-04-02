@@ -1,4 +1,4 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "https://api.myfair.tw1.ru"
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'https://api.myexpo.uz'
 let serverTimeOffsetMs = 0
 let hasServerTimeSync = false
 

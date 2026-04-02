@@ -235,7 +235,7 @@ export function venueMapHref(venue: string): string {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(v)}`
 }
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://api.myfair.tw1.ru'
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://api.myexpo.uz'
 
 export async function fetchLandingScheduleExhibitions(): Promise<LandingScheduleExhibition[]> {
   try {
