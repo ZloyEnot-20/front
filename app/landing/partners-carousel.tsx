@@ -80,7 +80,7 @@ export function LandingPartnersSection() {
     }
   }, [])
 
-  if (!loaded || partners.length === 0) return null
+  if (!loaded) return null
 
   return (
     <section id="participants" className="bg-white py-16 md:py-20">
@@ -89,13 +89,17 @@ export function LandingPartnersSection() {
           <strong>{t('landingPartnersTitle')}</strong>
         </h1>
         <p className="mb-10 text-center text-lg text-gray-900">{t('landingPartnersSubtitle')}</p>
-        <LandingPartnersCarousel
-          partners={partners}
-          ariaCarousel={t('landingCarouselPartnersAria')}
-          ariaPrev={t('landingCarouselPrev')}
-          ariaNext={t('landingCarouselNext')}
-          ariaSlide={t('landingCarouselSlide')}
-        />
+        {partners.length > 0 ? (
+          <LandingPartnersCarousel
+            partners={partners}
+            ariaCarousel={t('landingCarouselPartnersAria')}
+            ariaPrev={t('landingCarouselPrev')}
+            ariaNext={t('landingCarouselNext')}
+            ariaSlide={t('landingCarouselSlide')}
+          />
+        ) : (
+          <p className="text-center text-muted-foreground">{t('landingPartnersEmpty')}</p>
+        )}
       </div>
     </section>
   )

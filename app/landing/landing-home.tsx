@@ -845,8 +845,8 @@ export default function LandingPage({ initialLang: _initialLang }: { initialLang
             </div>
           </div>
         </section>
-
         <LandingPartnersSection />
+
 
         <section className="border-t border-gray-200 bg-white py-16 md:py-20">
           <div className="container mx-auto max-w-6xl px-4">
@@ -862,6 +862,7 @@ export default function LandingPage({ initialLang: _initialLang }: { initialLang
             />
           </div>
         </section>
+
 
         <section id="review" className="landing-section-alt py-16 md:py-20">
           <div className="container mx-auto max-w-6xl px-4">

@@ -69,7 +69,8 @@ const rawSlides: LandingOrganizerSlide[] = [
         image: landingPublicImage('c5383960660573c3be28d1573e33bad3.png'),
       },
       {
-        type: 'none',
+        type: 'external',
+        href: 'https://www.nichegrp.com/',
         image: landingPublicImage('b206b279e8b567412c2342f1960e7c61.png'),
       },
       {

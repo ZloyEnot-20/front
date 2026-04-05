@@ -137,7 +137,7 @@ function LandingAdminContent() {
       return
     }
     if (f.size > MAX_FILE_MB * 1024 * 1024) {
-      setError(`Максимум ${MAX_FILE_MB} МБ`)
+      setError(`${t('fileTooLargeMax')} ${MAX_FILE_MB} ${t('mb')}`)
       e.target.value = ''
       setFile(null)
       return
@@ -149,7 +149,7 @@ function LandingAdminContent() {
   return (
     <div className="min-h-screen bg-slate-50 lg:pl-64 pt-14 lg:pt-0">
       <AdminSidebar />
-      <main className="p-4 lg:p-8 max-w-5xl mx-auto">
+      <main className="mx-auto max-w-[min(100%,96rem)] p-4 lg:p-8">
         <h1 className="text-2xl font-bold text-slate-900 mb-6">{t('landing')}</h1>
 
         <Tabs defaultValue="partners" className="w-full">
@@ -179,38 +179,54 @@ function LandingAdminContent() {
                 <CardContent className="py-12 text-center text-muted-foreground">{t('adminLandingPartnersEmpty')}</CardContent>
               </Card>
             ) : (
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10">
                 {list.map((p) => (
                   <Card key={p.id} className="overflow-hidden">
-                    <CardContent className="p-4 flex flex-col gap-3">
-                      <div className="h-24 rounded-lg bg-white border flex items-center justify-center p-2">
+                    <CardContent className="flex flex-col gap-1.5 p-2">
+                      <div className="flex h-14 items-center justify-center rounded-md border bg-white p-1">
                         <img
                           src={getImageUrl(p.logoFileId)}
                           alt=""
-                          className="max-h-20 max-w-full object-contain"
+                          className="max-h-12 max-w-full object-contain"
                         />
                       </div>
                       <a
                         href={p.href}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-sm text-primary hover:underline flex items-center gap-1 truncate"
+                        className="flex min-h-8 items-center gap-0.5 text-xs text-primary hover:underline"
+                        title={p.href}
                       >
-                        <span className="truncate">{p.href}</span>
-                        <ExternalLink className="size-3 shrink-0" />
+                        <span className="min-w-0 flex-1 truncate">{p.href}</span>
+                        <ExternalLink className="size-3 shrink-0" aria-hidden />
                       </a>
-                      <div className="flex gap-2 mt-auto">
-                        <Button variant="outline" size="sm" className="flex-1 gap-1" onClick={() => openEdit(p)}>
-                          <Pencil className="size-3.5" />
-                          {t('adminLandingPartnerEdit')}
+                      <div className="mt-auto flex justify-center gap-1">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          className="size-8 shrink-0"
+                          aria-label={t('adminLandingPartnerEdit')}
+                          title={t('adminLandingPartnerEdit')}
+                          onClick={() => openEdit(p)}
+                        >
+                          <Pencil className="size-3.5" aria-hidden />
                         </Button>
                         <Button
+                          type="button"
                           variant="destructive"
-                          size="sm"
+                          size="icon"
+                          className="size-8 shrink-0"
+                          aria-label={t('delete')}
+                          title={t('delete')}
                           disabled={deletingId === p.id}
                           onClick={() => handleDelete(p.id)}
                         >
-                          {deletingId === p.id ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
+                          {deletingId === p.id ? (
+                            <Loader2 className="size-3.5 animate-spin" aria-hidden />
+                          ) : (
+                            <Trash2 className="size-3.5" aria-hidden />
+                          )}
                         </Button>
                       </div>
                     </CardContent>
@@ -239,15 +255,22 @@ function LandingAdminContent() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="lp-logo">{t('adminLandingPartnerLogo')}</Label>
-                <input
-                  ref={fileInputRef}
-                  id="lp-logo"
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp,image/gif"
-                  className="text-sm w-full"
-                  onChange={onPickFile}
-                />
+                <div className="text-sm font-medium leading-none">{t('adminLandingPartnerLogo')}</div>
+                <label htmlFor="lp-logo" className="inline-flex cursor-pointer flex-wrap items-baseline gap-x-1">
+                  <input
+                    ref={fileInputRef}
+                    id="lp-logo"
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    className="hidden"
+                    disabled={saving}
+                    onChange={onPickFile}
+                  />
+                  <span className="text-sm text-primary hover:underline">{t('chooseFile')}</span>
+                  <span className="ml-1 text-xs text-muted-foreground">
+                    ({MAX_FILE_MB} {t('mb')})
+                  </span>
+                </label>
                 <p className="text-xs text-muted-foreground">{t('adminLandingPartnerLogoHint')}</p>
                 {editing && !file && (
                   <div className="h-20 rounded-md border bg-white flex items-center justify-center p-2">
