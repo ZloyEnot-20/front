@@ -10,7 +10,7 @@ const navBtnClass =
   'inline-flex size-10 shrink-0 items-center justify-center rounded-full border-2 border-[#01AEF9] bg-white/95 text-[#01AEF9] shadow-sm transition-colors hover:bg-[#01AEF9]/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#01AEF9] disabled:pointer-events-none disabled:opacity-35'
 
 const cardClass =
-  'flex h-[5.5rem] items-center justify-center rounded-xl border border-gray-100 bg-white p-3 shadow-sm transition-transform duration-200 hover:scale-105 hover:border-[#01AEF9]/40 hover:shadow-md md:h-24'
+  'flex h-[5.5rem] items-center justify-center rounded-xl border border-gray-100 bg-[#ffffff] p-3 shadow-sm transition-transform duration-200 hover:scale-105 hover:border-[#01AEF9]/40 hover:shadow-md md:h-24'
 
 function OrganizerLogo({
   item,
@@ -22,15 +22,17 @@ function OrganizerLogo({
   singleOrphan?: boolean
 }) {
   const img = (
-    <img
-      src={item.image}
-      alt=""
-      className="max-h-14 w-auto max-w-[min(100%,9rem)] object-contain md:max-h-16"
-      loading="lazy"
-      decoding="async"
-      width={162}
-      height={80}
-    />
+    <span className="landing-organizer-logo-frame flex h-full w-full max-w-full items-center justify-center rounded-md bg-[#ffffff]">
+      <img
+        src={item.image}
+        alt=""
+        className="max-h-14 w-auto max-w-[min(100%,9rem)] bg-[#ffffff] object-contain md:max-h-16"
+        loading="lazy"
+        decoding="async"
+        width={162}
+        height={80}
+      />
+    </span>
   )
 
   const cellClass = cn(
@@ -46,7 +48,7 @@ function OrganizerLogo({
   if (item.type === 'utm') {
     return (
       <a
-        href={`https://myfair.events${utmQuery}`}
+        href={`https://myexpo.uz/`}
         target="_blank"
         rel="noopener noreferrer"
         className={cellClass}

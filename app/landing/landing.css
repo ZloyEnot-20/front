@@ -19,6 +19,18 @@
   color: #111827;
 }
 
+/* Прозрачные PNG: подложка и фон у <img>, чтобы не просвечивало чёрным (dark / color-scheme). */
+.landing-page .landing-partner-logo-frame,
+.landing-page .landing-organizer-logo-frame {
+  background-color: #ffffff;
+  isolation: isolate;
+}
+
+.landing-page .landing-partner-logo-frame img,
+.landing-page .landing-organizer-logo-frame img {
+  background-color: #ffffff;
+}
+
 /* Первая секция */
 .landing-page .landing-hero-first {
   position: relative;

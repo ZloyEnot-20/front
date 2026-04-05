@@ -25,7 +25,7 @@ import { LANDING_EXHIBITION_CITY_LABELS } from '@/lib/landing-rotating-cities'
 import { cn } from '@/lib/utils'
 import { LandingAppDownloadBand } from './landing-app-download-band'
 import { LandingOrganizersCarousel } from './organizers-carousel'
-import { LandingPartnersCarousel } from './partners-carousel'
+import { LandingPartnersSection } from './partners-carousel'
 
 const TELEGRAM_HELP_URL = 'https://t.me/myfair_help'
 
@@ -39,7 +39,7 @@ const REVIEW_VIDEO_THUMB = landingPublicImage('7665ed017e5dfd3e3333075462c8b75e.
 
 const YOUTUBE_MYFAIR_CHANNEL = 'https://www.youtube.com/@myfairuzbekistan'
 
-const ABITURIENT_UZ_URL = 'https://myfair.events/abiturient/uz'
+const ABITURIENT_UZ_URL = 'https://myexpo.uz/'
 
 const FOOTER_PORTAL_CTA_IMG = landingPublicImage('465bed6e075a99229a6d5e228830fea3.png')
 
@@ -846,20 +846,7 @@ export default function LandingPage({ initialLang: _initialLang }: { initialLang
           </div>
         </section>
 
-        <section id="participants" className="bg-white py-16 md:py-20">
-          <div className="container mx-auto max-w-6xl px-4">
-            <h1 className="landing-section-heading mb-4 text-center text-3xl font-bold md:text-4xl">
-              <strong>{t('landingPartnersTitle')}</strong>
-            </h1>
-            <p className="mb-10 text-center text-lg text-gray-900">{t('landingPartnersSubtitle')}</p>
-            <LandingPartnersCarousel
-              ariaCarousel={t('landingCarouselPartnersAria')}
-              ariaPrev={t('landingCarouselPrev')}
-              ariaNext={t('landingCarouselNext')}
-              ariaSlide={t('landingCarouselSlide')}
-            />
-          </div>
-        </section>
+        <LandingPartnersSection />
 
         <section className="border-t border-gray-200 bg-white py-16 md:py-20">
           <div className="container mx-auto max-w-6xl px-4">

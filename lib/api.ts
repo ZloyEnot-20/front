@@ -44,8 +44,8 @@ export async function api<T>(
   return data as T
 }
 
-/** POST/PUT с FormData (multipart). Не ставит Content-Type — браузер подставит boundary. */
-async function apiFormData<T>(path: string, formData: FormData, method: 'POST' | 'PUT' = 'POST'): Promise<T> {
+/** POST/PUT/PATCH с FormData (multipart). Не ставит Content-Type — браузер подставит boundary. */
+async function apiFormData<T>(path: string, formData: FormData, method: 'POST' | 'PUT' | 'PATCH' = 'POST'): Promise<T> {
   const token = getToken()
   const headers: HeadersInit = { Authorization: `Bearer ${token}` }
   const res = await fetch(`${API_URL}${path}`, { method, headers, body: formData })
@@ -255,6 +255,42 @@ export const auditLogsApi = {
     api<ApiAuditLogItem[]>('/api/admin/audit-logs', {
       params: opts?.limit ? { limit: String(opts.limit) } : undefined,
     }),
+}
+
+export interface ApiLandingPartner {
+  id: string
+  href: string
+  logoFileId: string
+  sortOrder: number
+  createdAt: string
+  updatedAt: string
+}
+
+/** Партнёры лендинга (публичный список + админ CRUD) */
+export const landingPartnersApi = {
+  list: () => api<ApiLandingPartner[]>('/api/landing-partners'),
+  create: (href: string, logo: File) => {
+    const fd = new FormData()
+    fd.append('href', href.trim())
+    fd.append('logo', logo)
+    return apiFormData<ApiLandingPartner>('/api/landing-partners', fd, 'POST')
+  },
+  update: (id: string, data: { href?: string; logo?: File }) => {
+    if (data.logo) {
+      const fd = new FormData()
+      if (data.href !== undefined) fd.append('href', data.href.trim())
+      fd.append('logo', data.logo)
+      return apiFormData<ApiLandingPartner>(`/api/landing-partners/${id}`, fd, 'PATCH')
+    }
+    if (data.href !== undefined) {
+      return api<ApiLandingPartner>(`/api/landing-partners/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ href: data.href.trim() }),
+      })
+    }
+    return Promise.reject(new Error('Укажите ссылку или файл'))
+  },
+  delete: (id: string) => api<void>(`/api/landing-partners/${id}`, { method: 'DELETE' }),
 }
 
 // Загрузка файла на бэкенд (S3 публичный бакет)

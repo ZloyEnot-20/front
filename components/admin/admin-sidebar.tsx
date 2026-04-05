@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
 import { useLocale } from '@/lib/i18n'
 import { Button } from '@/components/ui/button'
-import { Users, FileText, BarChart3, LogOut, Menu, X, Home, BookMarked, QrCode } from 'lucide-react'
+import { Users, FileText, BarChart3, LogOut, Menu, X, Home, BookMarked, QrCode, Building2 } from 'lucide-react'
 
 export function AdminSidebar() {
   const pathname = usePathname()
@@ -16,6 +16,7 @@ export function AdminSidebar() {
   const FULL_MENU = [
     { labelKey: 'users' as const, href: '/admin/users', icon: Users, roles: ['admin'] as const },
     { labelKey: 'publications' as const, href: '/admin/publications', icon: FileText, roles: ['admin', 'content_manager'] as const },
+    { labelKey: 'landing' as const, href: '/admin/landing', icon: Building2, roles: ['admin', 'content_manager'] as const },
     { labelKey: 'reference' as const, href: '/admin/reference', icon: BookMarked, roles: ['admin', 'content_manager'] as const },
     { labelKey: 'reports' as const, href: '/admin/reports', icon: BarChart3, roles: ['admin'] as const },
     { labelKey: 'scans' as const, href: '/admin/scans', icon: QrCode, roles: ['admin'] as const },

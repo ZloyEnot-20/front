@@ -3,10 +3,22 @@
 import * as React from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from '@/components/ui/carousel'
-import { chunkPartnerSlides, LANDING_PARTNER_LOGOS } from '@/lib/landing-partners-data'
+import { landingPartnersApi, getImageUrl } from '@/lib/api'
+import { useLocale } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 
-const slides = chunkPartnerSlides(LANDING_PARTNER_LOGOS)
+const SLIDE_SIZE = 15
+
+export type LandingPartnerCard = { id: string; href: string; image: string }
+
+function chunkPartnerSlides(partners: LandingPartnerCard[]): LandingPartnerCard[][] {
+  if (!partners.length) return []
+  const slides: LandingPartnerCard[][] = []
+  for (let i = 0; i < partners.length; i += SLIDE_SIZE) {
+    slides.push(partners.slice(i, i + SLIDE_SIZE))
+  }
+  return slides
+}
 
 const navBtnClass =
   'inline-flex size-10 shrink-0 items-center justify-center rounded-full border-2 border-[#01AEF9] bg-white/95 text-[#01AEF9] shadow-sm transition-colors hover:bg-[#01AEF9]/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#01AEF9] disabled:pointer-events-none disabled:opacity-35'
@@ -37,19 +49,75 @@ function usePartnerGridCols(): 2 | 3 | 5 {
   )
 }
 
+/** Секция лендинга: загрузка партнёров из API; не рендерится, если список пуст. */
+export function LandingPartnersSection() {
+  const { t } = useLocale()
+  const [partners, setPartners] = React.useState<LandingPartnerCard[]>([])
+  const [loaded, setLoaded] = React.useState(false)
+
+  React.useEffect(() => {
+    let cancelled = false
+    landingPartnersApi
+      .list()
+      .then((list) => {
+        if (cancelled) return
+        setPartners(
+          list.map((p) => ({
+            id: p.id,
+            href: p.href,
+            image: getImageUrl(p.logoFileId),
+          }))
+        )
+      })
+      .catch(() => {
+        if (!cancelled) setPartners([])
+      })
+      .finally(() => {
+        if (!cancelled) setLoaded(true)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  if (!loaded || partners.length === 0) return null
+
+  return (
+    <section id="participants" className="bg-white py-16 md:py-20">
+      <div className="container mx-auto max-w-6xl px-4">
+        <h1 className="landing-section-heading mb-4 text-center text-3xl font-bold md:text-4xl">
+          <strong>{t('landingPartnersTitle')}</strong>
+        </h1>
+        <p className="mb-10 text-center text-lg text-gray-900">{t('landingPartnersSubtitle')}</p>
+        <LandingPartnersCarousel
+          partners={partners}
+          ariaCarousel={t('landingCarouselPartnersAria')}
+          ariaPrev={t('landingCarouselPrev')}
+          ariaNext={t('landingCarouselNext')}
+          ariaSlide={t('landingCarouselSlide')}
+        />
+      </div>
+    </section>
+  )
+}
+
 export function LandingPartnersCarousel({
+  partners,
   ariaCarousel = 'Participating university logos',
   ariaPrev = 'Previous slide',
   ariaNext = 'Next slide',
   ariaSlide = 'Slide',
 }: {
+  partners: LandingPartnerCard[]
   ariaCarousel?: string
   ariaPrev?: string
   ariaNext?: string
   ariaSlide?: string
 }) {
+  const slides = React.useMemo(() => chunkPartnerSlides(partners), [partners])
   const [api, setApi] = React.useState<CarouselApi>()
   const [current, setCurrent] = React.useState(0)
+
   React.useEffect(() => {
     if (!api) return
     const onSelect = () => setCurrent(api.selectedScrollSnap())
@@ -64,6 +132,8 @@ export function LandingPartnersCarousel({
 
   const cols = usePartnerGridCols()
   const rowSize = cols
+
+  if (!slides.length) return null
 
   return (
     <div className="landing-partners-carousel relative w-full">
@@ -112,24 +182,26 @@ export function LandingPartnersCarousel({
                       >
                         {rowPartners.map((p, i) => (
                           <a
-                            key={`${slideIndex}-${rowIdx}-${i}`}
+                            key={p.id}
                             href={p.href}
                             target="_blank"
                             rel="noopener noreferrer"
                             className={cn(
-                              'flex h-[5.5rem] items-center justify-center rounded-xl border border-gray-100 bg-white p-3 shadow-sm transition-transform duration-200 hover:scale-105 hover:border-[#01AEF9]/40 hover:shadow-md md:h-24',
+                              'flex h-[5.5rem] items-center justify-center rounded-xl border border-gray-100 bg-[#ffffff] p-3 shadow-sm transition-transform duration-200 hover:scale-105 hover:border-[#01AEF9]/40 hover:shadow-md md:h-24',
                               rowPartners.length === 1 && cols === 2 && 'col-span-2 mx-auto w-full max-w-[min(100%,11rem)]',
                             )}
                           >
-                            <img
-                              src={p.image}
-                              alt=""
-                              className="max-h-14 w-auto max-w-[min(100%,9rem)] object-contain md:max-h-16"
-                              loading="lazy"
-                              decoding="async"
-                              width={162}
-                              height={80}
-                            />
+                            <span className="landing-partner-logo-frame flex h-full w-full max-w-full items-center justify-center rounded-md bg-[#ffffff]">
+                              <img
+                                src={p.image}
+                                alt=""
+                                className="max-h-14 w-auto max-w-[min(100%,9rem)] bg-[#ffffff] object-contain md:max-h-16"
+                                loading="lazy"
+                                decoding="async"
+                                width={162}
+                                height={80}
+                              />
+                            </span>
                           </a>
                         ))}
                       </div>
