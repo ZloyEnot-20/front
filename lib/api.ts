@@ -284,7 +284,8 @@ export function invalidateLandingPartnersPublicClientCache() {
 
 /** Партнёры лендинга (публичный список + админ CRUD) */
 export const landingPartnersApi = {
-  list: () => api<ApiLandingPartner[]>('/api/landing-partners'),
+  /** Без дискового кеша браузера: иначе после DELETE список остаётся старым из-за Cache-Control на GET. */
+  list: () => api<ApiLandingPartner[]>('/api/landing-partners', { cache: 'no-store' }),
   /**
    * Публичный список для лендинга: TTL в памяти + дедуп параллельных запросов (меньше ударов по nginx rate-limit).
    */
@@ -299,6 +300,7 @@ export const landingPartnersApi = {
     landingPartnersPublicInflight = fetch(`${API_URL}/api/landing-partners`, {
       method: 'GET',
       credentials: 'omit',
+      cache: 'no-store',
       headers: { Accept: 'application/json' },
     })
       .then(async (res) => {
