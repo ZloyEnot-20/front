@@ -266,9 +266,56 @@ export interface ApiLandingPartner {
   updatedAt: string
 }
 
+const LANDING_PARTNERS_CLIENT_TTL_MS = 90_000
+let landingPartnersPublicMem: { data: ApiLandingPartner[]; at: number } | null = null
+let landingPartnersPublicInflight: Promise<ApiLandingPartner[]> | null = null
+let landingPartnersPublicGen = 0
+
+/** Сброс клиентского кеша списка (после правок в админке и для SPA-переходов) */
+export function invalidateLandingPartnersPublicClientCache() {
+  landingPartnersPublicGen += 1
+  landingPartnersPublicMem = null
+  landingPartnersPublicInflight = null
+}
+
 /** Партнёры лендинга (публичный список + админ CRUD) */
 export const landingPartnersApi = {
   list: () => api<ApiLandingPartner[]>('/api/landing-partners'),
+  /**
+   * Публичный список для лендинга: TTL в памяти + дедуп параллельных запросов (меньше ударов по nginx rate-limit).
+   */
+  listPublicCached: (): Promise<ApiLandingPartner[]> => {
+    const now = Date.now()
+    if (landingPartnersPublicMem && now - landingPartnersPublicMem.at < LANDING_PARTNERS_CLIENT_TTL_MS) {
+      return Promise.resolve(landingPartnersPublicMem.data)
+    }
+    if (landingPartnersPublicInflight) return landingPartnersPublicInflight
+
+    const gen = landingPartnersPublicGen
+    landingPartnersPublicInflight = fetch(`${API_URL}/api/landing-partners`, {
+      method: 'GET',
+      credentials: 'omit',
+      headers: { Accept: 'application/json' },
+    })
+      .then(async (res) => {
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}))
+          throw new Error((err as { error?: string }).error ?? 'Ошибка загрузки партнёров')
+        }
+        return res.json() as Promise<ApiLandingPartner[]>
+      })
+      .then((data) => {
+        if (gen === landingPartnersPublicGen) {
+          landingPartnersPublicMem = { data, at: Date.now() }
+        }
+        return data
+      })
+      .finally(() => {
+        landingPartnersPublicInflight = null
+      })
+
+    return landingPartnersPublicInflight
+  },
   create: (href: string, logo: File) => {
     const fd = new FormData()
     fd.append('href', href.trim())

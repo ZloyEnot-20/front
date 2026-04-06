@@ -4,7 +4,12 @@ import { useState, useEffect, useRef } from 'react'
 import { ProtectedRoute } from '@/components/auth/protected-route'
 import { AdminSidebar } from '@/components/admin/admin-sidebar'
 import { useLocale } from '@/lib/i18n'
-import { landingPartnersApi, getImageUrl, type ApiLandingPartner } from '@/lib/api'
+import {
+  landingPartnersApi,
+  getImageUrl,
+  invalidateLandingPartnersPublicClientCache,
+  type ApiLandingPartner,
+} from '@/lib/api'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -108,6 +113,7 @@ function LandingAdminContent() {
       } else if (file) {
         await landingPartnersApi.create(h, file)
       }
+      invalidateLandingPartnersPublicClientCache()
       closeModal()
       await load()
     } catch (e) {
@@ -122,6 +128,7 @@ function LandingAdminContent() {
     setDeletingId(id)
     try {
       await landingPartnersApi.delete(id)
+      invalidateLandingPartnersPublicClientCache()
       await load()
     } catch (e) {
       setError(e instanceof Error ? e.message : t('error'))

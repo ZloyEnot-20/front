@@ -58,7 +58,7 @@ export function LandingPartnersSection() {
   React.useEffect(() => {
     let cancelled = false
     landingPartnersApi
-      .list()
+      .listPublicCached()
       .then((list) => {
         if (cancelled) return
         setPartners(
@@ -200,8 +200,9 @@ export function LandingPartnersCarousel({
                                 src={p.image}
                                 alt=""
                                 className="max-h-14 w-auto max-w-[min(100%,9rem)] bg-[#ffffff] object-contain md:max-h-16"
-                                loading="lazy"
+                                loading={slideIndex === current ? 'eager' : 'lazy'}
                                 decoding="async"
+                                fetchPriority={slideIndex === current ? 'high' : 'low'}
                                 width={162}
                                 height={80}
                               />
