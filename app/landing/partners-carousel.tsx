@@ -3,7 +3,8 @@
 import * as React from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from '@/components/ui/carousel'
-import { landingPartnersApi, getImageUrl } from '@/lib/api'
+import { landingPartnersApi, landingPartnerLogoSrc } from '@/lib/api'
+import { preloadPartnerImages } from '@/lib/partner-images-batch'
 import { useLocale } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 
@@ -61,12 +62,16 @@ export function LandingPartnersSection() {
       .listPublicCached()
       .then((list) => {
         if (cancelled) return
-        setPartners(
-          list.map((p) => ({
-            id: p.id,
-            href: p.href,
-            image: getImageUrl(p.logoFileId),
-          }))
+        const cards = list.map((p) => ({
+          id: p.id,
+          href: p.href,
+          image: landingPartnerLogoSrc(p),
+        }))
+        setPartners(cards)
+        preloadPartnerImages(
+          cards.map((c) => c.image),
+          5,
+          50,
         )
       })
       .catch(() => {

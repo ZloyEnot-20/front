@@ -8,8 +8,10 @@ import {
   landingPartnersApi,
   getImageUrl,
   invalidateLandingPartnersPublicClientCache,
+  landingPartnerLogoSrc,
   type ApiLandingPartner,
 } from '@/lib/api'
+import { preloadPartnerImages } from '@/lib/partner-images-batch'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -50,6 +52,15 @@ function LandingAdminContent() {
   useEffect(() => {
     load()
   }, [])
+
+  useEffect(() => {
+    if (list.length === 0) return
+    preloadPartnerImages(
+      list.map((p) => landingPartnerLogoSrc(p)),
+      5,
+      50,
+    )
+  }, [list])
 
   useEffect(() => {
     if (!file) {
@@ -192,9 +203,11 @@ function LandingAdminContent() {
                     <CardContent className="flex flex-col gap-1.5 p-2">
                       <div className="flex h-14 items-center justify-center rounded-md border bg-white p-1">
                         <img
-                          src={getImageUrl(p.logoFileId)}
+                          src={landingPartnerLogoSrc(p)}
                           alt=""
                           className="max-h-12 max-w-full object-contain"
+                          loading="lazy"
+                          decoding="async"
                         />
                       </div>
                       <a
@@ -281,7 +294,11 @@ function LandingAdminContent() {
                 <p className="text-xs text-muted-foreground">{t('adminLandingPartnerLogoHint')}</p>
                 {editing && !file && (
                   <div className="h-20 rounded-md border bg-white flex items-center justify-center p-2">
-                    <img src={getImageUrl(editing.logoFileId)} alt="" className="max-h-full max-w-full object-contain" />
+                    <img
+                      src={landingPartnerLogoSrc(editing)}
+                      alt=""
+                      className="max-h-full max-w-full object-contain"
+                    />
                   </div>
                 )}
                 {previewUrl && (

@@ -261,12 +261,16 @@ export interface ApiLandingPartner {
   id: string
   href: string
   logoFileId: string
+  /** Публичный URL в CDN/S3 при настроенном S3_PUBLIC_BASE_URL; иначе null — использовать getImageUrl(logoFileId) */
+  logoDirectUrl?: string | null
   sortOrder: number
   createdAt: string
   updatedAt: string
 }
 
-const LANDING_PARTNERS_CLIENT_TTL_MS = 90_000
+const LANDING_PARTNERS_CLIENT_TTL_MS = Number(
+  process.env.NEXT_PUBLIC_LANDING_PARTNERS_CLIENT_CACHE_MS ?? 900_000,
+)
 let landingPartnersPublicMem: { data: ApiLandingPartner[]; at: number } | null = null
 let landingPartnersPublicInflight: Promise<ApiLandingPartner[]> | null = null
 let landingPartnersPublicGen = 0
@@ -367,6 +371,11 @@ export function getImageUrl(image?: string | null): string {
   if (!image) return ''
   if (image.startsWith('data:') || image.startsWith('http')) return image
   return `${API_URL}/api/files/${encodeURIComponent(image)}`
+}
+
+export function landingPartnerLogoSrc(p: Pick<ApiLandingPartner, 'logoFileId'> & { logoDirectUrl?: string | null }): string {
+  if (p.logoDirectUrl) return p.logoDirectUrl
+  return getImageUrl(p.logoFileId)
 }
 
 // News
