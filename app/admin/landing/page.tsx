@@ -20,7 +20,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Plus, Loader2, Trash2, Pencil, ExternalLink } from 'lucide-react'
 
-const MAX_FILE_MB = 1
+const MAX_FILE_MB = 2
 
 function LandingAdminContent() {
   const { t } = useLocale()
