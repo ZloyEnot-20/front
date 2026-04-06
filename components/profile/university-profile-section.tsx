@@ -10,6 +10,8 @@ import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Loader2, Upload, Trash2, Plus } from 'lucide-react'
 
+const MAX_EXHIBITOR_PHOTO_BYTES = 1 * 1024 * 1024
+
 interface UniversityProfileSectionProps {
   user: User
 }
@@ -96,6 +98,11 @@ export function UniversityProfileSection({ user }: UniversityProfileSectionProps
     const file = e.target.files?.[0]
     if (!file) return
     if (formData.exhibitorPhotos.length >= 10) return
+    if (file.size > MAX_EXHIBITOR_PHOTO_BYTES) {
+      setSaveError(t('exhibitorPhotoTooLarge'))
+      e.target.value = ''
+      return
+    }
     setPhotoUploading(true)
     setSaveError('')
     try {
@@ -219,7 +226,8 @@ export function UniversityProfileSection({ user }: UniversityProfileSectionProps
 
       {/* Фото (до 10) */}
       <div>
-        <label className="block text-xs text-muted-foreground mb-2">{t('photosLabel')}</label>
+        <label className="block text-xs text-muted-foreground mb-1">{t('photosLabel')}</label>
+        <p className="mb-2 text-xs text-muted-foreground">{t('exhibitorPhotosHint')}</p>
         <div className="flex flex-wrap gap-3">
           {formData.exhibitorPhotos.map((fileId, index) => (
             <div key={fileId} className="relative group">
